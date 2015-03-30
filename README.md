@@ -2,21 +2,23 @@
 
 Tabbed SQL interface for Postrgesql.
 
+![](/pgtabs.png?raw=true)
+
 ## Building
-Project is under development. There no platform builds provided yet.
+Project is under development. There are no platform builds provided yet.
 
 Prerequisities:
 
-Install (NWJS)[http://nwjs.io] (former Node Webkit).
+Install [nwjs](http://nwjs.io) (former Node Webkit).
 
-Install (NPM)[https://www.npmjs.com].
+Install [npm](https://www.npmjs.com).
 
 Run:
 
     npm install -g nw-gyp
     npm install -g jsx
 
-    git clone 
+    git clone https://github.com/sasha-alias/pgtabs
     cd pgtabs
     npm install
 
