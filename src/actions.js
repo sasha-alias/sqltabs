@@ -40,6 +40,13 @@ var Actions = {
         });
     },
 
+    setMode: function(mode){
+        AppDispatcher.dispatch({
+            eventName: 'set-mode',
+            key: mode,
+        });
+    },
+
     saveEditorContent: function(key, value){
         AppDispatcher.dispatch({
             eventName: 'save-editor-content',

@@ -24,16 +24,20 @@ AppDispatcher.register( function(payload) {
 
         case 'set-theme':
             if (payload.key == 'bright'){ // brigth
-                editor_theme = 'chrome';
                 document.getElementById("theme_stylesheet").href = "css/bootstrap.bright.css";
             } else { // dark
-                editor_theme = 'idle_fingers';
                 document.getElementById("theme_stylesheet").href = "css/bootstrap.dark.css";
             };
 
             TabsStore.setTheme(payload.key);
             Config.saveTheme(TabsStore.theme);
             TabsStore.trigger('change-theme');
+            break;
+
+        case 'set-mode':
+            TabsStore.setMode(payload.key);
+            Config.saveMode(payload.key);
+            TabsStore.trigger('change-mode');
             break;
         
         case 'save-editor-content':

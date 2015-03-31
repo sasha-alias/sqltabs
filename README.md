@@ -7,7 +7,7 @@ Tabbed SQL interface for Postrgesql.
 ## Building
 Project is under development. There are no platform builds provided yet.
 
-Prerequisities:
+In order to make a custom build follow the following steps.
 
 Install [nwjs](http://nwjs.io) (former Node Webkit).
 
@@ -35,12 +35,8 @@ Run:
 
 There are two basic shortcuts:
 
-Windows/Linux:
-    - _Ctrl+R_ run script
-    - _Ctrl+B_ cancel execution
-
-Mac OSX:
-    - _Command+R_ run script
-    - _Command+B_ cancel execution
-
+Action              | Windows and Linux | OSX 
+-------------------------------------------------------------
+run script          | **Ctrl+R**        | **Command+R**
+break execution     | **Ctrl+B**        | **Command+B**
 

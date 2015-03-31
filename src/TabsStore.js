@@ -22,6 +22,7 @@ var Tab = function(id, connstr){
 var _TabsStore = function(){
 
     this.theme = (Config.getTheme() || 'dark');
+    this.mode = (Config.getMode() || 'classic');
     this.tabs = {};
     this.order = [];
     this.selectedTab = 0;
@@ -75,7 +76,19 @@ var _TabsStore = function(){
         } else {
             return 'chrome';
         };
-    }
+    };
+
+    this.setMode = function(mode){
+        this.mode = mode;
+    };
+
+    this.getEditorMode = function(){
+        if (this.mode == 'vim'){
+            return 'ace/keyboard/vim';
+        } else {
+            return '';
+        }
+    };
 
     this.saveEditorContent = function(id, content){
         this.tabs[id].content = content;

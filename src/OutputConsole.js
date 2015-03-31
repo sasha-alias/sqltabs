@@ -86,9 +86,9 @@ var OutputConsole = React.createClass({
     renderDataset: function(dataset, i){
 
         if (dataset.resultStatus == 'PGRES_COMMAND_OK'){
-            return <div className="alert alert-success">{dataset.cmdStatus}</div>;
+            return <div key={'cmdres_'+i} className="alert alert-success">{dataset.cmdStatus}</div>;
         } else if (['PGRES_FATAL_ERROR', 'PGRES_BAD_RESPONSE'].indexOf(dataset.resultStatus) > -1) {
-            return <div className="query-error alert alert-danger">{dataset.resultErrorMessage.toString()}</div>;
+            return <div key={'err_'+i} className="query-error alert alert-danger">{dataset.resultErrorMessage.toString()}</div>;
         }
 
         var fields = dataset.fields;
@@ -96,7 +96,7 @@ var OutputConsole = React.createClass({
 
         if (fields){
             var out_fields = fields.map(function(field, i){
-                return (<th key={'field'+i}>{field.name}</th>);
+                return (<th key={'field_'+i}>{field.name}</th>);
             });
         };
 
@@ -119,7 +119,7 @@ var OutputConsole = React.createClass({
             
         return (
 
-            <table className="table-resultset table table-hover">
+            <table  key={'dataset_'+i} className="table-resultset table table-hover">
             <thead>
                 <tr>
                 <th>#</th>

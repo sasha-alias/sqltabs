@@ -27,6 +27,15 @@ var Conf = {
         return config.theme;
     },
 
+    saveMode: function(mode){
+        config.edit_mode = mode;
+        db.saveSync();
+    },
+
+    getMode: function(){
+        return config.edit_mode;
+    },
+
     saveConnHistory: function(history){
         config.conn_history = history;
         db.saveSync();

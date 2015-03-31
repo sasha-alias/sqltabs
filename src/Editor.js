@@ -12,16 +12,19 @@ require('brace/keybinding/vim');
 var Editor = React.createClass({
 
     getInitialState: function(){
-        return {theme: TabsStore.getEditorTheme()};
+        return {
+            theme: TabsStore.getEditorTheme(), 
+            mode: TabsStore.getEditorMode()};
     },
 
     componentDidMount: function(){
         this.editor = Ace.edit(this.props.name);
         this.editor.getSession().setMode('ace/mode/pgsql');
         this.editor.setTheme('ace/theme/' + this.state.theme);
-        //this.editor.setKeyboardHandler('ace/keyboard/vim');
+        this.editor.setKeyboardHandler(this.state.mode);
         TabsStore.bind('editor-resize', this.resize);
-        TabsStore.bind('change-theme', this.changeTheme);
+        TabsStore.bind('change-theme', this.changeHandler);
+        TabsStore.bind('change-mode', this.changeHandler);
 
         this.editor.commands.addCommand({
             name: 'Exec',
@@ -39,6 +42,7 @@ var Editor = React.createClass({
     componentWillUnmount: function(){
         TabsStore.unbind('editor-resize', this.resize);
         TabsStore.unbind('change-theme', this.changeTheme);
+        TabsStore.unbind('change-mode', this.changeMode);
         this.editor.commands.removeCommand('Exec');
         this.editor.commands.removeCommand('Cancel');
     },
@@ -51,10 +55,13 @@ var Editor = React.createClass({
         TabActions.cancelQuery(this.props.eventKey);
     },
 
-    changeTheme: function(){
-        this.setState({theme: TabsStore.getEditorTheme()});
-        this.editor.setTheme('ace/theme/' + TabsStore.getEditorTheme());
-
+    changeHandler: function(){
+        this.setState({
+            theme: TabsStore.getEditorTheme(),
+            mode: TabsStore.getEditorMode(),
+        });
+        this.editor.setTheme('ace/theme/' + this.state.theme);
+        this.editor.setKeyboardHandler(this.state.mode);
         this.editor.resize();
     },
 
@@ -64,9 +71,7 @@ var Editor = React.createClass({
 
     render: function(){
         return (
-
-            <div id={this.props.name}/>
-
+            <div id={this.props.name} mode={this.state.mode}/>
         );
     },
 });
