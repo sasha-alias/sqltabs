@@ -37,6 +37,10 @@ var Editor = React.createClass({
             bindKey: {win: 'Ctrl-B',  mac: 'Command-B'},
             exec: this.cancelHandler,
         });
+
+        this.editor.getSelectedText = function() { 
+            return this.session.getTextRange(this.getSelectionRange());
+        }
     },
 
     componentWillUnmount: function(){
@@ -48,7 +52,13 @@ var Editor = React.createClass({
     },
 
     execHandler: function(editor) {
-        TabActions.runQuery(this.props.eventKey, this.editor.getValue());
+        var selected = this.editor.getSelectedText()
+        if (selected) {
+            var script = selected;
+        } else {
+            var script = this.editor.getValue();
+        }
+        TabActions.runQuery(this.props.eventKey, script);
     },
 
     cancelHandler: function(editor){
