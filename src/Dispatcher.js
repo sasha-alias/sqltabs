@@ -75,6 +75,11 @@ AppDispatcher.register( function(payload) {
             TabsStore.trigger('query-error-'+payload.key);
             break;
 
+        case 'open-file':
+            TabsStore.openFile(payload.filename);
+            TabsStore.trigger('open-file', payload.filename);
+            break;
+
     }
     return true; // Needed for Flux promise resolution
 }); 

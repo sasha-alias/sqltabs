@@ -2,6 +2,31 @@ var Actions = require ('./Actions');
 var remote = require('remote');
 var Menu = remote.require('menu');
 var BrowserWindow = remote.require('browser-window');
+var dialog = remote.require('dialog');
+
+var fs = require('fs');
+
+var openFile = function(){
+    dialog.showOpenDialog({ properties: ['openFile']}, 
+    function(filenames){
+        if (typeof(filenames) != 'undefined' && filenames.length == 1){
+            Actions.openFile(filenames[0]);
+        }
+    }
+    );
+}
+
+var saveFile = function(){
+    dialog.showSaveDialog(function(filename){
+        console.log(filename);
+    })
+}
+
+var saveFileAs = function(){
+    dialog.showSaveDialog(function(filename){
+        console.log(filename);
+    })
+}
 
 template = [
     {label: "PGTabs",
@@ -11,7 +36,15 @@ template = [
     submenu: [
         {label: "Open",
          accelerator: "Command+O",
-         click: function(){console.log('ooopen');},
+         click: function(){openFile();},
+        },
+        {label: "Save",
+         accelerator: "Command+S",
+         click: function(){saveFile();},
+        },
+        {label: "Save As",
+         accelerator: "Command+Shift+S",
+         click: function(){saveFileAs();},
         },
     ]
     },

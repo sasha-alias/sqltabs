@@ -138,6 +138,16 @@ var _TabsStore = function(){
         };
     };
 
+    this.openFile = function(filename){
+        this.tabs[this.selectedTab].filename = filename;
+    }
+
+    this.getEditorFile = function(id){
+        if (id in this.tabs){
+            return this.tabs[id].filename;
+        };
+    };
+        
 
     this.newTab(); 
     

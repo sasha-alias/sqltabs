@@ -90,6 +90,13 @@ var Actions = {
         });
     },
 
+    openFile: function(filename){
+        AppDispatcher.dispatch({
+            eventName: 'open-file',
+            filename: filename,
+        });
+    },
+
 }
 
 module.exports = Actions;

@@ -3,6 +3,7 @@ var React = require('react');
 var Ace = require('brace');
 var TabsStore = require('./TabsStore');
 var TabActions = require('./Actions');
+var fs = require('fs');
 
 require('brace/mode/pgsql');
 require('brace/theme/chrome');
@@ -25,6 +26,7 @@ var Editor = React.createClass({
         TabsStore.bind('editor-resize', this.resize);
         TabsStore.bind('change-theme', this.changeHandler);
         TabsStore.bind('change-mode', this.changeHandler);
+        TabsStore.bind('open-file', this.fileOpenHandler);
 
         this.editor.commands.addCommand({
             name: 'Exec',
@@ -73,6 +75,22 @@ var Editor = React.createClass({
         this.editor.setTheme('ace/theme/' + this.state.theme);
         this.editor.setKeyboardHandler(this.state.mode);
         this.editor.resize();
+    },
+
+    fileOpenHandler: function(){
+        filename = TabsStore.getEditorFile(this.props.eventKey);
+        this.setState({
+            file: filename
+        })
+
+        self = this;
+        fd = fs.readFile(filename, 'utf8', function(err, data){
+            if (err){
+                console.log(err);
+            } else {
+                self.editor.setValue(data, -1);
+            }
+        });
     },
 
     resize: function(){
