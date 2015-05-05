@@ -1,53 +1,74 @@
 var Actions = require ('./Actions');
-// enable cope/paste on OS X
-var gui = window.require('nw.gui');
+var remote = require('remote');
+var Menu = remote.require('menu');
+var BrowserWindow = remote.require('browser-window');
 
-var win = gui.Window.get();
-var menu = new gui.Menu({type: 'menubar'});
-win.menu = menu;
+template = [
+    {label: "PGTabs",
+    submenu: []
+    },
+    {label: "File",
+    submenu: [
+        {label: "Open",
+         accelerator: "Command+O",
+         click: function(){console.log('ooopen');},
+        },
+    ]
+    },
+    {label: 'Edit',
+    submenu: [
+        {label: 'Undo',
+         accelerator: 'Command+Z',
+         selector: 'undo:'
+        },
+        {label: 'Redo',
+         accelerator: 'Shift+Command+Z',
+         selector: 'redo:'
+        },
+        {type: 'separator'
+        },
+        {label: 'Cut',
+         accelerator: 'Command+X',
+         selector: 'cut:'
+        },
+        {label: 'Copy',
+         accelerator: 'Command+C',
+         selector: 'copy:'
+        },
+        {label: 'Paste',
+         accelerator: 'Command+V',
+         selector: 'paste:'
+        },
+        {label: 'Select All',
+         accelerator: 'Command+A',
+         selector: 'selectAll:'
+        },
+    ]
+    },
+    {label: "Options",
+    submenu: [
+        {label: "Theme",
+        submenu:[
+            {label: "Dark", click: function(){Actions.setTheme("dark");}},
+            {label: "Bright", click: function(){Actions.setTheme("bright");}},
+        ]},
+        {label: "Mode",
+        submenu: [
+            {label: "Classic", click: function(){Actions.setMode("classic");}},
+            {label: "Vim", click: function(){Actions.setMode("vim");}},
+        ]},
+    ]},
+    {label: "Window", submenu:[
+        {label: 'Toggle DevTools',
+        accelerator: 'Alt+Command+I',
+        click: function() { BrowserWindow.getFocusedWindow().toggleDevTools(); }
+        },
+    ]
+    },
+    {label: "Help", submenu:[]
+    },
+]
 
-if (process.platform === "darwin") {
-    menu.createMacBuiltin('PgTabs', {
-        hideEdit: false,
-    });
-}
-
-var options = new gui.Menu();
-var options_item = new gui.MenuItem({label: "Options", submenu: options});
-var theme = new gui.Menu();
-var mode = new gui.Menu();
-
-var theme_item = new gui.MenuItem({label: "Theme", submenu: theme});
-var mode_item = new gui.MenuItem({label: "Mode", submenu: mode});
-
-var dark_theme = new gui.MenuItem({
-    label: "Dark", 
-    click: function(){Actions.setTheme("dark");},
-    });
-
-var light_theme = new gui.MenuItem({
-    label: "Bright",
-    click: function(){Actions.setTheme("bright");},
-    });
-
-var mode_classic = new gui.MenuItem({
-    label: "Classic", 
-    click: function(){Actions.setMode("classic");},
-    });
-
-var mode_vim = new gui.MenuItem({
-    label: "Vim",
-    click: function(){Actions.setMode("vim");},
-    });
-
-options.append(theme_item);
-theme.append(dark_theme);
-theme.append(light_theme);
-
-options.append(mode_item);
-mode.append(mode_classic);
-mode.append(mode_vim);
-
-win.menu.insert(options_item, 2);
-
+menu = Menu.buildFromTemplate(template);
+Menu.setApplicationMenu(menu);
 
