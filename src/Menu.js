@@ -46,6 +46,15 @@ template = [
          accelerator: "Command+Shift+S",
          click: function(){saveFileAs();},
         },
+        {type: 'separator'},
+        {label: "New Tab",
+         accelerator: "Command+T",
+         click: function(){Actions.select(0)},
+        },
+        {label: "Close Tab",
+         accelerator: "Command+W",
+         click: function(){Actions.close()},
+        },
     ]
     },
     {label: 'Edit',
@@ -58,8 +67,7 @@ template = [
          accelerator: 'Shift+Command+Z',
          selector: 'redo:'
         },
-        {type: 'separator'
-        },
+        {type: 'separator'},
         {label: 'Cut',
          accelerator: 'Command+X',
          selector: 'cut:'
@@ -92,13 +100,20 @@ template = [
         ]},
     ]},
     {label: "Window", submenu:[
-        {label: 'Toggle DevTools',
-        accelerator: 'Alt+Command+I',
+        {label: "Toggle DevTools",
+        accelerator: "Alt+Command+I",
         click: function() { BrowserWindow.getFocusedWindow().toggleDevTools(); }
         },
+        {type: "separator"},
+        {label: "Next Tab",
+         accelerator: "Command+]",
+         click: function(){Actions.nextTab()},
+        },
+        {label: "Previous Tab",
+         accelerator: "Command+[",
+         click: function(){Actions.previosTab();},
+        },
     ]
-    },
-    {label: "Help", submenu:[]
     },
 ]
 

@@ -66,6 +66,30 @@ var _TabsStore = function(){
         };
     };
 
+    this.nextTab = function(){
+        if (this.order.length <= 1) {
+            return;
+        };
+        if (this.order.indexOf(this.selectedTab) == this.order.length-1){
+            idx = 0;
+        } else {
+            idx = this.order.indexOf(this.selectedTab)+1;
+        };
+        this.selectedTab = this.order[idx];
+    };
+
+    this.previosTab = function(){
+        if (this.order.length <= 1) {
+            return;
+        };
+        if (this.order.indexOf(this.selectedTab) == 0){
+            idx = this.order.length-1;
+        } else {
+            idx = this.order.indexOf(this.selectedTab)-1;
+        };
+        this.selectedTab = this.order[idx];
+    };
+
     this.setTheme = function(theme){
         this.theme = theme;
     };

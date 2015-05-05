@@ -18,7 +18,22 @@ AppDispatcher.register( function(payload) {
             break;
 
         case 'close-tab':
-            TabsStore.closeTab(payload.key);
+            if (typeof(payload.key) == 'undefined'){
+                tab = TabsStore.selectedTab;
+            } else {
+                tab = payload.key;
+            }
+            TabsStore.closeTab(tab);
+            TabsStore.trigger('change');
+            break;
+
+        case 'next-tab':
+            TabsStore.nextTab();
+            TabsStore.trigger('change');
+            break;
+
+        case 'previous-tab':
+            TabsStore.previosTab();
             TabsStore.trigger('change');
             break;
 

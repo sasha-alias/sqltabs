@@ -33,6 +33,18 @@ var Actions = {
         });
     },
 
+    nextTab: function(){
+        AppDispatcher.dispatch({
+            eventName: 'next-tab'
+        });
+    },
+
+    previosTab: function(){
+        AppDispatcher.dispatch({
+            eventName: 'previous-tab'
+        });
+    },
+
     setTheme: function(theme){
         AppDispatcher.dispatch({
             eventName: 'set-theme',
