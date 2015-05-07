@@ -27,18 +27,7 @@ var Editor = React.createClass({
         TabsStore.bind('change-theme', this.changeHandler);
         TabsStore.bind('change-mode', this.changeHandler);
         TabsStore.bind('open-file', this.fileOpenHandler);
-
-        this.editor.commands.addCommand({
-            name: 'Exec',
-            bindKey: {win: 'Ctrl-R',  mac: 'Command-R'},
-            exec: this.execHandler,
-        });
-
-        this.editor.commands.addCommand({
-            name: 'Cancel',
-            bindKey: {win: 'Ctrl-B',  mac: 'Command-B'},
-            exec: this.cancelHandler,
-        });
+        TabsStore.bind('execute-script-'+this.props.eventKey, this.execHandler);
 
         this.editor.getSelectedText = function() { 
             return this.session.getTextRange(this.getSelectionRange());
@@ -49,8 +38,8 @@ var Editor = React.createClass({
         TabsStore.unbind('editor-resize', this.resize);
         TabsStore.unbind('change-theme', this.changeTheme);
         TabsStore.unbind('change-mode', this.changeMode);
-        this.editor.commands.removeCommand('Exec');
-        this.editor.commands.removeCommand('Cancel');
+        TabsStore.unbind('open-file', this.fileOpenHandler);
+        TabsStore.unbind('execute-script-'+this.props.eventKey, this.execHandler);
     },
 
     execHandler: function(editor) {
@@ -61,10 +50,6 @@ var Editor = React.createClass({
             var script = this.editor.getValue();
         }
         TabActions.runQuery(this.props.eventKey, script);
-    },
-
-    cancelHandler: function(editor){
-        TabActions.cancelQuery(this.props.eventKey);
     },
 
     changeHandler: function(){

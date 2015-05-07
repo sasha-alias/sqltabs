@@ -6,11 +6,24 @@ var Config = require('./Config');
 
 var AppDispatcher = new Dispatcher();
 
+var SignalsDispatcher = new Dispatcher();
+
+SignalsDispatcher.register(function(payload){
+// separate dispatcher needed to avoid parallel actions execution for actions which don't change store
+    switch(payload.eventName){
+        case 'execute-script':
+            TabsStore.trigger('execute-script-'+TabsStore.selectedTab);
+            break;
+    };
+    return true;
+});
+
 AppDispatcher.register( function(payload) {
     switch( payload.eventName ) {
         case 'select-tab':
             if (payload.key == 0) { // select tab 0 (+) means create a new tab
-                TabsStore.newTab();
+                connstr = TabsStore.getConnstr(TabsStore.selectedTab); // open new tab with the same connstr as the current one
+                TabsStore.newTab(connstr);
             } else {
                 TabsStore.selectTab(payload.key);
             }
@@ -55,10 +68,6 @@ AppDispatcher.register( function(payload) {
             TabsStore.trigger('change-mode');
             break;
         
-        case 'save-editor-content':
-            TabsStore.saveEditorContent(payload.key, payload.value);
-            break;
-
         case 'set-connection':
             TabsStore.setConnection(payload.key, payload.value);
             Config.saveConnHistory(TabsStore.connectionHistory);
@@ -76,8 +85,9 @@ AppDispatcher.register( function(payload) {
             break;
 
         case 'query-cancelled':
-            Executor.cancelQuery(payload.key);
-            TabsStore.trigger('query-cancelled-'+payload.key);
+            tab = TabsStore.selectedTab;
+            Executor.cancelQuery(tab);
+            TabsStore.trigger('query-cancelled-'+tab);
             break;
 
         case 'query-finished':
@@ -99,4 +109,7 @@ AppDispatcher.register( function(payload) {
     return true; // Needed for Flux promise resolution
 }); 
 
-module.exports = AppDispatcher;
+module.exports = {
+AppDispatcher: AppDispatcher,
+SignalsDispatcher: SignalsDispatcher,
+}

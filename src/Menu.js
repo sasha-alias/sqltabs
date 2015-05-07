@@ -86,6 +86,18 @@ template = [
         },
     ]
     },
+    {label: "Database",
+     submenu:[
+        {label: "Run Query",
+         accelerator: "Command+R",
+         click: function(){Actions.execScript()},
+        },
+        {label: "Break Execution",
+         accelerator: "Command+B",
+         click: function(){Actions.cancelQuery()},
+        },
+     ]
+    },
     {label: "Options",
     submenu: [
         {label: "Theme",

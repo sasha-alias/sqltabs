@@ -10,8 +10,7 @@ var TabContent = React.createClass({
 
     getInitialState: function(){
         return {
-            theme: TabsStore.theme,
-            value: TabsStore.getContent(this.props.eventKey),
+            theme: TabsStore.theme
         };
     },
 
@@ -25,13 +24,8 @@ var TabContent = React.createClass({
 
     storeChangedHandler: function(){
         this.setState({
-            theme: TabsStore.theme,
-            value: TabsStore.getContent(this.props.eventKey),
+            theme: TabsStore.theme
         });
-    },
-
-    editorChangeHandler: function(value){
-        TabActions.saveEditorContent(this.props.eventKey, value);
     },
 
     render: function(){

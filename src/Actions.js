@@ -1,5 +1,7 @@
 
-var AppDispatcher = require('./Dispatcher')
+var dispatcher = require('./Dispatcher');
+var AppDispatcher = dispatcher.AppDispatcher;
+var SignalsDispatcher = dispatcher.SignalsDispatcher;
 
 var QueryCallback = function(key, result){
     AppDispatcher.dispatch({
@@ -59,14 +61,6 @@ var Actions = {
         });
     },
 
-    saveEditorContent: function(key, value){
-        AppDispatcher.dispatch({
-            eventName: 'save-editor-content',
-            key: key,
-            value: value,
-        });
-    },
-
     setConnection: function(key, value){
         AppDispatcher.dispatch({
             eventName: 'set-connection',
@@ -82,7 +76,13 @@ var Actions = {
         });
     },
 
-    runQuery: function(key, query){
+    execScript: function(){ // send message to current editor to send script for execution
+        SignalsDispatcher.dispatch({
+            eventName: 'execute-script'
+        });
+    },
+
+    runQuery: function(key, query){ // sends query to db for execution 
 
         AppDispatcher.dispatch(
         {
@@ -95,10 +95,9 @@ var Actions = {
         );
     },
 
-    cancelQuery: function(key){
+    cancelQuery: function(){
         AppDispatcher.dispatch({
             eventName: 'query-cancelled',
-            key: key,
         });
     },
 

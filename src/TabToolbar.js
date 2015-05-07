@@ -57,6 +57,7 @@ var TabToolbar = React.createClass({
                     type="text" 
                     placeholder="user@host:port/dbname"
                     list="history"
+                    value={this.state.connstr}
                 /> 
 
                 <datalist id="history">

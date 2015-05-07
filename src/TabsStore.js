@@ -31,19 +31,12 @@ var _TabsStore = function(){
 
     this.getAll = function(){return this.tabs;};
 
-    this.getContent = function(id){
-        if (id in this.tabs){
-            return this.tabs[id].content;
-        }
-    }
-
-    this.newTab = function(){
+    this.newTab = function(connstr){
 
         newid = TabSequence.nextval();
-        this.tabs[newid] = new Tab(newid, '');
+        this.tabs[newid] = new Tab(newid, connstr);
         this.order.push(newid);
         this.selectedTab = newid;
-        this.content = ''
 
     };
 
@@ -114,10 +107,6 @@ var _TabsStore = function(){
         }
     };
 
-    this.saveEditorContent = function(id, content){
-        this.tabs[id].content = content;
-    };
-
     this.getConnstr = function(id){
         if (id in this.tabs) {
             return this.tabs[id].connstr;
@@ -172,13 +161,19 @@ var _TabsStore = function(){
         };
     };
         
-
-    this.newTab(); 
+    // restore recent connection string on startup
+    if (typeof(Config.getConnHistory()) != 'undefined' && Config.getConnHistory().length > 0){
+        connstr = Config.getConnHistory()[0];
+        this.newTab(connstr);
+    } else {
+        this.newTab(); 
+    }
     
 };
 
 MicroEvent.mixin(_TabsStore);  
 
 TabsStore = new _TabsStore();
+
 
 module.exports = TabsStore;
