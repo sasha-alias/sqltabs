@@ -19,7 +19,7 @@ var Client = function(connstr){
 
     this.error = false;
 
-    this.Responce = null;
+    this.Response = null;
 
     this.cancel = function(){
         return self.pq.cancel();
@@ -35,7 +35,7 @@ var Client = function(connstr){
 
     // send query for execution
     this.sendQuery = function(query, callback, err_callback){
-        self.Responce = new Responce();
+        self.Response = new Response();
         self.finished = false;
         self.error = false;
 
@@ -73,7 +73,7 @@ var Client = function(connstr){
             self.finished = true;
             self.pq.removeListener('readable', self.readyHandler);
             self.pq.stopReader();
-            self.callback(self.Responce);
+            self.callback(self.Response);
         }
     }
     // extract data from server
@@ -89,6 +89,7 @@ var Client = function(connstr){
 
         if (!res){ // no more result sets
             this.finished = true;
+            this.pq.finish();
             return;
         }
 
@@ -115,7 +116,7 @@ var Client = function(connstr){
             records.push(rec);
         }
 
-        self.Responce.datasets.push({
+        self.Response.datasets.push({
             nrecords: nrows, 
             fields: fields, 
             data: records, 
@@ -126,7 +127,7 @@ var Client = function(connstr){
     }
 }
 
-var Responce = function(){
+var Response = function(){
     this.datasets = [];
 }
 
