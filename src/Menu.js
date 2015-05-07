@@ -1,4 +1,5 @@
 var Actions = require ('./Actions');
+var TabsStore = require('./TabsStore');
 var remote = require('remote');
 var Menu = remote.require('menu');
 var BrowserWindow = remote.require('browser-window');
@@ -17,9 +18,16 @@ var openFile = function(){
 }
 
 var saveFile = function(){
-    dialog.showSaveDialog(function(filename){
-        console.log(filename);
-    })
+    var filename = TabsStore.tabs[TabsStore.selectedTab].filename;
+    if ( filename != null){
+        Actions.saveFile(filename);
+    } else {
+        dialog.showSaveDialog(function(filename){
+            if (typeof(filename) != 'undefined'){
+                Actions.saveFile(filename);
+            }
+        })
+    }
 }
 
 var saveFileAs = function(){
@@ -95,6 +103,10 @@ template = [
         {label: "Break Execution",
          accelerator: "Command+B",
          click: function(){Actions.cancelQuery()},
+        },
+        {label: "Edit connect string",
+         accelerator: "Command+L",
+         click: function(){Actions.gotoConnstr()},
         },
      ]
     },

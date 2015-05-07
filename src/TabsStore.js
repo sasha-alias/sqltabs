@@ -14,9 +14,17 @@ var TabSequence = new Sequence(0);
 var Tab = function(id, connstr){
     this.id = id;
     this.connstr = connstr;
-    this.title = id+' - '+connstr;
     this.result = null;
     this.error = null;
+    this.filename = null;
+
+    this.getTitle = function(){
+        if (this.filename != null){
+            return this.filename;
+        } else {
+            return this.id+' - '+this.connstr;
+        }
+    }
 };
 
 var _TabsStore = function(){
@@ -115,7 +123,6 @@ var _TabsStore = function(){
 
     this.setConnection = function(id, connstr){
         this.tabs[id].connstr = connstr;
-        this.tabs[id].title = id +' - '+ connstr;
 
         hist_idx = this.connectionHistory.indexOf(connstr);
         if (hist_idx == -1){ // add to history
@@ -152,6 +159,10 @@ var _TabsStore = function(){
     };
 
     this.openFile = function(filename){
+        this.tabs[this.selectedTab].filename = filename;
+    }
+
+    this.saveFile = function(filename){
         this.tabs[this.selectedTab].filename = filename;
     }
 

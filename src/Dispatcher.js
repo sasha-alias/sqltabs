@@ -103,7 +103,19 @@ AppDispatcher.register( function(payload) {
         case 'open-file':
             TabsStore.openFile(payload.filename);
             TabsStore.trigger('open-file', payload.filename);
+            TabsStore.trigger('change');
             break;
+
+        case 'save-file':
+            TabsStore.saveFile(payload.filename);
+            TabsStore.trigger('save-file-'+TabsStore.selectedTab, payload.filename);
+            TabsStore.trigger('change');
+            break;
+
+        case 'goto-connstr':
+            TabsStore.trigger('goto-connstr-'+TabsStore.selectedTab);
+            break;
+
 
     }
     return true; // Needed for Flux promise resolution

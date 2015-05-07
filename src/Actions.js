@@ -108,6 +108,21 @@ var Actions = {
         });
     },
 
+    saveFile: function(filename){
+        AppDispatcher.dispatch({
+            eventName: 'save-file',
+            filename: filename,
+        });
+    },
+
+    gotoConnstr: function(){
+        AppDispatcher.dispatch({
+            eventName: 'goto-connstr',
+        });
+    }
+
+
+
 }
 
 module.exports = Actions;

@@ -1,7 +1,4 @@
 var React = require('react');
-var Input = require('react-bootstrap').Input;
-var DropdownButton = require('react-bootstrap').DropdownButton;
-var MenuItem = require('react-bootstrap').MenuItem;
 var TabActions = require('./Actions');
 var TabsStore = require('./TabsStore');
 
@@ -16,10 +13,12 @@ var TabToolbar = React.createClass({
 
     componentDidMount: function() {  
         TabsStore.bind('change', this.storeChangedHandler);
+        TabsStore.bind('goto-connstr-'+this.props.eventKey, this.focusConnstr);
     },
 
     componentWillUnmount: function(){
         TabsStore.unbind('change', this.storeChangedHandler);
+        TabsStore.unbind('goto-connstr-'+this.props.eventKey, this.focusConnstr);
     },
 
     storeChangedHandler: function() {
@@ -27,6 +26,12 @@ var TabToolbar = React.createClass({
             connstr: TabsStore.getConnstr(this.props.eventKey),
             history: TabsStore.connectionHistory,
         });
+    },
+
+    focusConnstr: function(){
+        var connInput = React.findDOMNode(this.refs.connInput)
+        connInput.focus();
+        connInput.select();
     },
 
     connectionSubmitHandler: function(e){
@@ -50,8 +55,8 @@ var TabToolbar = React.createClass({
         <div className="tab-toolbar"> 
 
             <form className="tab-toolbar-form" onSubmit={this.connectionSubmitHandler}>
-                <Input
-                    className="input-connstr"
+                <input
+                    className="input-connstr form-control"
                     ref="connInput"
                     onChange={this.connectionChangeHandler} 
                     type="text" 

@@ -23,15 +23,18 @@ var Editor = React.createClass({
         this.editor.getSession().setMode('ace/mode/pgsql');
         this.editor.setTheme('ace/theme/' + this.state.theme);
         this.editor.setKeyboardHandler(this.state.mode);
+        TabsStore.bind('change', this.changeHandler);
         TabsStore.bind('editor-resize', this.resize);
         TabsStore.bind('change-theme', this.changeHandler);
         TabsStore.bind('change-mode', this.changeHandler);
         TabsStore.bind('open-file', this.fileOpenHandler);
+        TabsStore.bind('save-file-'+this.props.eventKey, this.fileSaveHandler);
         TabsStore.bind('execute-script-'+this.props.eventKey, this.execHandler);
 
         this.editor.getSelectedText = function() { 
             return this.session.getTextRange(this.getSelectionRange());
         }
+        this.editor.focus();
     },
 
     componentWillUnmount: function(){
@@ -39,6 +42,7 @@ var Editor = React.createClass({
         TabsStore.unbind('change-theme', this.changeTheme);
         TabsStore.unbind('change-mode', this.changeMode);
         TabsStore.unbind('open-file', this.fileOpenHandler);
+        TabsStore.unbind('save-file-'+this.props.eventKey, this.fileSaveHandler);
         TabsStore.unbind('execute-script-'+this.props.eventKey, this.execHandler);
     },
 
@@ -60,13 +64,11 @@ var Editor = React.createClass({
         this.editor.setTheme('ace/theme/' + this.state.theme);
         this.editor.setKeyboardHandler(this.state.mode);
         this.editor.resize();
+        this.editor.focus();
     },
 
     fileOpenHandler: function(){
         filename = TabsStore.getEditorFile(this.props.eventKey);
-        this.setState({
-            file: filename
-        })
 
         self = this;
         fd = fs.readFile(filename, 'utf8', function(err, data){
@@ -76,6 +78,16 @@ var Editor = React.createClass({
                 self.editor.setValue(data, -1);
             }
         });
+    },
+
+    fileSaveHandler: function(){
+        filename = TabsStore.getEditorFile(this.props.eventKey);
+        fs.writeFile(filename, this.editor.getValue(), function(err) {
+            if(err) {
+                return console.log(err);
+            }
+            console.log("The file was saved!");
+        }); 
     },
 
     resize: function(){

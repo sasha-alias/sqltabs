@@ -60,7 +60,7 @@ var TabsNav = React.createClass({
         var tabs = this.state.tabs;
         var itemHtml = items.map( function(item) {
                 return <NavItem key={item} eventKey={item}> 
-                    {tabs[item].title}
+                    {tabs[item].getTitle()}
                     <CloseButton eventKey={item}/>
                 </NavItem>;
             });
