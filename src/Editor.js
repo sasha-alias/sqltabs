@@ -27,7 +27,7 @@ var Editor = React.createClass({
         TabsStore.bind('editor-resize', this.resize);
         TabsStore.bind('change-theme', this.changeHandler);
         TabsStore.bind('change-mode', this.changeHandler);
-        TabsStore.bind('open-file', this.fileOpenHandler);
+        TabsStore.bind('open-file-'+this.props.eventKey, this.fileOpenHandler);
         TabsStore.bind('save-file-'+this.props.eventKey, this.fileSaveHandler);
         TabsStore.bind('execute-script-'+this.props.eventKey, this.execHandler);
 
@@ -38,10 +38,11 @@ var Editor = React.createClass({
     },
 
     componentWillUnmount: function(){
+        TabsStore.unbind('change', this.changeHandler);
         TabsStore.unbind('editor-resize', this.resize);
         TabsStore.unbind('change-theme', this.changeTheme);
         TabsStore.unbind('change-mode', this.changeMode);
-        TabsStore.unbind('open-file', this.fileOpenHandler);
+        TabsStore.unbind('open-file-'+this.props.eventKey, this.fileOpenHandler);
         TabsStore.unbind('save-file-'+this.props.eventKey, this.fileSaveHandler);
         TabsStore.unbind('execute-script-'+this.props.eventKey, this.execHandler);
     },

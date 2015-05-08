@@ -102,7 +102,7 @@ AppDispatcher.register( function(payload) {
 
         case 'open-file':
             TabsStore.openFile(payload.filename);
-            TabsStore.trigger('open-file', payload.filename);
+            TabsStore.trigger('open-file-'+TabsStore.selectedTab, payload.filename);
             TabsStore.trigger('change');
             break;
 

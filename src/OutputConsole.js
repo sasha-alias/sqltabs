@@ -8,7 +8,15 @@ var OutputConsole = React.createClass({
         message: "# Output console",
         result: null,
         error: null,
+        updatable: true,
         };
+    },
+
+    shouldComponentUpdate: function(){
+        // prevent component re-render after result have been rendered
+        // so the resultset is rendered only once after execution
+        // otherwise it will recalculate state on every action in app, which is slow on large datasets
+        return this.state.updatable;
     },
     
     componentDidMount: function(){
@@ -24,10 +32,11 @@ var OutputConsole = React.createClass({
     },
 
     queryStarted: function(){
+        this.setState({updatable: true});
         this.setState({
             message: "#Executing ...", 
             result: null,
-            error: null,
+            error: null
         }); 
     },
 
@@ -36,6 +45,7 @@ var OutputConsole = React.createClass({
             message: null,
             result: TabsStore.getResult(this.props.eventKey), 
             error: null,
+            updatable: false,
         });
     },
 
