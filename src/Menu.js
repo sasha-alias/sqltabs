@@ -11,6 +11,7 @@ var openFile = function(){
     dialog.showOpenDialog({ properties: ['openFile']}, 
     function(filenames){
         if (typeof(filenames) != 'undefined' && filenames.length == 1){
+            Actions.newTab();
             Actions.openFile(filenames[0]);
         }
     }

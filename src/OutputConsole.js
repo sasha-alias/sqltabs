@@ -32,8 +32,8 @@ var OutputConsole = React.createClass({
     },
 
     queryStarted: function(){
-        this.setState({updatable: true});
-        this.setState({
+        this.setState({updatable: true});   // first make component updatable
+        this.setState({                     // second change state so it's get rerendered
             message: "#Executing ...", 
             result: null,
             error: null
@@ -88,6 +88,9 @@ var OutputConsole = React.createClass({
 
         return (
             <div className="output-console">
+                <div className="duration-div">
+                <span className="duration-word">Time:</span> <span className="duration-number">{this.state.result.duration}</span> <span className="duration-word">ms</span>
+                </div>
                 {datasets}
             </div>
         );
@@ -126,20 +129,35 @@ var OutputConsole = React.createClass({
                     {out_row_cols}
                 </tr>);
         });
+
+        if (dataset.nrecords == 1){
+            rword = 'row';
+        } else {
+            rword = 'rows';
+        }
+
             
         return (
 
-            <table  key={'dataset_'+i} className="table-resultset table table-hover">
-            <thead>
-                <tr>
-                <th>#</th>
-                {out_fields}
-                </tr>
-            </thead>
-            <tbody>
-            {out_rows}
-            </tbody>
-            </table>
+            <div>
+                <div className="rows-count-div">
+                <span className="rows-count-bracket">(</span>
+                <span className="rows-count-number">{dataset.nrecords}</span> <span className="rows-count-word">{rword}</span>
+                <span className="rows-count-bracket">)</span>
+                </div>
+
+                <table  key={'dataset_'+i} className="table-resultset table table-hover">
+                <thead>
+                    <tr>
+                    <th>#</th>
+                    {out_fields}
+                    </tr>
+                </thead>
+                <tbody>
+                {out_rows}
+                </tbody>
+                </table>
+            </div>
         );
     } 
 });

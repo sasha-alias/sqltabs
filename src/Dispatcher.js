@@ -53,8 +53,10 @@ AppDispatcher.register( function(payload) {
         case 'set-theme':
             if (payload.key == 'bright'){ // brigth
                 document.getElementById("theme_stylesheet").href = "css/bootstrap.bright.css";
+                document.getElementById("theme_tabs_stylesheet").href = "css/tabs.bright.css";
             } else { // dark
                 document.getElementById("theme_stylesheet").href = "css/bootstrap.dark.css";
+                document.getElementById("theme_tabs_stylesheet").href = "css/tabs.dark.css";
             };
 
             TabsStore.setTheme(payload.key);

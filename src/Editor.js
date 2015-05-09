@@ -71,14 +71,17 @@ var Editor = React.createClass({
     fileOpenHandler: function(){
         filename = TabsStore.getEditorFile(this.props.eventKey);
 
+
+
         self = this;
         fd = fs.readFile(filename, 'utf8', function(err, data){
             if (err){
                 console.log(err);
             } else {
-                self.editor.setValue(data, -1);
+                self.editor.session.setValue(data, -1);
             }
         });
+
     },
 
     fileSaveHandler: function(){

@@ -24,7 +24,14 @@ var Actions = {
     select: function(id){
         AppDispatcher.dispatch({
             eventName: 'select-tab',
-            key: id
+            key: id,
+        });
+    },
+
+    newTab: function(){
+        AppDispatcher.dispatch({
+            eventName: 'select-tab',
+            key: 0,
         });
     },
 

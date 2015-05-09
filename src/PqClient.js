@@ -90,6 +90,7 @@ var Client = function(connstr){
         if (!res){ // no more result sets
             this.finished = true;
             this.pq.finish();
+            self.Response.finish();
             return;
         }
 
@@ -129,6 +130,12 @@ var Client = function(connstr){
 
 var Response = function(){
     this.datasets = [];
+    this.start_time = performance.now(); //new Date().getTime();
+    this.duration = null;
+    self = this;
+    this.finish = function(){
+        self.duration = Math.round((performance.now() - self.start_time)*1000)/1000; 
+    };
 }
 
 // normalizes connect string

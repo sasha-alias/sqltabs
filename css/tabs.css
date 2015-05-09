@@ -13,12 +13,14 @@ body{
 .tab-app {
     height: 100%;
     width: 100%;
+    margin-top: 2px;
 }
 
 .tab-navigator{
     display: block;
     height: 30px;
     width: 100%;
+    margin-left: 3px;
 }
 
 .tab-close-button{
@@ -108,4 +110,12 @@ body{
 
 .table-resultset {
     width: auto;
+}
+
+.duration-div {
+    margin-left: 10px;
+}
+
+.rows-count-div{
+    margin-left: 10px;
 }

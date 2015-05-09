@@ -22,7 +22,7 @@ var Tab = function(id, connstr){
         if (this.filename != null){
             return this.filename;
         } else {
-            return this.id+' - '+this.connstr;
+            return '[ '+this.connstr+' ]';
         }
     }
 };
