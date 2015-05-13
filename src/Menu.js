@@ -4,6 +4,7 @@ var remote = require('remote');
 var Menu = remote.require('menu');
 var BrowserWindow = remote.require('browser-window');
 var dialog = remote.require('dialog');
+var app = remote.require('app');
 
 var fs = require('fs');
 
@@ -45,7 +46,30 @@ var saveFileAs = function(){
 
 template = [
     {label: "PGTabs",
-    submenu: []
+    submenu: [
+      {
+        label: 'Hide PGTabs',
+        accelerator: 'Command+H',
+        selector: 'hide:'
+      },
+      {
+        label: 'Hide Others',
+        accelerator: 'Command+Shift+H',
+        selector: 'hideOtherApplications:'
+      },
+      {
+        label: 'Show All',
+        selector: 'unhideAllApplications:'
+      },
+      {
+        type: 'separator'
+      },
+      {
+        label: 'Quite',
+        accelerator: 'Command+Q',
+        click: function(){app.quit()},
+      },
+    ]
     },
     {label: "File",
     submenu: [
