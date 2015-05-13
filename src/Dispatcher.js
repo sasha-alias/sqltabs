@@ -22,8 +22,7 @@ AppDispatcher.register( function(payload) {
     switch( payload.eventName ) {
         case 'select-tab':
             if (payload.key == 0) { // select tab 0 (+) means create a new tab
-                connstr = TabsStore.getConnstr(TabsStore.selectedTab); // open new tab with the same connstr as the current one
-                TabsStore.newTab(connstr);
+                TabsStore.newTab();
             } else {
                 TabsStore.selectTab(payload.key);
             }
@@ -72,9 +71,36 @@ AppDispatcher.register( function(payload) {
         
         case 'set-connection':
             TabsStore.setConnection(payload.key, payload.value);
+            TabsStore.setPassword(payload.key, null);
             Config.saveConnHistory(TabsStore.connectionHistory);
             TabsStore.trigger('change');
+            Executor.testConnection(
+                payload.key, 
+                payload.value, 
+                TabsStore.tabs[TabsStore.selectedTab].password,
+                payload.callback,
+                function(){
+                    TabsStore.trigger('ask-password');
+                },
+                function(id, err){
+                    payload.err_callback(id, err);
+                }
+                );
+
             break;
+
+        case 'set-password':
+            TabsStore.setPassword(TabsStore.selectedTab, payload.password);
+            Executor.testConnection(
+                TabsStore.selectedTab, 
+                TabsStore.getConnstr(TabsStore.selectedTab),
+                TabsStore.getPassword(TabsStore.selectedTab),
+                payload.callback,
+                payload.err_callback,
+                payload.err_callback
+            );
+            //Config.saveConnHistory(TabsStore.connectionHistory);
+            TabsStore.trigger('change');
 
         case 'editor-resize':
             TabsStore.trigger('editor-resize');
@@ -82,7 +108,8 @@ AppDispatcher.register( function(payload) {
 
         case 'run-query':
             connstr = TabsStore.getConnstr(payload.key);
-            Executor.runQuery(payload.key, connstr, payload.query, payload.callback, payload.err_callback);
+            password = TabsStore.getPassword(payload.key);
+            Executor.runQuery(payload.key, connstr, password, payload.query, payload.callback, payload.err_callback);
             TabsStore.trigger('query-started-'+payload.key);
             break;
 

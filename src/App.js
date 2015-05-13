@@ -1,4 +1,6 @@
 var React = require('react');
+var PasswordDialog = require('./PasswordDialog');
+
 var mountNode = document.body;
 
 var TabsNav = require('./TabsNav');
@@ -9,14 +11,22 @@ var Actions = require('./Actions');
 
 require('./Menu');
 
-var App = 
-<div className="tab-app">
-<TabsNav/>
-<TabContainer/>
-</div>
-;
+var App = React.createClass({
+
+    render: function(){
+        return (
+            <div className="tab-app">
+                <TabsNav/>
+                <TabContainer/>
+                <PasswordDialog/>
+            </div>
+        );
+    },
+});
+
+var app = <App/>;
 
 var theme = (Config.getTheme() || 'dark');
 Actions.setTheme(theme);
 
-React.render(App, mountNode);
+React.render(app, mountNode);

@@ -14,6 +14,7 @@ var TabSequence = new Sequence(0);
 var Tab = function(id, connstr){
     this.id = id;
     this.connstr = connstr;
+    this.password = password;
     this.result = null;
     this.error = null;
     this.filename = null;
@@ -40,9 +41,17 @@ var _TabsStore = function(){
     this.getAll = function(){return this.tabs;};
 
     this.newTab = function(connstr){
+        if (typeof(connstr) == 'undefined'){
+            connstr = this.getConnstr(this.selectedTab);
+        }
+        if (this.selectedTab > 0) {
+            password = this.tabs[this.selectedTab].password;
+        } else {
+            password = null;
+        }
 
         newid = TabSequence.nextval();
-        this.tabs[newid] = new Tab(newid, connstr);
+        this.tabs[newid] = new Tab(newid, connstr, password);
         this.order.push(newid);
         this.selectedTab = newid;
 
@@ -121,6 +130,12 @@ var _TabsStore = function(){
         };
     };
 
+    this.getPassword = function(id){
+        if (id in this.tabs) {
+            return this.tabs[id].password;
+        };
+    };
+
     this.setConnection = function(id, connstr){
         this.tabs[id].connstr = connstr;
 
@@ -133,6 +148,16 @@ var _TabsStore = function(){
         } else { // shift to the beginning of history
             this.connectionHistory.splice(hist_idx, 1);
             this.connectionHistory.unshift(connstr);
+        }
+    };
+
+    this.setPassword = function(id, password){
+        this.tabs[id].password = password;
+        connstr = this.getConnstr(id);
+        for (var key in this.tabs){ // update password in all tabs with the same connstr
+            if (this.tabs[key].connstr == connstr){
+                this.tabs[key].password = password;
+            }
         }
     };
 
@@ -171,6 +196,15 @@ var _TabsStore = function(){
             return this.tabs[id].filename;
         };
     };
+
+    this.getTabByFilename = function(filename){
+        for (var id in this.tabs){
+            if (this.tabs[id].filename == filename){
+                return Number(id);
+            }
+        }
+        return null;
+    }
         
     // restore recent connection string on startup
     if (typeof(Config.getConnHistory()) != 'undefined' && Config.getConnHistory().length > 0){

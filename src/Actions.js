@@ -73,6 +73,8 @@ var Actions = {
             eventName: 'set-connection',
             key: key,
             value: value,
+            callback: QueryCallback,
+            err_callback: ErrorCallback,
         });
     },
 
@@ -126,9 +128,16 @@ var Actions = {
         AppDispatcher.dispatch({
             eventName: 'goto-connstr',
         });
-    }
+    },
 
-
+    setPassword: function(password){
+        AppDispatcher.dispatch({
+            eventName: 'set-password',
+            password: password,
+            callback: QueryCallback,
+            err_callback: ErrorCallback,
+        });
+    },
 
 }
 

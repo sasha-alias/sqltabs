@@ -1,12 +1,20 @@
 var PQ = require('libpq');
+var util = require('util');
+var url = require('url');
 
 
-var Client = function(connstr){
+var Client = function(connstr, password){
     var self = this;
 
     // connection string
     this.connstr = connstr;
-    this._connstr = normalizeConnstr(connstr);
+    this.password = password;
+    this._connstr = normalizeConnstr(connstr, password);
+
+    this.setPassword = function(password){
+        this.password = password;
+        this._connstr = normalizeConnstr(this.connstr, password);
+    };
 
     // libpq instance
     this.pq = new PQ();
@@ -55,8 +63,6 @@ var Client = function(connstr){
                 console.log('Query sending error: '+self.pq.errorMessage());
                 return self.raiseError(self.pq.errorMessage());
             }
-
-
 
             self.pq.startReader();
         });
@@ -138,11 +144,19 @@ var Response = function(){
     };
 }
 
-// normalizes connect string
-var normalizeConnstr = function(connstr){
+// normalizes connect string: ensures protocol, and substitutes password
+var normalizeConnstr = function(connstr, password){
     if (connstr){
         if (connstr.lastIndexOf('postgres://', 0) !== 0) {
-            connstr = 'postgres://'+connstr
+            connstr = 'postgres://'+connstr;
+            parsed = url.parse(connstr);
+            connstr = util.format('%s//%s%s%s%s',
+                parsed.protocol,
+                parsed.auth,
+                (password == null) ? '' : ':'+password,
+                (parsed.host == null) ? '' : '@'+parsed.host,
+                (parsed.path == null) ? '' : parsed.path
+            )
         }
         return connstr;
     }

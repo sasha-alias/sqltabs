@@ -117,7 +117,7 @@ var OutputConsole = React.createClass({
 
             var out_row_cols = row.map(function(val, j){
                 return (
-                    <td key={i+'_'+j}>
+                    <td key={'col_'+i+'_'+j}>
                     {val}
                     </td>
                 );
@@ -125,7 +125,7 @@ var OutputConsole = React.createClass({
 
             return (
                 <tr key={'row'+i}>
-                    <td>{i+1}</td>
+                    <td key={'rownum_'+i}>{i+1}</td>
                     {out_row_cols}
                 </tr>);
         });

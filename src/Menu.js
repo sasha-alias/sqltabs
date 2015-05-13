@@ -11,8 +11,14 @@ var openFile = function(){
     dialog.showOpenDialog({ properties: ['openFile']}, 
     function(filenames){
         if (typeof(filenames) != 'undefined' && filenames.length == 1){
-            Actions.newTab();
-            Actions.openFile(filenames[0]);
+            var filename = filenames[0];
+            var existing_tab = TabsStore.getTabByFilename(filename);
+            if ( existing_tab != null){
+                Actions.select(existing_tab);
+            } else {
+                Actions.newTab();
+                Actions.openFile(filename);
+            }
         }
     }
     );
