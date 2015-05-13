@@ -139,7 +139,7 @@ var OutputConsole = React.createClass({
             
         return (
 
-            <div>
+            <div key={'dataset_'+i}>
                 <div className="rows-count-div">
                 <span className="rows-count-bracket">(</span>
                 <span className="rows-count-number">{dataset.nrecords}</span> <span className="rows-count-word">{rword}</span>
