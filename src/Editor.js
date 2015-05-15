@@ -30,6 +30,7 @@ var Editor = React.createClass({
         TabsStore.bind('open-file-'+this.props.eventKey, this.fileOpenHandler);
         TabsStore.bind('save-file-'+this.props.eventKey, this.fileSaveHandler);
         TabsStore.bind('execute-script-'+this.props.eventKey, this.execHandler);
+        TabsStore.bind('execute-block-'+this.props.eventKey, this.execBlockHandler);
 
         this.editor.getSelectedText = function() { 
             return this.session.getTextRange(this.getSelectionRange());
@@ -45,6 +46,7 @@ var Editor = React.createClass({
         TabsStore.unbind('open-file-'+this.props.eventKey, this.fileOpenHandler);
         TabsStore.unbind('save-file-'+this.props.eventKey, this.fileSaveHandler);
         TabsStore.unbind('execute-script-'+this.props.eventKey, this.execHandler);
+        TabsStore.unbind('execute-block-'+this.props.eventKey, this.execBlockHandler);
     },
 
     execHandler: function(editor) {
@@ -55,6 +57,51 @@ var Editor = React.createClass({
             var script = this.editor.getValue();
         }
         TabActions.runQuery(this.props.eventKey, script);
+    },
+
+    execBlockHandler: function(){
+        var selected = this.editor.getSelectedText()
+        if (selected) {
+            var script = selected;
+        } else {
+            var current_line = this.editor.selection.getCursor().row;
+            var script = this.detectBlock(current_line, this.editor.getValue);
+        }
+        TabActions.runQuery(this.props.eventKey, script);
+
+    },
+
+    detectBlock: function(current_line, script){
+        var start = 0;
+        var start_found = false;
+        while (!start_found){
+            current_line_text = this.editor.session.getLine(current_line).trim();
+            if (current_line === 0) {
+                start = current_line;
+                start_found = true;
+            } else if (current_line_text.indexOf('---') === 0){
+                start = current_line;
+                start_found = true;
+            } 
+            current_line--;
+        }
+        
+        var end = null;
+        var end_found = false;
+        current_line = start;
+        while (!end_found){
+            current_line_text = this.editor.session.getLine(current_line).trim();
+            if (current_line_text.indexOf('---') === 0 && current_line > start){
+                end = current_line - 1;
+                end_found = true;
+            } else if (current_line >= this.editor.session.getLength()){
+                end = current_line - 1;
+                end_found = true;
+            }
+            current_line++; 
+        }
+        
+        return this.editor.session.getLines(start, end).join('\r');
     },
 
     changeHandler: function(){
@@ -90,7 +137,6 @@ var Editor = React.createClass({
             if(err) {
                 return console.log(err);
             }
-            console.log("The file was saved!");
         }); 
     },
 

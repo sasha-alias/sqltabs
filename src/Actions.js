@@ -91,6 +91,12 @@ var Actions = {
         });
     },
 
+    execBlock: function(){
+        SignalsDispatcher.dispatch({
+            eventName: 'execute-block'
+        })
+    },
+
     runQuery: function(key, query){ // sends query to db for execution 
 
         AppDispatcher.dispatch(

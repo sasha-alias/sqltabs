@@ -14,6 +14,9 @@ SignalsDispatcher.register(function(payload){
         case 'execute-script':
             TabsStore.trigger('execute-script-'+TabsStore.selectedTab);
             break;
+        case 'execute-block':
+            TabsStore.trigger('execute-block-'+TabsStore.selectedTab);
+            break;
     };
     return true;
 });
