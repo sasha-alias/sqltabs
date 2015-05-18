@@ -72,6 +72,7 @@ var Editor = React.createClass({
     },
 
     detectBlock: function(current_line, script){
+        var meta = '^\s*---\s*.*';
         var start = 0;
         var start_found = false;
         while (!start_found){
@@ -79,7 +80,7 @@ var Editor = React.createClass({
             if (current_line === 0) {
                 start = current_line;
                 start_found = true;
-            } else if (current_line_text.indexOf('---') === 0){
+            } else if (current_line_text.match(meta) != null){
                 start = current_line;
                 start_found = true;
             } 
@@ -91,7 +92,7 @@ var Editor = React.createClass({
         current_line = start;
         while (!end_found){
             current_line_text = this.editor.session.getLine(current_line).trim();
-            if (current_line_text.indexOf('---') === 0 && current_line > start){
+            if (current_line_text.match(meta) != null && current_line > start){
                 end = current_line - 1;
                 end_found = true;
             } else if (current_line >= this.editor.session.getLength()){

@@ -1,4 +1,5 @@
 var React = require('react');
+var Chart = require('./Chart');
 
 var OutputConsole = React.createClass({
 
@@ -53,6 +54,14 @@ var OutputConsole = React.createClass({
         this.setState({error: TabsStore.getError(this.props.eventKey)});
     },
 
+    getRenderer: function(query){
+        if (query.match('^\\s*---\\s+chart\s*.*') != null){
+            return this.renderChart;
+        } else {
+            return this.renderDataset;
+        }
+    },
+
     render: function(){
         if (this.state.error){
             return this.renderError();
@@ -80,10 +89,10 @@ var OutputConsole = React.createClass({
     },
 
     renderResult: function(){
+        var renderer = this.getRenderer(this.state.result.query);
         self = this;
-
         var datasets = this.state.result.datasets.map(function(dataset, i){
-            return self.renderDataset(dataset, i);
+            return renderer(dataset, i, self.state.result.query);
         });
 
         return (
@@ -96,7 +105,7 @@ var OutputConsole = React.createClass({
         );
     },
 
-    renderDataset: function(dataset, i){
+    renderDataset: function(dataset, i, query){
 
         if (dataset.resultStatus == 'PGRES_COMMAND_OK'){
             return <div key={'cmdres_'+i} className="alert alert-success">{dataset.cmdStatus}</div>;
@@ -159,7 +168,18 @@ var OutputConsole = React.createClass({
                 </table>
             </div>
         );
-    } 
+    },
+
+    renderChart: function(dataset, i, query){
+
+        var chart_type = query.match('^\\s*---\\s+chart\\s+([a-z\\-]*)')[1];
+        if (chart_type == ''){
+            chart_type = 'line';
+        }
+        return(
+            <Chart key={'dataset_'+i} dataset={dataset} type={chart_type}/>
+        );
+    },
 });
 
 module.exports = OutputConsole;

@@ -1,2 +1,5 @@
+.DS_Store
+PGTabs.app
 build/*
 node_modules/*
+

@@ -20,3 +20,11 @@
 .input-connstr:focus{
     background-color: #fcfcfc;
 }
+
+.c3-legend-item text{
+    fill: #959595;
+}
+
+.c3 .c3-axis path, .c3 .c3-axis line, .c3 .c3-axis text {
+    stroke: #5e5e5e;
+}

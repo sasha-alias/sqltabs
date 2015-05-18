@@ -43,7 +43,7 @@ var Client = function(connstr, password){
 
     // send query for execution
     this.sendQuery = function(query, callback, err_callback){
-        self.Response = new Response();
+        self.Response = new Response(query);
         self.finished = false;
         self.error = false;
 
@@ -134,7 +134,8 @@ var Client = function(connstr, password){
     }
 }
 
-var Response = function(){
+var Response = function(query){
+    this.query = query
     this.datasets = [];
     this.start_time = performance.now(); //new Date().getTime();
     this.duration = null;
