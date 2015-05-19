@@ -55,8 +55,12 @@ var OutputConsole = React.createClass({
     },
 
     getRenderer: function(query){
-        if (query.match('^\\s*---\\s+chart\s*.*') != null){
-            return this.renderChart;
+        if (TabsStore.getRenderer() == 'auto'){
+            if (query.match('^\\s*---\\s+chart\s*.*') != null){
+                return this.renderChart;
+            } else {
+                return this.renderDataset;
+            }
         } else {
             return this.renderDataset;
         }

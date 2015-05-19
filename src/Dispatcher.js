@@ -9,12 +9,14 @@ var AppDispatcher = new Dispatcher();
 var SignalsDispatcher = new Dispatcher();
 
 SignalsDispatcher.register(function(payload){
-// separate dispatcher needed to avoid parallel actions execution for actions which don't change store
+// separate dispatcher needed to avoid parallel actions execution
     switch(payload.eventName){
         case 'execute-script':
+            TabsStore.setRenderer('plain');
             TabsStore.trigger('execute-script-'+TabsStore.selectedTab);
             break;
         case 'execute-block':
+            TabsStore.setRenderer('auto');
             TabsStore.trigger('execute-block-'+TabsStore.selectedTab);
             break;
     };
@@ -102,7 +104,6 @@ AppDispatcher.register( function(payload) {
                 payload.err_callback,
                 payload.err_callback
             );
-            //Config.saveConnHistory(TabsStore.connectionHistory);
             TabsStore.trigger('change');
 
         case 'editor-resize':

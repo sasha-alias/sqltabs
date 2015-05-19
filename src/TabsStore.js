@@ -35,6 +35,7 @@ var _TabsStore = function(){
     this.tabs = {};
     this.order = [];
     this.selectedTab = 0;
+    this.renderer = 'plain'; // plain or auto
 
     this.connectionHistory = (Config.getConnHistory() || []);
 
@@ -204,6 +205,14 @@ var _TabsStore = function(){
             }
         }
         return null;
+    }
+
+    this.setRenderer = function(renderer){
+        this.renderer = renderer
+    }
+
+    this.getRenderer = function(){
+        return this.renderer;
     }
         
     // restore recent connection string on startup

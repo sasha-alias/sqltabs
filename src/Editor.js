@@ -50,7 +50,7 @@ var Editor = React.createClass({
     },
 
     execHandler: function(editor) {
-        var selected = this.editor.getSelectedText()
+        var selected = this.editor.getSelectedText();
         if (selected) {
             var script = selected;
         } else {
