@@ -1,3 +1,4 @@
 #!/bin/sh
-rm -rf ./PGTabs
-electron-packager ./ PGTabs --platform=darwin --arch=x64 --version=0.25.2
+rm -rf ./PGTabs.app
+electron-packager ./ PGTabs --platform=darwin --arch=x64 --version=0.25.2 --icon logo.icns
+hdiutil create -format UDZO -srcfolder PGTabs.app pgtabs.dmg
