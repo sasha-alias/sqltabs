@@ -119,3 +119,26 @@ body{
 .rows-count-div{
     margin-left: 10px;
 }
+
+.conn_history{
+    position: absolute;
+    width: 800px;
+    z-index: 1000;
+    border: 1px solid;
+    border-radius: 5px;
+}
+
+.conn_history_list{
+    list-style-type: none;
+    padding-left: 0px;
+}
+
+.conn_history_hidden{
+    display: none;
+}
+
+.conn_history_item{
+    cursor: pointer;    
+    padding-left: 10px;
+}
+

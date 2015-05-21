@@ -28,3 +28,16 @@
 .c3 .c3-axis path, .c3 .c3-axis line, .c3 .c3-axis text {
     stroke: #5e5e5e;
 }
+
+.conn_history{
+    background: rgba(74, 74, 74, 0.9);
+}
+
+.conn_history_item:hover{
+    background-color: grey;
+}
+
+.conn_history_item_active{
+    background-color: grey;
+}
+

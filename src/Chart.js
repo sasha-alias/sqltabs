@@ -18,7 +18,6 @@ var Chart = React.createClass({
 
         if (column_charts.indexOf(this.props.type) != -1){
             // field name as a header
-            console.log('col');
             var rows = this.props.dataset.data;
             rows.unshift(fields); 
             data = {
@@ -27,15 +26,12 @@ var Chart = React.createClass({
             }
         } else if (row_charts.indexOf(this.props.type) != -1){
             // first column value as a header
-            console.log('row');
             var columns = this.props.dataset.data;
             data = {
                 columns: columns,
                 type: this.props.type,
             }
         } else {
-            console.log('ret');
-            // TODO: render message "unsupported chart"
             $(React.findDOMNode(this)).html('<div class="connection-error alert alert-danger">Chart '+this.props.type+' is not supported<div>');
             return;
         }
