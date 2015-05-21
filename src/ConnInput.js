@@ -81,6 +81,9 @@ var ConnInput = React.createClass({
 
     keyPressHandler: function(e){
         var history_length = TabsStore.connectionHistory.length;
+        if (TabsStore.connectionHistory.length == 0 || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey){
+            return;
+        }
         if (e.keyCode == 40){ // down
             var hilight = (this.state.hilight < history_length - 1 ) ? this.state.hilight+1 : 0;
             this.setState({
@@ -123,7 +126,7 @@ var ConnInput = React.createClass({
             return <li data-idx={i} onMouseOver={self.itemMouseOverHandler} onClick={self.pickHandler} className={"conn_history_item"+hilighted} key={'connhist'+i}>{item}</li>;
         });
 
-        if (this.state.active){
+        if (this.state.active && TabsStore.connectionHistory.length > 0){
             var visibility = "conn_history_visisble"
         } else {
             var visibility = "conn_history_hidden"
