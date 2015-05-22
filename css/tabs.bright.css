@@ -1,6 +1,7 @@
 
 .conn_history{
     background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgb(200, 200, 200);
 }
 
 .conn_history_item:hover{

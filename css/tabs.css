@@ -78,7 +78,7 @@ body{
     height: 100%;
     width: 100%;
     overflow: scroll;
-    border:1px solid black;
+    border:1px solid;
 }
 
 .hsplitter {
@@ -124,7 +124,6 @@ body{
     position: absolute;
     width: 800px;
     z-index: 1000;
-    border: 1px solid;
     border-radius: 5px;
 }
 

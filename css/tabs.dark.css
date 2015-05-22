@@ -31,13 +31,17 @@
 
 .conn_history{
     background: rgba(74, 74, 74, 0.9);
+    color: rgb(200, 200, 200);
+    border: 1px solid rgb(240, 240, 240);
 }
 
 .conn_history_item:hover{
-    background-color: grey;
+    background-color: rgb(127, 127, 127);
+    color: rgb(240, 240, 240);
 }
 
 .conn_history_item_active{
-    background-color: grey;
+    background-color: rgb(127, 127, 127);
+    color: rgb(240, 240, 240);
 }
 
