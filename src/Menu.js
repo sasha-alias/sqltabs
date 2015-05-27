@@ -45,10 +45,10 @@ var saveFileAs = function(){
 }
 
 template = [
-    {label: "PGTabs",
+    {label: "SQL Tabs",
     submenu: [
       {
-        label: 'Hide PGTabs',
+        label: 'Hide SQL Tabs',
         accelerator: 'Command+H',
         selector: 'hide:'
       },

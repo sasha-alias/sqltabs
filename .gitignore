@@ -1,5 +1,5 @@
 .DS_Store
-PGTabs.app
+SQL Tabs.app
 build/*
 node_modules/*
-pgtabs.dmg
+sqltabs.dmg
