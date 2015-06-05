@@ -42,6 +42,6 @@ cp -r node_modules/react-bootstrap .build/node_modules/
 
 
 cd .build
-electron-packager ./ "SQL Tabs" --platform=darwin --arch=x64 --version=0.25.2 --icon logo.icns
+electron-packager ./ "sqltabs" --platform=darwin --arch=x64 --version=0.25.2 --icon logo.icns --asar --prune
 cd ..
 
