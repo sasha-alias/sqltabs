@@ -14,11 +14,9 @@ mkdir -p .build/node_modules/bootstrap
 cp -r node_modules/bootstrap/dist .build/node_modules/bootstrap/
 # brace
 cp -r node_modules/brace .build/node_modules/
+
 # c3
-mkdir -p .build/node_modules/c3/
-cp -r node_modules/c3/node_modules .build/node_modules/c3/
-cp node_modules/c3/c3.min.css .build/node_modules/c3/
-cp node_modules/c3/c3.min.js .build/node_modules/c3/
+cp -r node_modules/c3 .build/node_modules/
 
 # flux
 cp -r node_modules/flux .build/node_modules/
@@ -42,6 +40,6 @@ cp -r node_modules/react-bootstrap .build/node_modules/
 
 
 cd .build
-electron-packager ./ "sqltabs" --platform=darwin --arch=x64 --version=0.25.2 --icon logo.icns --asar --prune
+electron-packager ./ "SQL Tabs" --platform=darwin --arch=x64 --version=0.25.2 --icon logo.icns --asar --prune
 cd ..
 
