@@ -244,11 +244,11 @@ if (process.platform == 'darwin'){
 
 
         {label: "Window", submenu:[
-            {label: "Toggle DevTools",
+            /*{label: "Toggle DevTools",
             accelerator: "Alt+Ctrl+I",
             click: function() { BrowserWindow.getFocusedWindow().toggleDevTools(); }
             },
-            {type: "separator"},
+            {type: "separator"},*/
             {label: "Next Tab",
              accelerator: "Ctrl+Tab",
              click: function(){Actions.nextTab()},
