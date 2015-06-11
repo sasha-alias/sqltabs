@@ -170,7 +170,7 @@ if (process.platform == 'darwin'){
                 {label: "Large", click: function(){setFontSize("large");}},
                 {label: "X-Large", click: function(){setFontSize("x-large");}},
                 {label: "XX-Large", click: function(){setFontSize("xx-large");}},
-            ]}
+            ]},
         ]},
         {label: "Window", submenu:[
             {label: "Toggle DevTools",
@@ -251,6 +251,15 @@ if (process.platform == 'darwin'){
             submenu: [
                 {label: "Classic", click: function(){Actions.setMode("classic");}},
                 {label: "Vim", click: function(){Actions.setMode("vim");}},
+            ]},
+            {label: "Font",
+            submenu: [
+                {label: "X-Small", click: function(){setFontSize("x-small");}},
+                {label: "Small", click: function(){setFontSize("small");}},
+                {label: "Medium", click: function(){setFontSize("medium");}},
+                {label: "Large", click: function(){setFontSize("large");}},
+                {label: "X-Large", click: function(){setFontSize("x-large");}},
+                {label: "XX-Large", click: function(){setFontSize("xx-large");}},
             ]},
         ]},
 
