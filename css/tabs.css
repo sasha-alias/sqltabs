@@ -147,3 +147,10 @@ body{
     padding-left: 10px;
 }
 
+.c3-legend-item{
+    font-size: inherit;
+}
+
+.c3 svg {
+  font-size: inherit;
+}
