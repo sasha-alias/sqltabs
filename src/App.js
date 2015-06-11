@@ -27,6 +27,8 @@ var App = React.createClass({
 var app = <App/>;
 
 var theme = (Config.getTheme() || 'dark');
+var size = (Config.getFontSize() || 'medium');
 Actions.setTheme(theme);
+Actions.setFontSize(size);
 
 React.render(app, mountNode);

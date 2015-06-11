@@ -5,7 +5,6 @@ var Menu = remote.require('menu');
 var BrowserWindow = remote.require('browser-window');
 var dialog = remote.require('dialog');
 var app = remote.require('app');
-
 var fs = require('fs');
 
 var openFile = function(){
@@ -42,6 +41,10 @@ var saveFileAs = function(){
     dialog.showSaveDialog(function(filename){
         console.log(filename);
     })
+}
+
+var setFontSize = function(size){
+    Actions.setFontSize(size);
 }
 
 if (process.platform == 'darwin'){
@@ -159,13 +162,22 @@ if (process.platform == 'darwin'){
                 {label: "Classic", click: function(){Actions.setMode("classic");}},
                 {label: "Vim", click: function(){Actions.setMode("vim");}},
             ]},
+            {label: "Font",
+            submenu: [
+                {label: "X-Small", click: function(){setFontSize("x-small");}},
+                {label: "Small", click: function(){setFontSize("small");}},
+                {label: "Medium", click: function(){setFontSize("medium");}},
+                {label: "Large", click: function(){setFontSize("large");}},
+                {label: "X-Large", click: function(){setFontSize("x-large");}},
+                {label: "XX-Large", click: function(){setFontSize("xx-large");}},
+            ]}
         ]},
         {label: "Window", submenu:[
-            /*{label: "Toggle DevTools",
+            {label: "Toggle DevTools",
             accelerator: "Alt+Command+I",
             click: function() { BrowserWindow.getFocusedWindow().toggleDevTools(); }
             },
-            {type: "separator"},*/
+            {type: "separator"},
             {label: "Next Tab",
              accelerator: "Command+]",
              click: function(){Actions.nextTab()},
@@ -244,11 +256,11 @@ if (process.platform == 'darwin'){
 
 
         {label: "Window", submenu:[
-            /*{label: "Toggle DevTools",
+            {label: "Toggle DevTools",
             accelerator: "Alt+Ctrl+I",
             click: function() { BrowserWindow.getFocusedWindow().toggleDevTools(); }
             },
-            {type: "separator"},*/
+            {type: "separator"},
             {label: "Next Tab",
              accelerator: "Ctrl+Tab",
              click: function(){Actions.nextTab()},

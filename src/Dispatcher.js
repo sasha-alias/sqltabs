@@ -149,6 +149,12 @@ AppDispatcher.register( function(payload) {
             TabsStore.trigger('goto-connstr-'+TabsStore.selectedTab);
             break;
 
+        case 'set-font-size':
+            TabsStore.setFontSize(payload.size);
+            Config.saveFontSize(payload.size);
+            document.body.style.fontSize = payload.size;
+            break;
+
 
     }
     return true; // Needed for Flux promise resolution

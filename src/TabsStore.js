@@ -33,6 +33,7 @@ var _TabsStore = function(){
     this.theme = (Config.getTheme() || 'dark');
     this.mode = (Config.getMode() || 'classic');
     this.tabs = {};
+    this.fontSize = (Config.getFontSize() || 'medium');
     this.order = [];
     this.selectedTab = 0;
     this.renderer = 'plain'; // plain or auto
@@ -124,6 +125,14 @@ var _TabsStore = function(){
             return '';
         }
     };
+
+    this.setFontSize = function(size){
+        this.fontSize = size;
+    };
+
+    this.getFontSize = function(){
+        return this.fontSize;
+    }
 
     this.getConnstr = function(id){
         if (id in this.tabs) {

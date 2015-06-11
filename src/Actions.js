@@ -145,6 +145,13 @@ var Actions = {
         });
     },
 
+    setFontSize: function(size){
+        AppDispatcher.dispatch({
+            eventName: 'set-font-size',
+            size: size,
+        });
+    },
+
 }
 
 module.exports = Actions;

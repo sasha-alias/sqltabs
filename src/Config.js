@@ -45,6 +45,15 @@ var Conf = {
         return config.conn_history;
     },
 
+    getFontSize: function(){
+        return config.font_size;
+    },
+
+    saveFontSize: function(size){
+        config.font_size = size;
+        db.saveSync();
+    },
+
 }
 
 module.exports = Conf;
