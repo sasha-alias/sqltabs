@@ -18,6 +18,8 @@ var Tab = function(id, connstr){
     this.result = null;
     this.error = null;
     this.filename = null;
+    this.searchValue = '';
+    this.searchVisible = false;
 
     this.getTitle = function(){
         if (this.filename != null){
@@ -222,6 +224,14 @@ var _TabsStore = function(){
 
     this.getRenderer = function(){
         return this.renderer;
+    }
+
+    this.setSearchValue = function(value){
+        this.searchValue = value;
+    }
+
+    this.getSearchValue = function(){
+        return this.searchValue;
     }
         
     // restore recent connection string on startup

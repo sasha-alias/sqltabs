@@ -155,6 +155,18 @@ AppDispatcher.register( function(payload) {
             document.body.style.fontSize = payload.size;
             break;
 
+        case 'toggle-find-box':
+            TabsStore.searchVisible = !TabsStore.searchVisible;
+            TabsStore.trigger('toggle-find-box');
+            if (TabsStore.searchVisible == false){
+                TabsStore.trigger('change'); // set focus to editor
+            }
+            break;
+
+        case 'editor-find-next':
+            TabsStore.setSearchValue(payload.value);
+            TabsStore.trigger('editor-find-next');
+            break;
 
     }
     return true; // Needed for Flux promise resolution

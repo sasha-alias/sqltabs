@@ -103,6 +103,10 @@ if (process.platform == 'darwin'){
         },
         {label: 'Edit',
         submenu: [
+            {label: 'Find',
+             accelerator: 'Command+F',
+             click: function(){Actions.toggleFindBox()},
+            },
             {label: 'Undo',
              accelerator: 'Command+Z',
              selector: 'undo:'

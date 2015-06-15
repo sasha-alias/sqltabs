@@ -5,6 +5,7 @@ var OutputConsole = require('./OutputConsole');
 var TabSplit = require('./TabSplit');
 var Editor = require('./Editor');
 var TabToolbar = require('./TabToolbar');
+var SearchBox = require('./SearchBox');
 
 var TabContent = React.createClass({
 
@@ -45,6 +46,8 @@ var TabContent = React.createClass({
                     <OutputConsole eventKey={this.props.eventKey}/>
 
                 </TabSplit>
+
+                <SearchBox eventKey={this.props.eventKey}/>
 
             </div>
         );

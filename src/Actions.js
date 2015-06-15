@@ -152,6 +152,19 @@ var Actions = {
         });
     },
 
+    toggleFindBox: function(){
+        AppDispatcher.dispatch({
+            eventName: 'toggle-find-box',
+        });
+    },
+
+    editorFindNext: function(value){
+        AppDispatcher.dispatch({
+            eventName: 'editor-find-next',
+            value: value,
+        });
+    }
+
 }
 
 module.exports = Actions;

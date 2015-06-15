@@ -152,5 +152,15 @@ body{
 }
 
 .c3 svg {
-  font-size: inherit;
+    font-size: inherit;
+}
+
+.search-box{
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-bottom: 5px;
+    width: 50%;
 }

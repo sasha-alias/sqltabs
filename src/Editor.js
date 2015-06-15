@@ -2,7 +2,7 @@
 var React = require('react');
 var Ace = require('brace');
 var TabsStore = require('./TabsStore');
-var TabActions = require('./Actions');
+var Actions = require('./Actions');
 var fs = require('fs');
 
 require('brace/mode/pgsql');
@@ -31,6 +31,19 @@ var Editor = React.createClass({
         TabsStore.bind('save-file-'+this.props.eventKey, this.fileSaveHandler);
         TabsStore.bind('execute-script-'+this.props.eventKey, this.execHandler);
         TabsStore.bind('execute-block-'+this.props.eventKey, this.execBlockHandler);
+        TabsStore.bind('editor-find-next', this.findNext);
+
+        this.editor.commands.addCommand({
+            name: "find",
+            bindKey: {
+                win: "Ctrl-F",
+                mac: "Command-F"
+            },
+            exec: function(editor, line) {
+                Actions.toggleFindBox();
+            },
+            readOnly: true
+        })
 
         this.editor.getSelectedText = function() { 
             return this.session.getTextRange(this.getSelectionRange());
@@ -47,6 +60,7 @@ var Editor = React.createClass({
         TabsStore.unbind('save-file-'+this.props.eventKey, this.fileSaveHandler);
         TabsStore.unbind('execute-script-'+this.props.eventKey, this.execHandler);
         TabsStore.unbind('execute-block-'+this.props.eventKey, this.execBlockHandler);
+        TabsStore.unbind('editor-find-next', this.findNext);
     },
 
     execHandler: function(editor) {
@@ -56,7 +70,7 @@ var Editor = React.createClass({
         } else {
             var script = this.editor.getValue();
         }
-        TabActions.runQuery(this.props.eventKey, script);
+        Actions.runQuery(this.props.eventKey, script);
     },
 
     execBlockHandler: function(){
@@ -67,7 +81,7 @@ var Editor = React.createClass({
             var current_line = this.editor.selection.getCursor().row;
             var script = this.detectBlock(current_line, this.editor.getValue);
         }
-        TabActions.runQuery(this.props.eventKey, script);
+        Actions.runQuery(this.props.eventKey, script);
 
     },
 
@@ -139,6 +153,36 @@ var Editor = React.createClass({
                 return console.log(err);
             }
         }); 
+    },
+
+    findNext: function(){
+
+        var init_position = this.editor.getCursorPosition();
+        var value = TabsStore.getSearchValue();
+        var ret = this.editor.find(value ,{
+          backwards: false,
+          wrap: false,
+          caseSensitive: false,
+          wholeWord: false,
+          regExp: false,
+          start: 0,
+        });
+
+        if (typeof(ret) == 'undefined'){ // start from the beginning in case of end of file
+            this.editor.gotoLine(0, 0, true);
+            var ret = this.editor.find(value ,{
+              backwards: false,
+              wrap: false,
+              caseSensitive: false,
+              wholeWord: false,
+              regExp: false,
+              start: 0,
+            });
+
+            if (typeof(ret) == 'undefined'){ // if nothing found
+                this.editor.gotoLine(init_position.row+1, init_position.column, false); 
+            }
+        }
     },
 
     resize: function(){
