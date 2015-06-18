@@ -168,6 +168,9 @@ AppDispatcher.register( function(payload) {
             TabsStore.trigger('editor-find-next');
             break;
 
+        case 'about':
+            TabsStore.trigger('about');
+
     }
     return true; // Needed for Flux promise resolution
 }); 

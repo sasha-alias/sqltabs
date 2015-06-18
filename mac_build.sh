@@ -4,6 +4,7 @@ jsx src/ build/
 cp index.html .build/
 cp main.js .build/
 cp logo.icns .build/
+cp logo.png .build/
 cp package.json .build/
 cp -r build .build/
 cp -r css .build/

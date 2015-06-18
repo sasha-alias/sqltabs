@@ -68,6 +68,12 @@ var Client = function(connstr, password){
         });
     };
 
+    this.noticeHandler = function(message){
+        self.Response.datasets.push({
+            resultStatus: 'PGRES_NONFATAL_ERROR', 
+            resultErrorMessage: message,
+        });
+    };
 
     // query is ready to return data, so read data from server
     this.readyHandler = function(){
@@ -81,7 +87,7 @@ var Client = function(connstr, password){
             self.pq.stopReader();
             self.callback(self.Response);
         }
-    }
+    };
     // extract data from server
     this._read = function(){
         
@@ -132,6 +138,9 @@ var Client = function(connstr, password){
             resultErrorMessage: self.pq.resultErrorMessage(),
         });
     }
+
+    this.pq.on('notice', this.noticeHandler);
+
 }
 
 var Response = function(query){

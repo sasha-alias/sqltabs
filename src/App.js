@@ -1,5 +1,6 @@
 var React = require('react');
 var PasswordDialog = require('./PasswordDialog');
+var About = require('./About');
 
 var mountNode = document.body;
 
@@ -19,6 +20,7 @@ var App = React.createClass({
                 <TabsNav/>
                 <TabContainer/>
                 <PasswordDialog/>
+                <About/>
             </div>
         );
     },

@@ -52,6 +52,9 @@ if (process.platform == 'darwin'){
     var template = [
         {label: "SQL Tabs",
         submenu: [
+          { label: "About SQL Tabs",
+            click: function(){Actions.about();}
+          },
           {
             label: 'Hide SQL Tabs',
             accelerator: 'Command+H',

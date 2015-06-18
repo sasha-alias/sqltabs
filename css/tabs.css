@@ -164,3 +164,16 @@ body{
     margin-bottom: 5px;
     width: 50%;
 }
+
+.alert{
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.about-logo{
+    width: 50px;
+}
+
+.about-table{
+    width: 100%;
+}

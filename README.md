@@ -29,12 +29,17 @@ Run (replace 0.25.2 with electron version you have):
 
     electron .
 
-## Using
+## Release notes
 
-There are two basic shortcuts:
+### v0.2.0
 
-Action              | Windows and Linux | OSX 
---------------------|-------------------|--------------------
-run script          | **Ctrl+R**        | **Command+R**
-break execution     | **Ctrl+B**        | **Command+B**
+- Changeable font size
+- Text search in editor
+- Display server notices (RAISE NOTICE/WARNING)
+- About window
+
+### v0.1.0
+
+first basic release
+
 

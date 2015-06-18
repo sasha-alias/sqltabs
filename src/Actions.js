@@ -163,7 +163,13 @@ var Actions = {
             eventName: 'editor-find-next',
             value: value,
         });
-    }
+    },
+
+    about: function(){
+        AppDispatcher.dispatch({
+            eventName: 'about',
+        });
+    },
 
 }
 

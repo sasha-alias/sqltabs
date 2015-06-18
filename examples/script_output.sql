@@ -1,3 +1,7 @@
+DO $$
+BEGIN RAISE NOTICE 'AAA'; END;
+$$;
+
 CREATE SCHEMA test;
 
 CREATE TABLE test.mytable(t text);
