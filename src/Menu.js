@@ -225,6 +225,12 @@ if (process.platform == 'darwin'){
             },
         ]
         },
+        {label: "Edit", submenu:[
+            {label: 'Find',
+             accelerator: 'Ctrl+F',
+             click: function(){Actions.toggleFindBox()},
+            },
+        ]},
 
         {label: "Database",
          submenu:[
@@ -287,6 +293,14 @@ if (process.platform == 'darwin'){
             },
         ]
         },
+	
+        {label: "Help", submenu:[
+            {label: "About",
+             click: function(){Actions.about()},
+            }
+        ]
+	},
+
     ];
 }
 
