@@ -46,5 +46,6 @@ cd .build
 electron-packager ./ "sqltabs" --platform=linux --arch=x64 --version=0.27.1 --icon logo.png --asar --prune
 rm sqltabs-linux/LICENSE
 rm sqltabs-linux/version
+cp ../logo.png sqltabs-linux/logo.png
 cd ..
 
