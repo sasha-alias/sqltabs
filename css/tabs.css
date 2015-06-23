@@ -96,6 +96,8 @@ body{
     height: 100%;
     width: 100%;
     overflow: auto;
+    padding-bottom: 40px;
+    padding-top: 5px;
 }
 
 .ace_editor{
@@ -176,4 +178,25 @@ body{
 
 .about-table{
     width: 100%;
+}
+
+.object-info-div{
+    margin-left: 20px;
+    margin-bottom: 10px;
+}
+
+.object-info-name{
+    font-weight: bold;
+}
+
+.object-info-columns-table td{
+    padding-left: 10px;
+    padding-right: 30px;
+}
+
+.object-info-columns-table th{
+    padding-left: 10px;
+    padding-right: 30px;
+    padding-bottom: 10px;
+    padding-top: 10px;
 }

@@ -32,6 +32,7 @@ var Editor = React.createClass({
         TabsStore.bind('execute-script-'+this.props.eventKey, this.execHandler);
         TabsStore.bind('execute-block-'+this.props.eventKey, this.execBlockHandler);
         TabsStore.bind('editor-find-next', this.findNext);
+        TabsStore.bind('object-info-'+this.props.eventKey, this.objectInfoHandler);
 
         this.editor.commands.addCommand({
             name: "find",
@@ -61,6 +62,7 @@ var Editor = React.createClass({
         TabsStore.unbind('execute-script-'+this.props.eventKey, this.execHandler);
         TabsStore.unbind('execute-block-'+this.props.eventKey, this.execBlockHandler);
         TabsStore.unbind('editor-find-next', this.findNext);
+        TabsStore.unbind('object-info-'+this.props.eventKey, this.objectInfoHandler);
     },
 
     execHandler: function(editor) {
@@ -133,8 +135,6 @@ var Editor = React.createClass({
     fileOpenHandler: function(){
         filename = TabsStore.getEditorFile(this.props.eventKey);
 
-
-
         self = this;
         fd = fs.readFile(filename, 'utf8', function(err, data){
             if (err){
@@ -183,6 +183,30 @@ var Editor = React.createClass({
                 this.editor.gotoLine(init_position.row+1, init_position.column, false); 
             }
         }
+    },
+
+    objectInfoHandler: function(){
+        // detect object under cursor
+        var pos = this.editor.getCursorPosition();
+        var line_text = this.editor.session.getLine(pos.row);
+        var part1 = line_text.substring(0, pos.column);
+        part1 = part1.match("[A-z0-9.]*$"); 
+        if (part1 != null){
+            part1 = part1[0]
+        } else {
+            part1 = ""
+        }
+
+        var part2 = line_text.substring(pos.column);
+        part2 = part2.match("^[A-z0-9.]+"); 
+        if (part2 != null){
+            part2 = part2[0]
+        } else {
+            part2 = ""
+        }
+
+        var object = part1 + part2;
+        Actions.getObjectInfo(object);
     },
 
     resize: function(){

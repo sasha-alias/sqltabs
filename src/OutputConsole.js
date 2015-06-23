@@ -1,12 +1,13 @@
 var React = require('react');
 var Chart = require('./Chart');
+var ObjectInfo = require('./ObjectInfo');
 
 var OutputConsole = React.createClass({
 
     getInitialState: function(){
 
         return {
-        message: "# Output console",
+        message: " ",
         result: null,
         error: null,
         updatable: true,
@@ -24,12 +25,14 @@ var OutputConsole = React.createClass({
         TabsStore.bind('query-started-'+this.props.eventKey, this.queryStarted);
         TabsStore.bind('query-finished-'+this.props.eventKey, this.queryFinished);
         TabsStore.bind('query-error-'+this.props.eventKey, this.queryError);
+        TabsStore.bind('object-info-received-'+this.props.eventKey, this.objectInfoReceived);
     },
 
     componentWillUnmount: function(){
         TabsStore.unbind('query-started-'+this.props.eventKey, this.queryStarted);
         TabsStore.unbind('query-finished-'+this.props.eventKey, this.queryFinished);
         TabsStore.unbind('query-error-'+this.props.eventKey, this.queryError);
+        TabsStore.unbind('object-info-received-'+this.props.eventKey, this.objectInfoReceived);
     },
 
     queryStarted: function(){
@@ -37,7 +40,8 @@ var OutputConsole = React.createClass({
         this.setState({                     // second change state so it's get rerendered
             message: "#Executing ...", 
             result: null,
-            error: null
+            error: null,
+            info: null,
         }); 
     },
 
@@ -46,12 +50,24 @@ var OutputConsole = React.createClass({
             message: null,
             result: TabsStore.getResult(this.props.eventKey), 
             error: null,
+            info: null,
             updatable: false,
         });
     },
 
     queryError: function(){
         this.setState({error: TabsStore.getError(this.props.eventKey)});
+    },
+
+    objectInfoReceived: function(){
+        this.setState({updatable: true});   // first make component updatable
+        this.setState({
+            message: null,
+            result: null,
+            error: null,
+            info: TabsStore.getObjectInfo(),
+            updatable: false,
+        });
     },
 
     getRenderer: function(query){
@@ -71,6 +87,8 @@ var OutputConsole = React.createClass({
             return this.renderError();
         } else if (this.state.message){
             return this.renderMessage();
+        } else if (this.state.info){
+            return this.renderInfo();
         } else {
             return this.renderResult();
         }
@@ -186,6 +204,19 @@ var OutputConsole = React.createClass({
             <Chart key={'dataset_'+i} dataset={dataset} type={chart_type}/>
         );
     },
+
+    renderInfo: function(){
+        if (this.state.info.object != null){
+            var id = this.state.info.object_name+'_'+this.state.info.object.columns.length;
+        } else {
+            var id = this.state.info.object_name;
+        }
+        return (
+            <div className="output-console">
+                <ObjectInfo key={id} info={this.state.info}/>
+            </div>
+        );
+    }
 });
 
 module.exports = OutputConsole;

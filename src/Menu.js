@@ -155,6 +155,10 @@ if (process.platform == 'darwin'){
              accelerator: "Command+L",
              click: function(){Actions.gotoConnstr()},
             },
+            {label: "Object Info",
+             accelerator: "Command+I",
+             click: function(){Actions.objectInfo()},
+            },
          ]
         },
         {label: "Options",
@@ -249,6 +253,10 @@ if (process.platform == 'darwin'){
             {label: "Edit connect string",
              accelerator: "Ctrl+L",
              click: function(){Actions.gotoConnstr()},
+            },
+            {label: "Object Info",
+             accelerator: "Ctrl+I",
+             click: function(){Actions.objectInfo()},
             },
          ]
         },

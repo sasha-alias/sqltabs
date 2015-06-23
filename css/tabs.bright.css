@@ -11,3 +11,15 @@
 .conn_history_item_active{
     background-color: lightgrey;
 }
+
+.ace_comment {
+    color: #236e24;
+}
+
+.ace_keyword{
+    color: rgb(147, 15, 128);
+}
+
+.ace_constant{
+    color: rgb(0, 0, 205);
+}
