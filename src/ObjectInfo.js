@@ -65,6 +65,15 @@ var ObjectInfo = React.createClass({
                     var description = "";
                 }
 
+                // pk
+                if (info.object.pk != null){
+                    var pk_cols = info.object.pk.columns.replace(/^\{/, '');
+                    var pk_cols = pk_cols.replace(/\}$/, '');
+                    pk = <div>Primary key: {info.object.pk.pk_name} ({pk_cols})</div>;
+                } else {
+                    pk = null;
+                }
+
                 var column = (<tr key={info.object_name+"_"+i}> 
                     <td>{info.object.columns[i].name}</td>
                     <td>{type}</td>
@@ -83,6 +92,7 @@ var ObjectInfo = React.createClass({
                 <table className="object-info-columns-table table-hover">
                     {columns}
                 </table>
+                {pk}
             </div>
             );
         } else {

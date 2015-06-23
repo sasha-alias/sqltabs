@@ -162,7 +162,7 @@ AND objsubid = 0";
 
         var client = this.getClient(id, connstr, password);
 
-        query = 'SELECT \
+        var query = 'SELECT \
     a.attname "name", \
     a.atttypid::regtype "type", \
     atttypmod "max_length", \
@@ -202,6 +202,38 @@ ORDER BY a.attnum';
         });
     },
 
+    _getRelationPK: function(id, connstr, password, object, callback, err_callback){
+
+        var client = this.getClient(id, connstr, password);
+
+        var query = " \
+SELECT conname, conindid::regclass, array_agg(b.attname ORDER BY attnum) \
+FROM pg_constraint a \
+JOIN pg_attribute b ON b.attrelid = a.conindid \
+WHERE conrelid = '"+object+"'::regclass \
+AND contype = 'p' \
+GROUP BY conname, conindid;";
+
+        client.sendQuery(query,
+        function(result){
+            if (result.datasets[0].data.length == 0){
+                callback(null);
+            } else {
+                var row = result.datasets[0].data[0];
+                var pk = {
+                    pk_name: row[0],
+                    ind_name: row[1],
+                    columns: row[2],
+                };
+                callback(pk);
+            }
+        },
+        function(err){
+            err_callback(id, err);
+        });
+
+    },
+
     getObjectInfo: function(id, connstr, password, object, callback, err_callback){
 
         var self = this;
@@ -220,7 +252,15 @@ ORDER BY a.attnum';
                 self._getRelationColumns(id, connstr, password, object,
                 function(columns){
                     ret.object.columns = columns;
-                    callback(id, ret);
+
+                    self._getRelationPK(id, connstr, password, object,
+                    function(pk){
+                        ret.object.pk = pk;
+                        callback(id, ret);
+                    },
+                    function(err){
+                        err_callback(id, err);
+                    });
                 },
                 function(id, err){
                     err_callback(id, err);
