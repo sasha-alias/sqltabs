@@ -45,3 +45,23 @@
     color: rgb(240, 240, 240);
 }
 
+.ace_comment{
+    font-style: italic;
+    color: #BC9458;
+}
+
+.ace_keyword{
+    color: #CC7833;
+}
+
+.ace_constant{
+    color: #6C99BB;
+}
+
+.omitted-message{
+    color: #CC7833;
+}
+
+.rownum{
+    background-color: #3B3B3B;
+}

@@ -2,9 +2,10 @@
 var dispatcher = require('./Dispatcher');
 var AppDispatcher = dispatcher.AppDispatcher;
 var SignalsDispatcher = dispatcher.SignalsDispatcher;
+var DBDispatcher = dispatcher.DBDispatcher;
 
 var QueryCallback = function(key, result){
-    AppDispatcher.dispatch({
+    DBDispatcher.dispatch({
         eventName: 'query-finished',
         key: key,
         result: result,
@@ -12,10 +13,18 @@ var QueryCallback = function(key, result){
 };
 
 var ErrorCallback = function(key, error){
-    AppDispatcher.dispatch({
+    DBDispatcher.dispatch({
         eventName: 'query-error',
         key: key,
         error: error,
+    });
+}
+
+var ObjectInfoCallback = function(key, object){
+    DBDispatcher.dispatch({
+        eventName: 'object-info-received',
+        key: key,
+        object: object,
     });
 }
 
@@ -170,6 +179,21 @@ var Actions = {
             eventName: 'about',
         });
     },
+
+    objectInfo: function(){
+        SignalsDispatcher.dispatch({
+            eventName: 'object-info',
+        });
+    },
+
+    getObjectInfo: function(object){
+        AppDispatcher.dispatch({
+            eventName: 'get-object-info',
+            object: object,
+            callback: ObjectInfoCallback,
+            err_callback: ErrorCallback,
+        });
+    }
 
 }
 

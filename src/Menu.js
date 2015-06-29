@@ -139,7 +139,7 @@ if (process.platform == 'darwin'){
         },
         {label: "Database",
          submenu:[
-            {label: "Run Query",
+            {label: "Run Script",
              accelerator: "Command+R",
              click: function(){Actions.execScript()},
             },
@@ -154,6 +154,10 @@ if (process.platform == 'darwin'){
             {label: "Edit connect string",
              accelerator: "Command+L",
              click: function(){Actions.gotoConnstr()},
+            },
+            {label: "Object Info",
+             accelerator: "Command+I",
+             click: function(){Actions.objectInfo()},
             },
          ]
         },
@@ -180,10 +184,10 @@ if (process.platform == 'darwin'){
             ]},
         ]},
         {label: "Window", submenu:[
-            {label: "Toggle DevTools",
-            accelerator: "Alt+Command+I",
-            click: function() { BrowserWindow.getFocusedWindow().toggleDevTools(); }
-            },
+            //{label: "Toggle DevTools",
+            //accelerator: "Alt+Command+I",
+            //click: function() { BrowserWindow.getFocusedWindow().toggleDevTools(); }
+            //},
             {type: "separator"},
             {label: "Next Tab",
              accelerator: "Command+]",
@@ -234,21 +238,25 @@ if (process.platform == 'darwin'){
 
         {label: "Database",
          submenu:[
-            {label: "Run Query",
-             accelerator: "F5",
+            {label: "Run Script",
+             accelerator: "Alt+E",
              click: function(){Actions.execScript()},
             },
             {label: "Execute Block",
-             accelerator: "F6",
+             accelerator: "Alt+R",
              click: function(){Actions.execBlock()},
             },
             {label: "Break Execution",
-             accelerator: "Ctrl+B",
+             accelerator: "Alt+B",
              click: function(){Actions.cancelQuery()},
             },
             {label: "Edit connect string",
              accelerator: "Ctrl+L",
              click: function(){Actions.gotoConnstr()},
+            },
+            {label: "Object Info",
+             accelerator: "Alt+I",
+             click: function(){Actions.objectInfo()},
             },
          ]
         },
@@ -278,10 +286,10 @@ if (process.platform == 'darwin'){
 
 
         {label: "Window", submenu:[
-            {label: "Toggle DevTools",
-            accelerator: "Alt+Ctrl+I",
-            click: function() { BrowserWindow.getFocusedWindow().toggleDevTools(); }
-            },
+            //{label: "Toggle DevTools",
+            //accelerator: "Alt+Ctrl+I",
+            //click: function() { BrowserWindow.getFocusedWindow().toggleDevTools(); }
+            //},
             {type: "separator"},
             {label: "Next Tab",
              accelerator: "Ctrl+Tab",

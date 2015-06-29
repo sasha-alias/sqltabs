@@ -5,8 +5,8 @@ var Executor = require('./Executor');
 var Config = require('./Config');
 
 var AppDispatcher = new Dispatcher();
-
 var SignalsDispatcher = new Dispatcher();
+var DBDispatcher = new Dispatcher();
 
 SignalsDispatcher.register(function(payload){
 // separate dispatcher needed to avoid parallel actions execution
@@ -19,6 +19,9 @@ SignalsDispatcher.register(function(payload){
             TabsStore.setRenderer('auto');
             TabsStore.trigger('execute-block-'+TabsStore.selectedTab);
             break;
+        case 'object-info':
+            TabsStore.trigger('object-info-'+TabsStore.selectedTab);
+            break
     };
     return true;
 });
@@ -123,16 +126,6 @@ AppDispatcher.register( function(payload) {
             TabsStore.trigger('query-cancelled-'+tab);
             break;
 
-        case 'query-finished':
-            TabsStore.setResult(payload.key, payload.result);
-            TabsStore.trigger('query-finished-'+payload.key);
-            break;
-
-        case 'query-error':
-            TabsStore.setError(payload.key, payload.error);
-            TabsStore.trigger('query-error-'+payload.key);
-            break;
-
         case 'open-file':
             TabsStore.openFile(payload.filename);
             TabsStore.trigger('open-file-'+TabsStore.selectedTab, payload.filename);
@@ -171,11 +164,44 @@ AppDispatcher.register( function(payload) {
         case 'about':
             TabsStore.trigger('about');
 
+        case 'get-object-info':
+            connstr = TabsStore.getConnstr(TabsStore.selectedTab);
+            password = TabsStore.getPassword(TabsStore.selectedTab);
+            Executor.getObjectInfo(TabsStore.selectedTab, connstr, password, payload.object,
+                payload.callback,
+                payload.err_callback
+            );
+            TabsStore.trigger('query-started-'+TabsStore.selectedTab);
+            break;
+
     }
     return true; // Needed for Flux promise resolution
 }); 
 
+DBDispatcher.register(function(payload){
+    switch(payload.eventName){
+
+        case 'query-finished':
+            TabsStore.setResult(payload.key, payload.result);
+            TabsStore.trigger('query-finished-'+payload.key);
+            break;
+
+        case 'query-error':
+            TabsStore.setError(payload.key, payload.error);
+            TabsStore.trigger('query-error-'+payload.key);
+            break;
+
+        case 'object-info-received':
+            TabsStore.setObjectInfo(payload.object);
+            TabsStore.trigger('object-info-received-'+payload.key);
+            break;
+    }
+    return true; // Needed for Flux promise resolution
+});
+
+
 module.exports = {
 AppDispatcher: AppDispatcher,
 SignalsDispatcher: SignalsDispatcher,
+DBDispatcher: DBDispatcher,
 }
