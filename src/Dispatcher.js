@@ -171,6 +171,7 @@ AppDispatcher.register( function(payload) {
                 payload.callback,
                 payload.err_callback
             );
+            TabsStore.trigger('query-started-'+TabsStore.selectedTab);
             break;
 
     }

@@ -23,3 +23,7 @@
 .ace_constant{
     color: rgb(0, 0, 205);
 }
+
+.omitted-message{
+    color: rgb(147, 15, 128);
+}

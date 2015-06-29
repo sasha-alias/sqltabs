@@ -113,7 +113,10 @@ var Executor = {
 
             var client = this.getClient(id, connstr, password);
 
-            query = "select n.nspname, c.relname, c.relkind from  \
+            query = "select n.nspname, c.relname, c.relkind, \
+pg_size_pretty(pg_relation_size(c.oid)) size, \
+pg_size_pretty(pg_total_relation_size(c.oid)) size \
+from  \
 pg_class c, \
 pg_namespace n \
 where c.oid = '"+object+"'::regclass \
@@ -127,6 +130,8 @@ and n.oid = c.relnamespace;";
                         schema: row[0],
                         relname: row[1],
                         relkind: row[2],
+                        size: row[3],
+                        total_size: row[4],
                     };
                     callback(relation);
                 } else {
@@ -234,6 +239,88 @@ GROUP BY conname, conindid;";
 
     },
 
+    _getCheckConstraints: function(id, connstr, password, object, callback, err_callback){
+
+        var client = this.getClient(id, connstr, password);
+
+        var query = " \
+SELECT conname, consrc \
+FROM pg_constraint \
+WHERE conrelid = '"+object+"'::regclass \
+AND contype = 'c'";
+
+        client.sendQuery(query,
+        function(result){
+            if (result.datasets[0].data.length == 0){
+                callback(null);
+            } else {
+                var constraints = [];
+                for (var i=0; i<result.datasets[0].data.length; i++){
+                    var row = result.datasets[0].data[i];
+                    constraints.push({
+                        name: row[0],
+                        src: row[1],
+                    });
+                }
+                callback(constraints);
+            }
+        },
+        function(err){
+            err_callback(id, err);
+        });
+
+    },
+
+    _getRelationIndexes: function(id, connstr, password, object, callback, err_callback){
+
+        var client = this.getClient(id, connstr, password);
+
+        var query = " \
+SELECT \
+    a.indexrelid::regclass \"name\", \
+    a.indisunique \"unique\", \
+    d.amname \"method\", \
+    array_agg(pg_get_indexdef(a.indexrelid, b.attnum, TRUE) ORDER BY b.attnum) \"fields\", \
+    pg_get_expr(a.indpred, a.indrelid, TRUE) predicate, \
+    pg_get_indexdef(a.indexrelid, 0, TRUE) indexdef \
+FROM \
+    pg_index a, \
+    pg_attribute b, \
+    pg_class c, \
+    pg_am d \
+WHERE \
+        a.indrelid = '"+object+"'::regclass \
+    AND NOT a.indisprimary \
+    AND b.attrelid = a.indexrelid \
+    AND c.OID = a.indexrelid \
+    AND d.OID = c.relam \
+GROUP BY a.indexrelid, a.indisunique, d.amname, a.indrelid, a.indpred";
+
+        client.sendQuery(query,
+        function(result){
+            if (result.datasets[0].data.length == 0){
+                callback(null);
+            } else {
+                var indexes = [];
+                for (var i=0; i<result.datasets[0].data.length; i++){
+                    var row = result.datasets[0].data[i];
+                    indexes.push({
+                        name: row[0],
+                        unique: row[1],
+                        method: row[2],
+                        columns: row[3],
+                        predicate: row[4],
+                        indexdef: row[5],
+                    });
+                }
+                callback(indexes);
+            }
+        },
+        function(err){
+            err_callback(id, err);
+        });
+    },
+
     getObjectInfo: function(id, connstr, password, object, callback, err_callback){
 
         var self = this;
@@ -256,7 +343,24 @@ GROUP BY conname, conindid;";
                     self._getRelationPK(id, connstr, password, object,
                     function(pk){
                         ret.object.pk = pk;
-                        callback(id, ret);
+
+                        self._getCheckConstraints(id, connstr, password, object,
+                        function(constraints){
+                            ret.object.check_constraints = constraints;
+
+                            self._getRelationIndexes(id, connstr, password, object,
+                            function(indexes){
+                                ret.object.indexes = indexes;
+
+                                callback(id, ret);
+                            },
+                            function(err){
+                                err_callback(id, err);
+                            });
+                        },
+                        function(err){
+                            err_callback(id, err);
+                        });
                     },
                     function(err){
                         err_callback(id, err);

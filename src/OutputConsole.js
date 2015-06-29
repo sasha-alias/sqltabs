@@ -146,30 +146,66 @@ var OutputConsole = React.createClass({
             });
         };
 
-        var out_rows = rows.map(function(row, i){
+        var out_rows = [];
+        var omitted_count = 0;
 
-            var out_row_cols = row.map(function(val, j){
-                return (
+        for (var i=0; i < rows.length; i++){
+            if (i == 2000 && rows.length > 5000){
+                var omitted_count = rows.length - 2000;
+                var omitted_message = <span className="omitted-message">{omitted_count} rows where omitted from rendering to prevent long wating</span>;
+                break;
+            }
+
+            var row = rows[i];
+
+            var out_cols = [];
+            for (var j=0; j < row.length; j++){
+                var val = row[j];
+                out_cols.push(
                     <td key={'col_'+i+'_'+j}>
-                    {val}
+                        {val}
                     </td>
                 );
-            });
+            }
 
-            return (
+            out_rows.push(
                 <tr key={'row'+i}>
-                    <td key={'rownum_'+i}>{i+1}</td>
-                    {out_row_cols}
-                </tr>);
-        });
+                    <td className="rownum" key={'rownum_'+i}>{i+1}</td>
+                    {out_cols}
+                </tr>
+            );
+        }
+
+        if (omitted_count > 0){
+            out_rows.push(
+                <tr>
+                    <td colSpan={fields.length+1}>{omitted_message}</td>
+                </tr>
+            );
+        }
+        //var out_rows = rows.map(function(row, i){
+
+        //    var out_row_cols = row.map(function(val, j){
+        //        return (
+        //            <td key={'col_'+i+'_'+j}>
+        //            {val}
+        //            </td>
+        //        );
+        //    });
+
+        //    return (
+        //        <tr key={'row'+i}>
+        //            <td key={'rownum_'+i}>{i+1}</td>
+        //            {out_row_cols}
+        //        </tr>);
+        //});
 
         if (dataset.nrecords == 1){
             rword = 'row';
         } else {
             rword = 'rows';
         }
-
-            
+        
         return (
 
             <div key={'dataset_'+i}>
@@ -182,7 +218,7 @@ var OutputConsole = React.createClass({
                 <table  key={'dataset_'+i} className="table-resultset table table-hover">
                 <thead>
                     <tr>
-                    <th>#</th>
+                    <th className="rownum">#</th>
                     {out_fields}
                     </tr>
                 </thead>

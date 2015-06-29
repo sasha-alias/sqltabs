@@ -33,7 +33,7 @@ var ObjectInfo = React.createClass({
             for (var i=0; i<info.object.columns.length; i++){
                 // not null
                 if (info.object.columns[i].not_null == 't'){
-                    var not_null = <span className="ace_keyword">not null</span>;
+                    var not_null = <span className="ace_keyword">NOT NULL</span>;
                 } else {
                     var not_null = '';
                 }
@@ -50,7 +50,7 @@ var ObjectInfo = React.createClass({
                 // default
                 if (info.object.columns[i].default_value != null){
                     var default_value = <span>
-                        <span className="ace_keyword">default </span>
+                        <span className="ace_keyword">DEFAULT </span>
                         <span className="">{info.object.columns[i].default_value}</span>
                     </span>;
                 } else {
@@ -65,15 +65,6 @@ var ObjectInfo = React.createClass({
                     var description = "";
                 }
 
-                // pk
-                if (info.object.pk != null){
-                    var pk_cols = info.object.pk.columns.replace(/^\{/, '');
-                    var pk_cols = pk_cols.replace(/\}$/, '');
-                    pk = <div>Primary key: {info.object.pk.pk_name} ({pk_cols})</div>;
-                } else {
-                    pk = null;
-                }
-
                 var column = (<tr key={info.object_name+"_"+i}> 
                     <td>{info.object.columns[i].name}</td>
                     <td>{type}</td>
@@ -86,13 +77,76 @@ var ObjectInfo = React.createClass({
                 columns.push(column);
             }
 
+            // pk
+            if (info.object.pk != null){
+                var pk_cols = info.object.pk.columns.replace(/^\{/, '');
+                var pk_cols = pk_cols.replace(/\}$/, '');
+                pk = <p><span className="ace_keyword">CONSTRAINT</span> {info.object.pk.pk_name} 
+                <span className="ace_keyword"> PRIMARY KEY</span> ({pk_cols})</p>;
+            } else {
+                pk = null;
+            }
+
+            // check constraints
+            if (info.object.check_constraints != null){
+                var check_constraints = [];
+                for (var i=0; i < info.object.check_constraints.length; i++){
+                    var check = <p key={"check_" + info.object.check_constraints[i].name}>
+                        <span className="ace_keyword">CONSTRAINT</span> {info.object.check_constraints[i].name} 
+                        <span className="ace_keyword"> CHECK </span> {info.object.check_constraints[i].src}
+                    </p>;
+                    check_constraints.push(check);
+                }
+            } else {
+                var check_constraints = null;
+            }
+
+            // indexes
+            if (info.object.indexes != null){
+                var indexes=[];
+                for (var i=0; i < info.object.indexes.length; i++){
+                    
+                    var idx = info.object.indexes[i];
+                    var idx_cols = idx.columns.replace(/^\{/, '');
+                    var idx_cols = idx_cols.replace(/\}$/, '');
+
+                    if (idx.unique == 't'){
+                        var unique = "UNIQUE ";
+                    } else {
+                        var unique = "";
+                    }
+                    if (idx.predicate){
+                        var predicate = <span><span className="ace_keyword">WHERE </span>{idx.predicate}</span>
+                    } else {
+                        var predicate = null;
+                    }
+                    var index = <p key={"idx_" + idx.name}>
+                    <span className="ace_keyword">{unique}INDEX </span>{idx.name}
+                    <span className="ace_keyword"> {idx.method} </span>({idx_cols}) {predicate}
+                    </p>
+
+                    indexes.push(index);
+                }
+
+            } else {
+                var indexes = null;
+            }
+
+
             return (
             <div className="object-info-div"> 
-                <div>{relkind} <span className="object-info-name">"{info.object.schema}.{info.object.relname}"</span></div>
+                <p>
+                <div>{relkind} <span className="object-info-name">"{info.object.schema}.{info.object.relname}"</span>
+                </div>
                 <table className="object-info-columns-table table-hover">
                     {columns}
                 </table>
+                </p>
                 {pk}
+                {indexes}
+                {check_constraints}
+                <p> Size: <span className="ace_constant">{info.object.size}</span> </p>
+                <p> Total Size: <span className="ace_constant">{info.object.total_size}</span></p>
             </div>
             );
         } else {
