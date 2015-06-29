@@ -41,6 +41,9 @@ cp -r node_modules/react-bootstrap .build/node_modules/
 # jsdom
 cp -r node_modules/jsdom .build/node_modules/
 
+# mkdirp
+cp -r node_modules/mkdirp .build/node_modules/
+
 
 cd .build
 electron-packager ./ "sqltabs" --platform=linux --arch=x64 --version=0.27.1 --icon logo.png --asar --prune

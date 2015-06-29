@@ -15,7 +15,8 @@
     "microevent": "1.0.0",
     "react-bootstrap": ">=0.16.1",
     "react": ">=0.12.2",
-    "c3": "0.4.*"
+    "c3": "0.4.*",
+    "mkdirp": "*"
   },
   "devDependencies": {
     "electron-rebuild": "^0.1.4"
