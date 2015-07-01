@@ -40,7 +40,7 @@ var PasswordDialog = React.createClass({
         }
         this.setState({hidden: true});
         var passwordInput = React.findDOMNode(this.refs.passwordInput);
-        Actions.setPassword(passwordInput.value);
+        Actions.setPassword(encodeURIComponent(passwordInput.value));
     },
 
     render: function(){
