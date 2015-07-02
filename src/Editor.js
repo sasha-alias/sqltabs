@@ -3,6 +3,7 @@ var React = require('react');
 var Ace = require('brace');
 var TabsStore = require('./TabsStore');
 var Actions = require('./Actions');
+var History = require('./History');
 var fs = require('fs');
 
 require('brace/mode/pgsql');
@@ -33,6 +34,7 @@ var Editor = React.createClass({
         TabsStore.bind('execute-block-'+this.props.eventKey, this.execBlockHandler);
         TabsStore.bind('editor-find-next', this.findNext);
         TabsStore.bind('object-info-'+this.props.eventKey, this.objectInfoHandler);
+        TabsStore.bind('paste-history-item-'+this.props.eventKey, this.pasteHistoryHandler);
 
         this.editor.commands.addCommand({
             name: "find",
@@ -42,6 +44,18 @@ var Editor = React.createClass({
             },
             exec: function(editor, line) {
                 Actions.toggleFindBox();
+            },
+            readOnly: true
+        });
+
+        this.editor.commands.addCommand({
+            name: "history",
+            bindKey: {
+                win: "Ctrl-H",
+                mac: "Command-Y"
+            },
+            exec: function(editor, line) {
+                Actions.toggleHistory();
             },
             readOnly: true
         })
@@ -63,6 +77,7 @@ var Editor = React.createClass({
         TabsStore.unbind('execute-block-'+this.props.eventKey, this.execBlockHandler);
         TabsStore.unbind('editor-find-next', this.findNext);
         TabsStore.unbind('object-info-'+this.props.eventKey, this.objectInfoHandler);
+        TabsStore.unbind('paste-history-item-'+this.props.eventKey, this.pasteHistoryHandler);
     },
 
     execHandler: function(editor) {
@@ -207,6 +222,14 @@ var Editor = React.createClass({
 
         var object = part1 + part2;
         Actions.getObjectInfo(object);
+    },
+
+    pasteHistoryHandler: function(){
+        var item = History.get(TabsStore.getHistoryItem());
+        if (item != null){
+            var position = this.editor.getCursorPosition();
+            this.editor.getSession().insert(position, item.query);
+        }
     },
 
     resize: function(){

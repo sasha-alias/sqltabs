@@ -193,7 +193,20 @@ var Actions = {
             callback: ObjectInfoCallback,
             err_callback: ErrorCallback,
         });
-    }
+    },
+
+    toggleHistory: function(){
+        AppDispatcher.dispatch({
+            eventName: 'toggle-history',
+        });
+    },
+
+    pasteHistoryItem: function(idx){
+        AppDispatcher.dispatch({
+            eventName: 'paste-history-item',
+            idx: idx,
+        });
+    },
 
 }
 

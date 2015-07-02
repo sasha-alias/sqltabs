@@ -3,6 +3,7 @@ var Dispatcher = require('flux').Dispatcher;
 var TabsStore = require('./TabsStore');
 var Executor = require('./Executor');
 var Config = require('./Config');
+var History = require('./History');
 
 var AppDispatcher = new Dispatcher();
 var SignalsDispatcher = new Dispatcher();
@@ -117,6 +118,7 @@ AppDispatcher.register( function(payload) {
             connstr = TabsStore.getConnstr(payload.key);
             password = TabsStore.getPassword(payload.key);
             Executor.runQuery(payload.key, connstr, password, payload.query, payload.callback, payload.err_callback);
+            History.push(payload.query);
             TabsStore.trigger('query-started-'+payload.key);
             break;
 
@@ -172,6 +174,15 @@ AppDispatcher.register( function(payload) {
                 payload.err_callback
             );
             TabsStore.trigger('query-started-'+TabsStore.selectedTab);
+            break;
+
+        case 'toggle-history':
+            TabsStore.trigger('toggle-history');
+            break;
+        
+        case 'paste-history-item':
+            TabsStore.setHistoryItem(payload.idx);
+            TabsStore.trigger('paste-history-item-'+TabsStore.selectedTab);
             break;
 
     }

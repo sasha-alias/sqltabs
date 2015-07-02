@@ -23,6 +23,8 @@ var ConnInput = React.createClass({
     componentWillUnmount: function(){
         TabsStore.unbind('change', this.storeChangedHandler);
         TabsStore.unbind('goto-connstr-'+this.props.eventKey, this.focusConnstr);
+
+        React.findDOMNode(this).removeEventListener("focusout", this.unfocusHandler);
     },
 
     storeChangedHandler: function() {

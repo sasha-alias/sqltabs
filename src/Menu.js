@@ -159,6 +159,10 @@ if (process.platform == 'darwin'){
              accelerator: "Command+I",
              click: function(){Actions.objectInfo()},
             },
+            {label: "History",
+             accelerator: "Command+Y",
+             click: function(){Actions.toggleHistory()},
+            }
          ]
         },
         {label: "Options",
@@ -184,10 +188,10 @@ if (process.platform == 'darwin'){
             ]},
         ]},
         {label: "Window", submenu:[
-            //{label: "Toggle DevTools",
-            //accelerator: "Alt+Command+I",
-            //click: function() { BrowserWindow.getFocusedWindow().toggleDevTools(); }
-            //},
+            {label: "Toggle DevTools",
+            accelerator: "Alt+Command+I",
+            click: function() { BrowserWindow.getFocusedWindow().toggleDevTools(); }
+            },
             {type: "separator"},
             {label: "Next Tab",
              accelerator: "Command+]",

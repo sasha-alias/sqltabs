@@ -1,16 +1,15 @@
 var React = require('react');
 var PasswordDialog = require('./PasswordDialog');
 var About = require('./About');
-
-var mountNode = document.body;
-
 var TabsNav = require('./TabsNav');
-
 var TabContainer = require('./TabContainer');
+var HistoryCarousel = require('./HistoryCarousel');
 var Config = require('./Config');
 var Actions = require('./Actions');
 
 require('./Menu');
+
+var mountNode = document.body;
 
 var App = React.createClass({
 
@@ -21,6 +20,7 @@ var App = React.createClass({
                 <TabContainer/>
                 <PasswordDialog/>
                 <About/>
+                <HistoryCarousel/>
             </div>
         );
     },

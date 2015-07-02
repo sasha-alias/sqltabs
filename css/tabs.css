@@ -200,3 +200,19 @@ body{
     padding-bottom: 10px;
     padding-top: 10px;
 }
+
+.history-view{
+    margin-top: 10px;
+}
+
+.history-header{
+    width: 100%;
+}
+
+.history-header td{
+    text-align: right;
+}
+
+.history-header tr td:first-child{
+    text-align: left;
+}
