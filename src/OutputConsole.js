@@ -129,6 +129,8 @@ var OutputConsole = React.createClass({
 
     renderDataset: function(dataset, i, query){
 
+        var dataset_idx = i;
+
         if (dataset.resultStatus == 'PGRES_COMMAND_OK'){
             return <div key={'cmdres_'+i} className="alert alert-success">{dataset.cmdStatus}</div>;
         } else if (['PGRES_FATAL_ERROR', 'PGRES_BAD_RESPONSE'].indexOf(dataset.resultStatus) > -1) {
@@ -208,14 +210,14 @@ var OutputConsole = React.createClass({
         
         return (
 
-            <div key={'dataset_'+i}>
+            <div key={'dataset_'+dataset_idx}>
                 <div className="rows-count-div">
                 <span className="rows-count-bracket">(</span>
                 <span className="rows-count-number">{dataset.nrecords}</span> <span className="rows-count-word">{rword}</span>
                 <span className="rows-count-bracket">)</span>
                 </div>
 
-                <table  key={'dataset_'+i} className="table-resultset table table-hover">
+                <table  key={'dataset_'+dataset_idx} className="table-resultset table table-hover">
                 <thead>
                     <tr>
                     <th className="rownum">#</th>
