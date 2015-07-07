@@ -185,6 +185,20 @@ AppDispatcher.register( function(payload) {
             TabsStore.trigger('paste-history-item-'+TabsStore.selectedTab);
             break;
 
+        case 'reread-config':
+            TabsStore.rereadConfig();
+            if (TabsStore.theme == 'bright'){ // brigth
+                document.getElementById("theme_stylesheet").href = "css/bootstrap.bright.css";
+                document.getElementById("theme_tabs_stylesheet").href = "css/tabs.bright.css";
+            } else { // dark
+                document.getElementById("theme_stylesheet").href = "css/bootstrap.dark.css";
+                document.getElementById("theme_tabs_stylesheet").href = "css/tabs.dark.css";
+            };
+            TabsStore.trigger('change-theme');
+            TabsStore.trigger('change-mode');
+            TabsStore.trigger('change');
+            break;
+
     }
     return true; // Needed for Flux promise resolution
 }); 

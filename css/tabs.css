@@ -122,6 +122,16 @@ body{
 
 .duration-div {
     margin-left: 10px;
+    margin-right: 20px;
+}
+
+.duration-table{
+    width: 100%;
+    text-align: right;
+}
+
+.duration-table tr td:first-child{
+    text-align: left;
 }
 
 .rows-count-div{
@@ -215,4 +225,8 @@ body{
 
 .history-header tr td:first-child{
     text-align: left;
+}
+
+.markdown-block{
+    padding-left: 10px;
 }

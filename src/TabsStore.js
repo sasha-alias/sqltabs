@@ -33,7 +33,7 @@ var Tab = function(id, connstr){
 };
 
 var _TabsStore = function(){
-
+    
     this.theme = (Config.getTheme() || 'dark');
     this.mode = (Config.getMode() || 'classic');
     this.tabs = {};
@@ -251,6 +251,13 @@ var _TabsStore = function(){
     this.getHistoryItem = function(){
         return this.historyItem;
     }
+
+    this.rereadConfig = function(){
+        this.theme = (Config.getTheme() || 'dark');
+        this.mode = (Config.getMode() || 'classic');
+        this.connectionHistory = (Config.getConnHistory() || []);
+    };
+
         
     // restore recent connection string on startup
     if (typeof(Config.getConnHistory()) != 'undefined' && Config.getConnHistory().length > 0){

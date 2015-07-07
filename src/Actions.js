@@ -208,6 +208,12 @@ var Actions = {
         });
     },
 
+    rereadConfig: function(){
+        AppDispatcher.dispatch({
+            eventName: 'reread-config',
+        });
+    }
+
 }
 
 module.exports = Actions;

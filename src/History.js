@@ -19,6 +19,9 @@ var history = db.object.history;
 
 var History = {
     push: function(query){
+
+        fs.unwatchFile(history_path);
+
         history.unshift({
             time: Date.now(),
             query: query,
@@ -26,7 +29,9 @@ var History = {
         if (history.length > 1000){
             history.pop();
         }
-        db.save();
+
+        db.saveSync();
+        fs.watchFile(history_path, this.fileChangeHandler);
     },
 
     get: function(idx){
@@ -41,6 +46,16 @@ var History = {
         return history.length;
     },
 
+    fileChangeHandler: function(){
+        // reread history from file
+        var db = lowdb(history_path)
+        history = db.object.history;
+    },
+
 }
+
+fs.watchFile(history_path, History.fileChangeHandler);
+    
+
 
 module.exports = History;

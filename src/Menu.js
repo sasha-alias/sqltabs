@@ -188,10 +188,10 @@ if (process.platform == 'darwin'){
             ]},
         ]},
         {label: "Window", submenu:[
-            //{label: "Toggle DevTools",
-            //accelerator: "Alt+Command+I",
-            //click: function() { BrowserWindow.getFocusedWindow().toggleDevTools(); }
-            //},
+            {label: "Toggle DevTools",
+            accelerator: "Alt+Command+I",
+            click: function() { BrowserWindow.getFocusedWindow().toggleDevTools(); }
+            },
             {type: "separator"},
             {label: "Next Tab",
              accelerator: "Command+]",

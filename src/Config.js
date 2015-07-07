@@ -20,7 +20,7 @@ var config = db.object.config;
 var Conf = {
     saveTheme: function(theme){
         config.theme = theme;
-        db.saveSync();
+        this.saveSync();
     },
 
     getTheme: function(){
@@ -29,7 +29,7 @@ var Conf = {
 
     saveMode: function(mode){
         config.edit_mode = mode;
-        db.saveSync();
+        this.saveSync();
     },
 
     getMode: function(){
@@ -38,7 +38,7 @@ var Conf = {
 
     saveConnHistory: function(history){
         config.conn_history = history;
-        db.saveSync();
+        this.saveSync();
     },
 
     getConnHistory: function(){
@@ -51,7 +51,20 @@ var Conf = {
 
     saveFontSize: function(size){
         config.font_size = size;
+        this.saveSync();
+    },
+
+    saveSync: function(){
+        fs.unwatchFile(config_path);
         db.saveSync();
+        fs.watchFile(config_path, this.fileChangeHandler)
+    },
+
+    fileChangeHandler: function(){
+        var db = lowdb(config_path);
+        config= db.object.config;
+        var Actions = require('./Actions');
+        Actions.rereadConfig();
     },
 
 }

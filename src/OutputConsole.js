@@ -1,6 +1,8 @@
 var React = require('react');
 var Chart = require('./Chart');
 var ObjectInfo = require('./ObjectInfo');
+var Marked = require('marked');
+var Shell = require('shell');
 
 var OutputConsole = React.createClass({
 
@@ -82,6 +84,35 @@ var OutputConsole = React.createClass({
         }
     },
 
+    markdown: function(str){
+        var renderer = new Marked.Renderer();
+        renderer.link = function(href, title, text){
+            return '<a href="#" onClick="openExternal(\''+href+'\');">'+text+'</a>'
+        };
+        return Marked(str, {renderer: renderer});
+    },
+
+    getHeader: function(query){
+        var cut = query.replace(/^\s*---\s.*(\r\n|\r|\n|)/, ''); 
+        var match = cut.match('^\s*/\\*\\*([\\s\\S]*?)\\*\\*/');
+        if (match != null && match.length == 2){
+            return <div className="markdown-block" dangerouslySetInnerHTML={{__html: this.markdown(match[1]) }} />;
+        } else {
+            return null;
+        }
+    },
+
+    getFooter: function(query){
+        var idx = query.lastIndexOf('/**');
+        var cut = query.substr(idx);
+        var match = cut.match('/\\*\\*([\\s\\S]*?)\\*\\*/[\\s\\r\\n]*$');
+        if (match != null && match.length == 2){
+            return <div className="markdown-block" dangerouslySetInnerHTML={{__html: this.markdown(match[1]) }} />;
+        } else {
+            return null;
+        }
+    },
+
     render: function(){
         if (this.state.error){
             return this.renderError();
@@ -117,12 +148,20 @@ var OutputConsole = React.createClass({
             return renderer(dataset, i, self.state.result.query);
         });
 
+        var header = this.getHeader(this.state.result.query);
+        var footer = this.getFooter(this.state.result.query);
+
         return (
             <div className="output-console">
                 <div className="duration-div">
-                <span className="duration-word">Time:</span> <span className="duration-number">{this.state.result.duration}</span> <span className="duration-word">ms</span>
+                <table className="duration-table"><tr>
+                <td><span className="duration-word">Time:</span> <span className="duration-number">{this.state.result.duration}</span> <span className="duration-word">ms</span></td>
+                <td><button type="button" className="btn btn-info">share</button></td>
+                </tr></table>
                 </div>
+                {header}
                 {datasets}
+                {footer}
             </div>
         );
     },
