@@ -96,14 +96,20 @@ var Actions = {
 
     execScript: function(){ // send message to current editor to send script for execution
         SignalsDispatcher.dispatch({
-            eventName: 'execute-script'
+            eventName: 'execute-script',
         });
     },
 
     execBlock: function(){
         SignalsDispatcher.dispatch({
-            eventName: 'execute-block'
-        })
+            eventName: 'execute-block',
+        });
+    },
+
+    execAll: function(){
+        SignalsDispatcher.dispatch({
+            eventName: 'execute-all',
+        });
     },
 
     runQuery: function(key, query){ // sends query to db for execution 
@@ -117,6 +123,16 @@ var Actions = {
             err_callback: ErrorCallback,
         }
         );
+    },
+
+    runAllBlocks: function(key, blocks){ // send all blocks to db for execution
+        AppDispatcher.dispatch({
+            eventName: 'run-all-blocks',
+            key: key,
+            blocks: blocks,
+            callback: QueryCallback,
+            err_callback: ErrorCallback,
+        });
     },
 
     cancelQuery: function(){

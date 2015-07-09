@@ -93,7 +93,7 @@ var OutputConsole = React.createClass({
     },
 
     getHeader: function(query){
-        var cut = query.replace(/^\s*---\s.*(\r\n|\r|\n|)/, ''); 
+        var cut = query.replace(/^\s*---.*[\s\n]*/, ''); 
         var match = cut.match('^\s*/\\*\\*([\\s\\S]*?)\\*\\*/');
         if (match != null && match.length == 2){
             return <div className="markdown-block" dangerouslySetInnerHTML={{__html: this.markdown(match[1]) }} />;
@@ -104,6 +104,11 @@ var OutputConsole = React.createClass({
 
     getFooter: function(query){
         var idx = query.lastIndexOf('/**');
+        var idx0 = query.indexOf('/**');
+        var check = query.replace(/^\s*---.*[\s\n]*/, ''); 
+        if (check.substr(0,3) == '/**' && idx == idx0){ // a single markdown passed, already generated as a header so pass by
+            return null;
+        }
         var cut = query.substr(idx);
         var match = cut.match('/\\*\\*([\\s\\S]*?)\\*\\*/[\\s\\r\\n]*$');
         if (match != null && match.length == 2){
@@ -142,26 +147,34 @@ var OutputConsole = React.createClass({
     },
 
     renderResult: function(){
-        var renderer = this.getRenderer(this.state.result.query);
         self = this;
-        var datasets = this.state.result.datasets.map(function(dataset, i){
-            return renderer(dataset, i, self.state.result.query);
-        });
+        var blocks = [];
+        var duration = 0;
+        for (var block_idx = 0; block_idx < this.state.result.length; block_idx++){
+            duration += this.state.result[block_idx].duration;
+            
+            var renderer = this.getRenderer(this.state.result[block_idx].query);
+            var datasets = this.state.result[block_idx].datasets.map(function(dataset, i){
+                return renderer(dataset, i, self.state.result[block_idx].query);
+            });
 
-        var header = this.getHeader(this.state.result.query);
-        var footer = this.getFooter(this.state.result.query);
+            var header = this.getHeader(this.state.result[block_idx].query);
+            var footer = this.getFooter(this.state.result[block_idx].query);
+
+            block = <div key={"block_"+block_idx}>{header}{datasets}{footer}</div>;
+            blocks.push(block);
+        }
+
 
         return (
             <div className="output-console">
                 <div className="duration-div">
                 <table className="duration-table"><tr>
-                <td><span className="duration-word">Time:</span> <span className="duration-number">{this.state.result.duration}</span> <span className="duration-word">ms</span></td>
+                <td><span className="duration-word">Time:</span> <span className="duration-number">{duration}</span> <span className="duration-word">ms</span></td>
                 <td><button type="button" className="btn btn-info">share</button></td>
                 </tr></table>
                 </div>
-                {header}
-                {datasets}
-                {footer}
+                {blocks}
             </div>
         );
     },
@@ -180,6 +193,10 @@ var OutputConsole = React.createClass({
 
         var fields = dataset.fields;
         var rows = dataset.data;
+
+        if (fields.length == 0){
+            return null;
+        }
 
         if (fields){
             var out_fields = fields.map(function(field, i){
@@ -224,22 +241,6 @@ var OutputConsole = React.createClass({
                 </tr>
             );
         }
-        //var out_rows = rows.map(function(row, i){
-
-        //    var out_row_cols = row.map(function(val, j){
-        //        return (
-        //            <td key={'col_'+i+'_'+j}>
-        //            {val}
-        //            </td>
-        //        );
-        //    });
-
-        //    return (
-        //        <tr key={'row'+i}>
-        //            <td key={'rownum_'+i}>{i+1}</td>
-        //            {out_row_cols}
-        //        </tr>);
-        //});
 
         if (dataset.nrecords == 1){
             rword = 'row';

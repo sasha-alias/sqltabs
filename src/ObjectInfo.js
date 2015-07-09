@@ -145,6 +145,7 @@ var ObjectInfo = React.createClass({
                 {pk}
                 {indexes}
                 {check_constraints}
+                <p> Records: <span className="ace_constant">{info.object.records}</span></p>
                 <p> Size: <span className="ace_constant">{info.object.size}</span> </p>
                 <p> Total Size: <span className="ace_constant">{info.object.total_size}</span></p>
             </div>

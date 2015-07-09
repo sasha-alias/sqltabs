@@ -32,6 +32,7 @@ var Editor = React.createClass({
         TabsStore.bind('save-file-'+this.props.eventKey, this.fileSaveHandler);
         TabsStore.bind('execute-script-'+this.props.eventKey, this.execHandler);
         TabsStore.bind('execute-block-'+this.props.eventKey, this.execBlockHandler);
+        TabsStore.bind('execute-all-'+this.props.eventKey, this.execAllHandler);
         TabsStore.bind('editor-find-next', this.findNext);
         TabsStore.bind('object-info-'+this.props.eventKey, this.objectInfoHandler);
         TabsStore.bind('paste-history-item-'+this.props.eventKey, this.pasteHistoryHandler);
@@ -58,7 +59,19 @@ var Editor = React.createClass({
                 Actions.toggleHistory();
             },
             readOnly: true
-        })
+        });
+
+        this.editor.commands.addCommand({
+            name: "exec all",
+            bindKey: {
+                win: "Ctrl-Shift-E",
+                mac: "Command-Shift-E"
+            },
+            exec: function(editor, line) {
+                Actions.execAll();
+            },
+            readOnly: true
+        });
 
         this.editor.getSelectedText = function() { 
             return this.session.getTextRange(this.getSelectionRange());
@@ -75,6 +88,7 @@ var Editor = React.createClass({
         TabsStore.unbind('save-file-'+this.props.eventKey, this.fileSaveHandler);
         TabsStore.unbind('execute-script-'+this.props.eventKey, this.execHandler);
         TabsStore.unbind('execute-block-'+this.props.eventKey, this.execBlockHandler);
+        TabsStore.unbind('execute-all-'+this.props.eventKey, this.execAllHandler);
         TabsStore.unbind('editor-find-next', this.findNext);
         TabsStore.unbind('object-info-'+this.props.eventKey, this.objectInfoHandler);
         TabsStore.unbind('paste-history-item-'+this.props.eventKey, this.pasteHistoryHandler);
@@ -100,6 +114,28 @@ var Editor = React.createClass({
         }
         Actions.runQuery(this.props.eventKey, script);
 
+    },
+
+    execAllHandler: function(){
+        var meta = '^\s*---\s*.*';
+        var current_line = 0;
+        var blocks = [];
+        var block = [];
+        while (current_line < this.editor.session.getLength()){
+            current_line_text = this.editor.session.getLine(current_line).trim();
+            if (current_line > 0 && current_line_text.match(meta) != null){ // new block started
+                blocks.push(block.join('\n'));
+                block = [];
+            }
+            block.push(current_line_text);
+            current_line++;
+        }
+
+        if (block.length > 0){ // append last block if any remained
+            blocks.push(block.join('\n'));
+        }
+
+        Actions.runAllBlocks(this.props.eventKey, blocks);
     },
 
     detectBlock: function(current_line, script){
@@ -133,7 +169,7 @@ var Editor = React.createClass({
             current_line++; 
         }
         
-        return this.editor.session.getLines(start, end).join('\r');
+        return this.editor.session.getLines(start, end).join('\n');
     },
 
     changeHandler: function(){

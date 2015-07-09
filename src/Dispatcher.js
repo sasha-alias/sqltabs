@@ -20,6 +20,10 @@ SignalsDispatcher.register(function(payload){
             TabsStore.setRenderer('auto');
             TabsStore.trigger('execute-block-'+TabsStore.selectedTab);
             break;
+        case 'execute-all':
+            TabsStore.setRenderer('auto');
+            TabsStore.trigger('execute-all-'+TabsStore.selectedTab);
+            break;
         case 'object-info':
             TabsStore.trigger('object-info-'+TabsStore.selectedTab);
             break
@@ -119,6 +123,14 @@ AppDispatcher.register( function(payload) {
             password = TabsStore.getPassword(payload.key);
             Executor.runQuery(payload.key, connstr, password, payload.query, payload.callback, payload.err_callback);
             History.push(payload.query);
+            TabsStore.trigger('query-started-'+payload.key);
+            break;
+
+        case 'run-all-blocks':
+            connstr = TabsStore.getConnstr(payload.key);
+            password = TabsStore.getPassword(payload.key);
+            Executor.runBlocks(payload.key, connstr, password, payload.blocks, payload.callback, payload.err_callback);
+            History.push(payload.blocks.join('\r'));
             TabsStore.trigger('query-started-'+payload.key);
             break;
 

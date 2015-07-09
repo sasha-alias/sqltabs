@@ -19,7 +19,7 @@ var Executor = {
     runQuery: function(id, connstr, password, query, callback, err_callback){
         var client = this.getClient(id, connstr, password);
         client.sendQuery(query, 
-            function(result){callback(id, result)}, 
+            function(result){callback(id, [result])}, 
             function(err){err_callback(id, err)}
         );
 
@@ -29,6 +29,27 @@ var Executor = {
         if (id in Clients){
             Clients[id].cancel();
         }
+    },
+
+    runBlocks: function(id, connstr, password, blocks, callback, err_callback){
+        var self = this;
+        var current_block = 0;
+        var results = [];
+
+        var deferred_callback = function(id, result){
+            results.push(result[0]); 
+            if (current_block == blocks.length-1){
+                callback(id, results);
+            } else {
+                current_block++;
+                self.runQuery(id, connstr, password, blocks[current_block], deferred_callback, function(err){err_callback(id, err);});
+            }
+        };
+
+        this.runQuery(id, connstr, password, blocks[current_block],
+            deferred_callback,
+            function(err){err_callback(id, err)}
+        );
     },
 
     testConnection: function(id, connstr, password, callback, err_callback1, err_callback2){
@@ -63,59 +84,14 @@ var Executor = {
         });
     },
 
-    _normalizeSearchPath: function(id, connstr, password, search_path, callback, err_callback){
-        var spath = search_path.split(',');
-
-        if (spath.indexOf('"$user"') > -1){
-            this._getCurrentUser(id, connstr, password,
-            function(user){
-                idx = spath.indexOf('$user');
-                spath[idx]=user;
-                if (spath.indexOf('pg_catalog') > -1){
-                    callback(spath);
-                } else {
-                    callback(spath.unshift('pg_catalog'));
-                }
-            }, 
-            function(err){
-                err_callback(id, err)
-            });
-        } else {
-            if (spath.indexOf('pg_catalog') > -1){
-                callback(spath);
-            } else {
-                callback(spath.unshift('pg_catalog'));
-            }
-        }
-    },
-
-    _getSearchPath: function(id, connstr, password, callback, err_callback){
-        var self = this;
-        var client = this.getClient(id, connstr, password);
-        query = "SHOW search_path";
-        client.sendQuery(query,
-        function(result){
-            var search_path = result.datasets[0].data[0][0];
-            self._normalizeSearchPath(id, connstr, password, search_path,
-            function(search_path){
-                callback(search_path);
-            },
-            function(err){
-                err_callback(id, err);
-            });
-        },
-        function(err){
-            err_callback(id, err);
-        });
-    },
-
     _findRelation: function(id, connstr, password, object, callback, err_callback){
 
             var client = this.getClient(id, connstr, password);
 
             query = "select n.nspname, c.relname, c.relkind, \
 pg_size_pretty(pg_relation_size(c.oid)) size, \
-pg_size_pretty(pg_total_relation_size(c.oid)) size \
+pg_size_pretty(pg_total_relation_size(c.oid)) total_size, \
+reltuples \
 from  \
 pg_class c, \
 pg_namespace n \
@@ -132,6 +108,7 @@ and n.oid = c.relnamespace;";
                         relkind: row[2],
                         size: row[3],
                         total_size: row[4],
+                        records: row[5],
                     };
                     callback(relation);
                 } else {
