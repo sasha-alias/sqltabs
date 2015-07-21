@@ -4,6 +4,7 @@ var TabsStore = require('./TabsStore');
 var Executor = require('./Executor');
 var Config = require('./Config');
 var History = require('./History');
+var Cloud = require('./Cloud');
 
 var AppDispatcher = new Dispatcher();
 var SignalsDispatcher = new Dispatcher();
@@ -209,6 +210,23 @@ AppDispatcher.register( function(payload) {
             TabsStore.trigger('change-theme');
             TabsStore.trigger('change-mode');
             TabsStore.trigger('change');
+            break;
+
+        case 'share':
+            var result = TabsStore.getResult(TabsStore.selectedTab);
+            Cloud.share(result, payload.callback, payload.err_callback);
+            break;
+
+        case 'doc-shared':
+            TabsStore.setCloudDoc(payload.docid);
+            TabsStore.setCloudError(null);
+            TabsStore.trigger('cloud-message');
+            break;
+
+        case 'doc-shared-error':
+            TabsStore.setCloudDoc(null);
+            TabsStore.setCloudError(payload.error);
+            TabsStore.trigger('cloud-message');
             break;
 
     }

@@ -28,6 +28,20 @@ var ObjectInfoCallback = function(key, object){
     });
 }
 
+var ShareErrorCallback = function(err){
+    AppDispatcher.dispatch({
+        eventName: 'doc-shared-error',
+        error: err,
+    });
+}
+
+var ShareCallback = function(docid){
+    AppDispatcher.dispatch({
+        eventName: 'doc-shared',
+        docid: docid,
+    });
+}
+
 var Actions = {
 
     select: function(id){
@@ -228,8 +242,15 @@ var Actions = {
         AppDispatcher.dispatch({
             eventName: 'reread-config',
         });
-    }
+    },
 
+    share: function(){
+        AppDispatcher.dispatch({
+            eventName: 'share',
+            callback: ShareCallback,
+            err_callback: ShareErrorCallback,
+        });
+    }
 }
 
 module.exports = Actions;

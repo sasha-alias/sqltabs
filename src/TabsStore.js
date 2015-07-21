@@ -25,10 +25,15 @@ var Tab = function(id, connstr){
 
     this.getTitle = function(){
         if (this.filename != null){
-            return this.filename;
+            var ret = this.filename;
         } else {
-            return '[ '+this.connstr+' ]';
+            if (this.connstr.length > 30){
+                var ret = '[...'+this.connstr.substr(this.connstr.length-20)+' ]';
+            } else {
+                var ret = '[ '+this.connstr+' ]';
+            }
         }
+        return ret;
     }
 };
 
@@ -256,6 +261,22 @@ var _TabsStore = function(){
         this.theme = (Config.getTheme() || 'dark');
         this.mode = (Config.getMode() || 'classic');
         this.connectionHistory = (Config.getConnHistory() || []);
+    };
+
+    this.setCloudDoc = function(docid){
+        this.cloudDoc = docid;
+    };
+
+    this.getCloudDoc = function(){
+        return this.cloudDoc;
+    };
+
+    this.setCloudError = function(error){
+        this.cloudError = error;
+    };
+
+    this.getCloudError = function(){
+        return this.cloudError;
     };
 
         

@@ -3,6 +3,7 @@ var Chart = require('./Chart');
 var ObjectInfo = require('./ObjectInfo');
 var Marked = require('marked');
 var Shell = require('shell');
+var Actions = require('./Actions');
 
 var OutputConsole = React.createClass({
 
@@ -59,6 +60,10 @@ var OutputConsole = React.createClass({
 
     queryError: function(){
         this.setState({error: TabsStore.getError(this.props.eventKey)});
+    },
+
+    share: function(){
+        Actions.share();
     },
 
     objectInfoReceived: function(){
@@ -171,7 +176,7 @@ var OutputConsole = React.createClass({
                 <div className="duration-div">
                 <table className="duration-table"><tr>
                 <td><span className="duration-word">Time:</span> <span className="duration-number">{duration}</span> <span className="duration-word">ms</span></td>
-                <td><button type="button" className="btn btn-info">share</button></td>
+                <td><button type="button" className="btn btn-info" onClick={this.share}>share</button></td>
                 </tr></table>
                 </div>
                 {blocks}

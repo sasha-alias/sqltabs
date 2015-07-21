@@ -6,6 +6,7 @@ var TabContainer = require('./TabContainer');
 var HistoryCarousel = require('./HistoryCarousel');
 var Config = require('./Config');
 var Actions = require('./Actions');
+var CloudMessage = require('./CloudMessage');
 
 require('./Menu');
 
@@ -21,6 +22,7 @@ var App = React.createClass({
                 <PasswordDialog/>
                 <About/>
                 <HistoryCarousel/>
+                <CloudMessage/>
             </div>
         );
     },
