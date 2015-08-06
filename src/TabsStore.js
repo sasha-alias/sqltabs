@@ -27,10 +27,14 @@ var Tab = function(id, connstr){
         if (this.filename != null){
             var ret = this.filename;
         } else {
-            if (this.connstr.length > 30){
-                var ret = '[...'+this.connstr.substr(this.connstr.length-20)+' ]';
+            if (typeof(this.connstr) != 'undefined') {
+                    if (this.connstr.length > 30){
+                        var ret = '[...'+this.connstr.substr(this.connstr.length-20)+' ]';
+                    } else {
+                        var ret = '[ '+this.connstr+' ]';
+                    }
             } else {
-                var ret = '[ '+this.connstr+' ]';
+                return '';
             }
         }
         return ret;

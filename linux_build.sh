@@ -29,6 +29,9 @@ cp -r node_modules/libpq .build/node_modules/
 # lowdb
 cp -r node_modules/lowdb .build/node_modules/
 
+# marked
+cp -r node_modules/marked .build/node_modules/
+
 # microevent
 cp -r node_modules/microevent .build/node_modules/
 
@@ -37,6 +40,9 @@ cp -r node_modules/react .build/node_modules/
 
 # react-bootstrap
 cp -r node_modules/react-bootstrap .build/node_modules/
+
+# request
+cp -r node_modules/request .build/node_modules/
 
 # jsdom
 cp -r node_modules/jsdom .build/node_modules/
