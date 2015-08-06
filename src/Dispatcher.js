@@ -215,6 +215,7 @@ AppDispatcher.register( function(payload) {
         case 'share':
             var result = TabsStore.getResult(TabsStore.selectedTab);
             Cloud.share(result, payload.callback, payload.err_callback);
+            TabsStore.trigger('cloud-sent');
             break;
 
         case 'doc-shared':

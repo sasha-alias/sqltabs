@@ -186,7 +186,7 @@ var OutputConsole = React.createClass({
 
     renderDataset: function(dataset, i, query){
 
-        var dataset_idx = i;
+        var dataset_idx = i; // hahaha, just I am drunk :)
 
         if (dataset.resultStatus == 'PGRES_COMMAND_OK'){
             return <div key={'cmdres_'+i} className="alert alert-success">{dataset.cmdStatus}</div>;
@@ -215,7 +215,7 @@ var OutputConsole = React.createClass({
         for (var i=0; i < rows.length; i++){
             if (i == 2000 && rows.length > 5000){
                 var omitted_count = rows.length - 2000;
-                var omitted_message = <span className="omitted-message">{omitted_count} rows where omitted from rendering to prevent long wating</span>;
+                var omitted_message = <span className="omitted-message">{omitted_count} rows were omitted from rendering to prevent long wating</span>;
                 break;
             }
 

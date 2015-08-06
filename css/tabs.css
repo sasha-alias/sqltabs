@@ -190,6 +190,14 @@ body{
     width: 100%;
 }
 
+.about-table tr td:first-child{
+    width: 70px;
+}
+
+.progress{
+    width: 100%;
+}
+
 .object-info-div{
     margin-left: 20px;
     margin-bottom: 10px;
@@ -229,4 +237,8 @@ body{
 
 .markdown-block{
     padding-left: 10px;
+}
+
+.cloud-error{
+    word-break: break-all;
 }
