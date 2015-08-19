@@ -24,6 +24,11 @@ var Chart = React.createClass({
                 rows: rows, 
                 type: this.props.type,
             }
+
+            if (this.props.x){
+                data.x = fields[this.props.x+1];
+            }
+
         } else if (row_charts.indexOf(this.props.type) != -1){
             // first column value as a header
             var columns = this.props.dataset.data;
