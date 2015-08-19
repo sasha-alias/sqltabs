@@ -44,6 +44,9 @@ cp -r node_modules/react-bootstrap .build/node_modules/
 # request
 cp -r node_modules/request .build/node_modules/
 
+# sqldoc
+cp -r node_modules/sqldoc .build/node_modules/
+
 # jsdom
 cp -r node_modules/jsdom .build/node_modules/
 
