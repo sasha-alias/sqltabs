@@ -30,8 +30,8 @@ function mount_charts(){
 
         var data = {};
 
-        var column_charts = ['line', 'spline', 'area', 'step', 'area-spline', 'area-step'];
-        var row_charts = ['bar', 'pie', 'donut'];
+        var column_charts = ['line', 'spline', 'area', 'step', 'area-spline', 'area-step', 'bar'];
+        var row_charts = ['pie', 'donut'];
 
         if (column_charts.indexOf(chart_type) != -1){
             // field name as a header
@@ -110,7 +110,8 @@ function mount_charts(){
                 type: chart_type,
             }
         } else {
-            $(React.findDOMNode(this)).html('<div class="connection-error alert alert-danger">Chart '+chart_type+' is not supported<div>');
+            var _div = $("div[data-chart-id='"+chart_id+"']");
+            _div.html('<div class="connection-error alert alert-danger">Chart '+chart_type+' is not supported<div>');
             return;
         }
 
@@ -121,7 +122,8 @@ function mount_charts(){
                 axis: axis,
             });
         } catch (err){
-            $(React.findDOMNode(this)).html('<div class="connection-error alert alert-danger">Chart building error<div>');
+            var _div = $("div[data-chart-id='"+chart_id+"']");
+            _div.html('<div class="connection-error alert alert-danger">Chart building error<div>');
             console.log(err);
             return;
         }
