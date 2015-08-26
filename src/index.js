@@ -1,7 +1,6 @@
 require('./build/App.js');
 var $ = require('jquery');
 var c3 = require('c3');
-var dateParse = require('postgres-date');
 
 function openExternal(url){
     require('shell').openExternal(url);

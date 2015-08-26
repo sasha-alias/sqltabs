@@ -332,7 +332,7 @@ if (process.platform == 'darwin'){
     ];
 
     if (DEVMODE) {
-        template[template.length-1].submenu.unshift(
+        template[template.length-2].submenu.unshift(
             {label: "Toggle DevTools",
             accelerator: "Alt+Ctrl+I",
             click: function() { BrowserWindow.getFocusedWindow().toggleDevTools(); }
