@@ -1,6 +1,7 @@
 rm -rf .build
 mkdir .build
 jsx src/ build/
+./minify.sh
 cp index.html .build/
 cp main.js .build/
 cp logo.icns .build/

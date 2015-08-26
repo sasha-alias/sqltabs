@@ -7,6 +7,10 @@ var dialog = remote.require('dialog');
 var app = remote.require('app');
 var fs = require('fs');
 
+if (typeof(DEVMODE) == 'undefined'){
+    DEVMODE = true;
+}
+
 var openFile = function(){
     dialog.showOpenDialog({ properties: ['openFile']}, 
     function(filenames){
@@ -192,11 +196,6 @@ if (process.platform == 'darwin'){
             ]},
         ]},
         {label: "Window", submenu:[
-            {label: "Toggle DevTools",
-            accelerator: "Alt+Command+I",
-            click: function() { BrowserWindow.getFocusedWindow().toggleDevTools(); }
-            },
-            {type: "separator"},
             {label: "Next Tab",
              accelerator: "Command+]",
              click: function(){Actions.nextTab()},
@@ -207,7 +206,17 @@ if (process.platform == 'darwin'){
             },
         ]
         },
-    ]
+    ];
+
+    if (DEVMODE) {
+        template[template.length-1].submenu.unshift(
+            {label: "Toggle DevTools",
+            accelerator: "Alt+Command+I",
+            click: function() { BrowserWindow.getFocusedWindow().toggleDevTools(); }
+            }
+        );
+    }
+
 } else {
 
     var template = [
@@ -302,11 +311,6 @@ if (process.platform == 'darwin'){
 
 
         {label: "Window", submenu:[
-            //{label: "Toggle DevTools",
-            //accelerator: "Alt+Ctrl+I",
-            //click: function() { BrowserWindow.getFocusedWindow().toggleDevTools(); }
-            //},
-            //{type: "separator"},
             {label: "Next Tab",
              accelerator: "Ctrl+Tab",
              click: function(){Actions.nextTab()},
@@ -326,6 +330,15 @@ if (process.platform == 'darwin'){
 	},
 
     ];
+
+    if (DEVMODE) {
+        template[template.length-1].submenu.unshift(
+            {label: "Toggle DevTools",
+            accelerator: "Alt+Ctrl+I",
+            click: function() { BrowserWindow.getFocusedWindow().toggleDevTools(); }
+            }
+        );
+    }
 }
 
 menu = Menu.buildFromTemplate(template);
