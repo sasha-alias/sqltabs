@@ -22,6 +22,7 @@ var Tab = function(id, connstr){
     this.searchVisible = false;
     this.objectInfo = null;
     this.historyItem = 0;
+    this.newVersion = null;
 
     this.getTitle = function(){
         if (this.filename != null){

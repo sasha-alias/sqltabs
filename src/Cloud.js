@@ -24,6 +24,20 @@ Cloud = {
 
                 callback(body.result);
             });
+    },
+
+    getVersion: function(callback){
+        request({
+            method: 'GET',
+            uri: 'http://www.sqltabs.com/version',
+            },
+            function(err, res, body){
+                if (err){
+                    return; // ignore errors
+                }
+
+                callback(body);
+            });
     }
 }
 module.exports = Cloud;

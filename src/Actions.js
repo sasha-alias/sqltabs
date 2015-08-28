@@ -42,6 +42,15 @@ var ShareCallback = function(docid){
     });
 }
 
+var CheckVersion = function(version){
+    var last_version = JSON.parse(version).version.split('.');
+    var pkg = require('../package.json');
+    var current_version = pkg.version.split('.');
+    if (last_version > current_version){
+        Actions.newVersionAvailable(last_version);
+    }
+}
+
 var Actions = {
 
     select: function(id){
@@ -250,7 +259,21 @@ var Actions = {
             callback: ShareCallback,
             err_callback: ShareErrorCallback,
         });
-    }
+    },
+
+    upgradeCheck: function(){
+        AppDispatcher.dispatch({
+            eventName: 'upgrade-check',
+            callback: CheckVersion,
+        });
+    },
+
+    newVersionAvailable: function(version){
+        AppDispatcher.dispatch({
+            eventName: 'new-version-available',
+            version: version,
+        });
+    },
 }
 
 module.exports = Actions;

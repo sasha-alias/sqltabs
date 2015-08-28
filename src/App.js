@@ -7,6 +7,7 @@ var HistoryCarousel = require('./HistoryCarousel');
 var Config = require('./Config');
 var Actions = require('./Actions');
 var CloudMessage = require('./CloudMessage');
+var UpgradeMessage = require('./UpgradeMessage');
 
 require('./Menu');
 
@@ -23,6 +24,7 @@ var App = React.createClass({
                 <About/>
                 <HistoryCarousel/>
                 <CloudMessage/>
+                <UpgradeMessage/>
             </div>
         );
     },
@@ -34,5 +36,6 @@ var theme = (Config.getTheme() || 'dark');
 var size = (Config.getFontSize() || 'medium');
 Actions.setTheme(theme);
 Actions.setFontSize(size);
+Actions.upgradeCheck();
 
 React.render(app, mountNode);

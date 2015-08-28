@@ -230,6 +230,15 @@ AppDispatcher.register( function(payload) {
             TabsStore.trigger('cloud-message');
             break;
 
+        case 'upgrade-check':
+            Cloud.getVersion(payload.callback);
+            break;
+
+        case 'new-version-available':
+            TabsStore.newVersion = payload.version;
+            TabsStore.trigger('new-version-available');
+            break;
+
     }
     return true; // Needed for Flux promise resolution
 }); 
