@@ -1,3 +1,5 @@
+var TabsStore = require('./TabsStore');
+var Actions = require('./Actions');
 var React = require('react');
 var Ace = require('brace');
 require('brace/mode/pgsql');
@@ -14,27 +16,43 @@ var ObjectInfo = React.createClass({
 
     componentDidMount: function(){
 
+        TabsStore.bind('change-theme', this.changeThemeHandler);
+
         if (this.scripts.length > 0){
 
-            editor = Ace.edit("script_"+this.props.eventKey);
-            editor.setOptions({
+            this.editor = Ace.edit("script_"+this.props.eventKey);
+            this.editor.setOptions({
                 maxLines: 1000,
                 showGutter: false,
                 showPrintMargin: false,
                 highlightActiveLine: false,
                 readOnly: true,
             });
-            editor.renderer.$cursorLayer.element.style.opacity=0;
-            editor.getSession().setMode('ace/mode/pgsql');
-            editor.setTheme('ace/theme/' + TabsStore.getEditorTheme());
+            this.editor.renderer.$cursorLayer.element.style.opacity=0;
+            this.editor.getSession().setMode('ace/mode/pgsql');
+            this.editor.setTheme('ace/theme/' + TabsStore.getEditorTheme());
 
             var script = '';
             for (var i=0; i<this.scripts.length; i++){
                 script += this.scripts[i];
                 script += '\n---\n\n';
             }
-            editor.session.setValue(script, -1);
+            this.editor.session.setValue(script, -1);
         }
+    },
+
+    componentWillUnmount: function(){
+        TabsStore.unbind('change-theme', this.changeThemeHandler);
+    },
+
+    changeThemeHandler: function(){
+        if (typeof(this.editor) != 'undefined'){
+            this.editor.setTheme('ace/theme/' + TabsStore.getEditorTheme());
+        }
+    },
+
+    getInfo: function(object){
+        Actions.getObjectInfo(object);
     },
 
     render_function_info: function(info){
@@ -45,6 +63,67 @@ var ObjectInfo = React.createClass({
         return (
         <div key={div_id} id={div_id}></div>
         );
+    },
+
+    render_schema_info: function(info){
+        var self = this;
+        var tables = info.object.tables.map(function(item, idx){
+            var id = "table_"+self.props.eventKey+"_"+idx;
+            var full_object_name = info.object_name+'.'+item; // schema.table
+            return <li key={id}><a href="#" onClick={function(){self.getInfo(full_object_name)}}>{item}</a></li>
+        });
+        var functions = info.object.functions.map(function(item, idx){
+            var id = "function_"+self.props.eventKey+"_"+idx;
+            var full_object_name = info.object_name+'.'+item; // schema.table
+            return <li key={id}><a href="#" onClick={function(){self.getInfo(full_object_name)}}>{item}</a></li>
+        });
+
+        return (<div className="object-info-div">Schema <span className="object-info-name">{info.object_name}</span>
+            <div>Tables:
+                <ul>
+                    {tables}
+                </ul>
+            </div>
+            <div>Functions:
+                <ul>
+                    {functions}
+                </ul>
+            </div>
+        </div>
+        );
+    },
+
+    render_db_info: function(info){
+        var self = this;
+        var schemas = info.object.schemas.map(function(item, idx){
+            var id = "schema_"+self.props.eventKey+"_"+idx;
+            return <li key={id}><a href="#" onClick={function(){self.getInfo(item+'.');}}>{item}</a></li>
+        });
+        var roles = info.object.roles.map(function(item, idx){
+            var id = "role_"+self.props.eventKey+"_"+idx;
+            return <li key={id}>{item}</li>
+        });
+        var databases = info.object.databases.map(function(item, idx){
+            var id = "role_"+self.props.eventKey+"_"+idx;
+            return <li key={id}>{item}</li>
+        });
+        return (<div className="object-info-div">Database <span className="object-info-name">{info.object_name}</span>
+            <div>Schemas:
+                <ul>
+                    {schemas}
+                </ul>
+            </div>
+            <div>Roles:
+                <ul>
+                    {roles}
+                </ul>
+            </div>
+            <div>Databases:
+                <ul>
+                    {databases}
+                </ul>
+            </div>
+        </div>);
     },
 
     render: function(){
@@ -199,6 +278,12 @@ var ObjectInfo = React.createClass({
                 <p> Total Size: <span className="ace_constant">{info.object.total_size}</span></p>
             </div>
             );
+        } else if (info.object_type == 'database'){
+            return this.render_db_info(info);
+
+        } else if (info.object_type == 'schema'){
+            return this.render_schema_info(info);
+
         } else {
             return (
                 <div className="alert alert-danger">Not supported object type: {info.object_type}</div>

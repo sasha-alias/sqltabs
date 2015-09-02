@@ -453,12 +453,37 @@ GROUP BY a.indexrelid, a.indisunique, d.amname, a.indrelid, a.indpred";
 
         var self = this;
 
+        // if no object selected then get info about database
         if (typeof(object) == 'undefined' || object == '' || object == null){
-            var ret = {object_type: null, object: null, object_name: object};
-            callback(id, ret);
+            var ret = {object_type: 'database', object: null, object_name: null};
+            this._get_db_info(id, connstr, password, 
+            function(db_info){
+                ret.object = db_info;
+                ret.object_name = db_info.dbname;
+                callback(id, ret);
+            }, 
+            function(err){
+                err_callback(id, err);
+            })
             return;
         }
 
+        // if dot placed in the end then get information about schema (example: "myschema." )
+        if (object.slice(-1) == '.'){
+            var schema_name = object.slice(0, object.length-1);
+            var ret = {object_type: 'schema', object: null, object_name: schema_name};
+            this._get_schema_info(id, connstr, password, schema_name,
+            function(schema_info){
+                ret.object = schema_info;
+                callback(id, ret);
+            }, 
+            function(err){
+                err_callback(id, err);
+            })
+            return;
+        }
+
+        // try to find relation
         self._findRelation(id, connstr, password, object,
         function(relation){
             var ret = {object_type: "relation", object: relation, object_name: object};
@@ -518,6 +543,174 @@ GROUP BY a.indexrelid, a.indisunique, d.amname, a.indrelid, a.indpred";
         });
 
 
+    },
+
+    _get_db_info: function(id, connstr, password, callback, err_callback){
+        var self = this;
+
+        var current_database = null;
+        var schemas = [];
+        var databases = [];
+        var roles = [];
+
+        // get current dbname
+        var get_current_database = function(cb){
+            var client = self.getClient(id, connstr, password);
+            var query = "SELECT current_database()";
+
+            client.sendQuery(query,
+            function(result){
+                if (result.datasets[0].data.length > 0){
+                    current_database = result.datasets[0].data[0][0];
+                }
+                cb();
+            },
+            function(err){
+                err_callback(id, err);
+                cb();
+            });
+        };
+
+        // get schemas
+        var get_schemas = function(cb){
+            var client = self.getClient(id, connstr, password);
+            var query = " \
+SELECT nspname AS schema \
+FROM pg_namespace \
+ORDER BY 1 \
+";
+
+            client.sendQuery(query,
+            function(result){
+                if (result.datasets[0].data.length > 0){
+                    schemas = result.datasets[0].data.map(function(item){return item[0];});
+                }
+                cb();
+            },
+            function(err){
+                err_callback(id, err);
+                cb();
+            });
+        }
+
+        // get roles
+        var get_roles = function(cb){
+            var client = self.getClient(id, connstr, password);
+            var query = " \
+SELECT rolname AS role \
+FROM pg_roles \
+ORDER BY 1 \
+";
+            client.sendQuery(query,
+            function(result){
+                if (result.datasets[0].data.length > 0){
+                    roles = result.datasets[0].data.map(function(item){return item[0];});
+                }
+                cb();
+            },
+            function(err){
+                err_callback(id, err);
+                cb();
+            });
+        }
+
+        // get databases
+        var get_databases = function(cb){
+            var client = self.getClient(id, connstr, password);
+            var query = " \
+SELECT datname AS db \
+FROM pg_database \
+ORDER BY 1 \
+";
+            client.sendQuery(query,
+            function(result){
+                if (result.datasets[0].data.length > 0){
+                    databases = result.datasets[0].data.map(function(item){return item[0];});
+                }
+                cb();
+            },
+            function(err){
+                err_callback(id, err);
+                cb();
+            });
+        }
+
+        async.series([get_current_database, get_schemas, get_roles, get_databases], function(){
+            var database = {
+                dbname: current_database,
+                schemas: schemas,
+                roles: roles,
+                databases: databases,
+            };
+            return callback(database);
+        });
+    },
+
+    _get_schema_info: function(id, connstr, password, schema_name, callback, err_callback){
+        var self = this;
+        var tables = [];
+        var functions = [];
+        // get tables
+        var get_tables = function(cb){
+            var client = self.getClient(id, connstr, password);
+            var query = " \
+select c.relname from \
+pg_class c, \
+pg_namespace n \
+where n.nspname = '"+schema_name+"' \
+and c.relnamespace = n.oid \
+and c.relkind = 'r' \
+order by 1 \
+";
+            client.sendQuery(query,
+            function(result){
+                if (result.datasets[0].data.length > 0){
+                    tables = result.datasets[0].data.map(function(item){return item[0];});
+                }
+                cb();
+            },
+            function(err){
+                err_callback(id, err);
+                cb();
+            });
+        }
+
+        // get functions
+        var get_functions = function(cb){
+            var client = self.getClient(id, connstr, password);
+            var query = " \
+select p.proname from \
+pg_proc p, \
+pg_namespace n \
+where \
+n.nspname = '"+schema_name+"' \
+and p.pronamespace = n.oid \
+order by 1  \
+";
+            client.sendQuery(query,
+            function(result){
+                if (result.datasets[0].data.length > 0){
+                    functions = result.datasets[0].data.map(function(item){return item[0];});
+                }
+                cb();
+            },
+            function(err){
+                err_callback(id, err);
+                cb();
+            });
+            
+        }
+
+        async.series([get_tables, get_functions], function(){
+            var schema = {
+                schema_name: schema_name,
+                tables: tables,
+                functions: functions,
+            };
+            callback(schema);
+        });
+
+  
     },
     
 };
