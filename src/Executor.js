@@ -1,3 +1,4 @@
+var async = require('async');
 var PqClient = require('./PqClient');
 
 var Clients={};
@@ -84,11 +85,59 @@ var Executor = {
         });
     },
 
+    _normalizeSearchPath: function(id, connstr, password, search_path, callback, err_callback){
+        var spath = search_path.split(',');
+        if (spath.indexOf('"$user"') > -1){
+            this._getCurrentUser(id, connstr, password,
+            function(user){
+                idx = spath.indexOf('"$user"');
+                spath[idx]=user;
+                if (spath.indexOf('pg_catalog') > -1){
+                    callback(spath);
+                } else {
+                    spath.unshift('pg_catalog');
+                    callback(spath);
+                }
+            }, 
+            function(err){
+                err_callback(id, err)
+            });
+        } else {
+            if (spath.indexOf('pg_catalog') > -1){
+                callback(spath);
+            } else {
+                spath.unshift('pg_catalog');
+                callback(spath);
+            }
+        }
+    },
+
+    _getSearchPath: function(id, connstr, password, callback, err_callback){
+        var self = this;
+        var client = this.getClient(id, connstr, password);
+        query = "SHOW search_path";
+        client.sendQuery(query,
+        function(result){
+            var search_path = result.datasets[0].data[0][0];
+            self._normalizeSearchPath(id, connstr, password, search_path,
+            function(search_path){
+                callback(search_path);
+            },
+            function(err){
+                err_callback(id, err);
+            });
+        },
+        function(err){
+            err_callback(id, err);
+        });
+    },
+
+
     _findRelation: function(id, connstr, password, object, callback, err_callback){
 
-            var client = this.getClient(id, connstr, password);
+        var client = this.getClient(id, connstr, password);
 
-            query = "select n.nspname, c.relname, c.relkind, \
+        query = "select n.nspname, c.relname, c.relkind, \
 pg_size_pretty(pg_relation_size(c.oid)) size, \
 pg_size_pretty(pg_total_relation_size(c.oid)) total_size, \
 reltuples \
@@ -98,26 +147,128 @@ pg_namespace n \
 where c.oid = '"+object+"'::regclass \
 and n.oid = c.relnamespace;";
 
-            client.sendQuery(query, 
-            function(result){
-                if (result.datasets[0].data.length > 0){
-                    var row = result.datasets[0].data[0];
-                    var relation = {
-                        schema: row[0],
-                        relname: row[1],
-                        relkind: row[2],
-                        size: row[3],
-                        total_size: row[4],
-                        records: row[5],
-                    };
-                    callback(relation);
-                } else {
-                    callback(null);
+        client.sendQuery(query, 
+        function(result){
+            if (result.datasets[0].data.length > 0){
+                var row = result.datasets[0].data[0];
+                var relation = {
+                    schema: row[0],
+                    relname: row[1],
+                    relkind: row[2],
+                    size: row[3],
+                    total_size: row[4],
+                    records: row[5],
+                };
+                callback(relation);
+            } else {
+                callback(null);
+            }
+        }, 
+        function(err){
+            err_callback(id, err);
+        });
+    },
+
+    _getProcOids: function(id, connstr, password, object, callback, err_callback){
+
+        var client = this.getClient(id, connstr, password);
+
+        var schema_name = object.split('.')[0];
+        var proc_name = object.split('.')[1];
+
+        var query = "SELECT p.oid from \
+    pg_proc p, \
+    pg_namespace n \
+where p.pronamespace = n.oid \
+and n.nspname = '"+schema_name+"' \
+and p.proname = '"+proc_name+"'";
+
+        client.sendQuery(query, 
+        function(result){
+            callback();
+            //callback(result.datasets[0].data);
+        },
+        function(err){
+            err_callback(id, err);
+        });
+    },
+
+    _findProc: function(id, connstr, password, object, callback, err_callback){
+        var self = this;
+        this._getSearchPath(id, connstr, password, 
+        function(search_path){
+
+            // rewrite search path if schema defined
+            if (object.indexOf('.') > -1){
+                search_path = [object.split('.')[0]];
+                object = object.split('.')[1];
+            }
+
+            // find oids of functions using search_path
+            var oids = [];
+            var scripts = [];
+
+            var calls_for_oids = search_path.map(function(item){return function(cb){
+                if (oids.length > 0){ // skip if already found
+                    cb();
+                    return;
                 }
-            }, 
-            function(err){
-                err_callback(id, err);
+                var client = self.getClient(id, connstr, password);
+
+                var schema_name = item;
+                var proc_name = object;
+
+                var query = "SELECT p.oid from \
+            pg_proc p, \
+            pg_namespace n \
+        where p.pronamespace = n.oid \
+        and n.nspname = '"+schema_name+"' \
+        and p.proname = '"+proc_name+"'";
+
+                client.sendQuery(query, 
+                function(result){
+                    oids = result.datasets[0].data;
+                    // get scripts for func oids
+                    if (oids.length > 0){
+                        var calls_for_scripts = oids.map(function(item){return function(cb_inner){
+                            var oid = item[0];
+
+                            var client = self.getClient(id, connstr, password);
+                            var query = "SELECT pg_get_functiondef("+oid+")";
+                            client.sendQuery(query, 
+                            function(result){
+                                var script = result.datasets[0].data[0][0];
+                                scripts.push(script);
+                                cb_inner();
+                            },
+                            function(err){
+                                err_callback(id, err);
+                            });
+
+                        }});
+                        
+                        async.series(calls_for_scripts, function(){
+                            callback(scripts);
+                        });
+                    }
+                    ///
+                    cb();
+                },
+                function(err){
+                    err_callback(id, err);
+                });
+
+            }});
+
+            async.series(calls_for_oids, function(){
+                if (oids.length == 0){
+                    callback(oids);
+                }
             });
+        }, 
+        function(err){
+            err_callback(id, err);
+        })
     },
 
     _getRelationDescription: function(id, connstr, password, object, callback, err_callback){
@@ -347,7 +498,19 @@ GROUP BY a.indexrelid, a.indisunique, d.amname, a.indrelid, a.indpred";
                     err_callback(id, err);
                 });
             } else {
-                callback(id, ret);
+                // relation not found, try functions
+                self._findProc(id, connstr, password, object, 
+                function(procs){
+                    if (procs.length > 0){
+                        var funcs = {object_type: "function", object: procs, object_name: null};
+                        return callback(id, funcs);
+                    } else {
+                        return callback(id, ret);
+                    }
+                }, 
+                function(err){
+                    return err_callback(id, err);
+                });
             }
         },
         function(err){

@@ -143,13 +143,13 @@ var OutputConsole = React.createClass({
 
     renderInfo: function(){
         if (this.state.info.object != null){
-            var id = this.state.info.object_name+'_'+this.state.info.object.columns.length;
+            var id = this.state.info.object_name;//+'_'+this.state.info.object.columns.length;
         } else {
             var id = this.state.info.object_name;
         }
         return (
             <div className="output-console">
-                <ObjectInfo key={id} info={this.state.info}/>
+                <ObjectInfo key={id} info={this.state.info} eventKey={this.props.eventKey}/>
             </div>
         );
     }

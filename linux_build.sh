@@ -10,6 +10,9 @@ cp -r build .build/
 cp -r css .build/
 cp -r driver .build/
 
+# async
+cp -r node_modules/async .build/node_modules/
+
 # bootstrap
 mkdir -p .build/node_modules/bootstrap
 cp -r node_modules/bootstrap/dist .build/node_modules/bootstrap/

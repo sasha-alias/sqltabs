@@ -1,12 +1,61 @@
 var React = require('react');
+var Ace = require('brace');
+require('brace/mode/pgsql');
+require('brace/theme/chrome');
+require('brace/theme/idle_fingers');
+require('brace/keybinding/vim');
 
 var ObjectInfo = React.createClass({
 
+    getInitialState: function(){
+        this.scripts = [];
+        return null;
+    },
+
+    componentDidMount: function(){
+
+        if (this.scripts.length > 0){
+
+            editor = Ace.edit("script_"+this.props.eventKey);
+            editor.setOptions({
+                maxLines: 1000,
+                showGutter: false,
+                showPrintMargin: false,
+                highlightActiveLine: false,
+                readOnly: true,
+            });
+            editor.renderer.$cursorLayer.element.style.opacity=0;
+            editor.getSession().setMode('ace/mode/pgsql');
+            editor.setTheme('ace/theme/' + TabsStore.getEditorTheme());
+
+            var script = '';
+            for (var i=0; i<this.scripts.length; i++){
+                script += this.scripts[i];
+                script += '\n---\n\n';
+            }
+            editor.session.setValue(script, -1);
+        }
+    },
+
+    render_function_info: function(info){
+        var self = this;
+        this.scripts = info.object;
+        var div_id = "script_"+self.props.eventKey;
+
+        return (
+        <div key={div_id} id={div_id}></div>
+        );
+    },
+
     render: function(){
         var info = this.props.info;
-        if (info.object_type == 'relation'){
+        if (info.object_type == 'function'){
+
+            return this.render_function_info(info);
+
+        } else if (info.object_type == 'relation'){
             if (info.object == null){
-                return <div className="alert alert-danger"> Relation "{info.object_name}" not found </div>
+                return <div className="alert alert-danger"> Object "{info.object_name}" not found </div>
             }
 
             if (info.object.relkind == 'r'){relkind = "Table"}
