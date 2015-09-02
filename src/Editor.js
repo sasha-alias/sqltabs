@@ -14,9 +14,17 @@ require('brace/keybinding/vim');
 var Editor = React.createClass({
 
     getInitialState: function(){
+        if (TabsStore.tmpScript != null){
+            var script = TabsStore.tmpScript;
+            TabsStore.tmpScript = null;
+        } else {
+            var script = null;
+        }
         return {
             theme: TabsStore.getEditorTheme(), 
-            mode: TabsStore.getEditorMode()};
+            mode: TabsStore.getEditorMode(),
+            script: script,
+        };
     },
 
     componentDidMount: function(){
@@ -75,6 +83,10 @@ var Editor = React.createClass({
 
         this.editor.getSelectedText = function() { 
             return this.session.getTextRange(this.getSelectionRange());
+        }
+
+        if (this.state.script != null){ // load script
+            this.editor.session.setValue(this.state.script, -1);
         }
         this.editor.focus();
     },

@@ -57,11 +57,18 @@ var ObjectInfo = React.createClass({
 
     render_function_info: function(info){
         var self = this;
-        this.scripts = info.object;
+        this.scripts = info.object.scripts;
         var div_id = "script_"+self.props.eventKey;
 
-        return (
-        <div key={div_id} id={div_id}></div>
+        return (<div className="object-info-div">
+            Function &nbsp;
+            <span className="object-info-name">
+            <a href="#" onClick={function(){self.getInfo(info.object.schema_name+'.');}}>{info.object.schema_name}</a>.{info.object.function_name}
+            </span>
+            &nbsp; <a href="#" onClick={function(){Actions.newTab(self.scripts.join('\n'));}}><span className="glyphicon glyphicon-edit" title="edit"/></a>
+            <hr/>
+            <div key={div_id} id={div_id}></div>
+        </div>
         );
     },
 
@@ -127,6 +134,7 @@ var ObjectInfo = React.createClass({
     },
 
     render: function(){
+        var self = this;
         var info = this.props.info;
         if (info.object_type == 'function'){
 
@@ -264,7 +272,11 @@ var ObjectInfo = React.createClass({
             return (
             <div className="object-info-div"> 
                 <p>
-                <div>{relkind} <span className="object-info-name">"{info.object.schema}.{info.object.relname}"</span>
+                <div>{relkind}&nbsp;
+                <span className="object-info-name">
+                    <a href="#" onClick={function(){self.getInfo(info.object.schema+'.');}}>{info.object.schema}</a>.{info.object.relname}
+                </span>
+                <hr/>
                 </div>
                 <table className="object-info-columns-table table-hover">
                     {columns}

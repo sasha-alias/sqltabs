@@ -206,7 +206,7 @@ and p.proname = '"+proc_name+"'";
 
             // find oids of functions using search_path
             var oids = [];
-            var scripts = [];
+            var func = {};
 
             var calls_for_oids = search_path.map(function(item){return function(cb){
                 if (oids.length > 0){ // skip if already found
@@ -218,12 +218,16 @@ and p.proname = '"+proc_name+"'";
                 var schema_name = item;
                 var proc_name = object;
 
+                func.schema_name = schema_name;
+                func.function_name = proc_name;
+                func.scripts = [];
+
                 var query = "SELECT p.oid from \
-            pg_proc p, \
-            pg_namespace n \
-        where p.pronamespace = n.oid \
-        and n.nspname = '"+schema_name+"' \
-        and p.proname = '"+proc_name+"'";
+pg_proc p, \
+pg_namespace n \
+where p.pronamespace = n.oid \
+and n.nspname = '"+schema_name+"' \
+and p.proname = '"+proc_name+"'";
 
                 client.sendQuery(query, 
                 function(result){
@@ -238,7 +242,7 @@ and p.proname = '"+proc_name+"'";
                             client.sendQuery(query, 
                             function(result){
                                 var script = result.datasets[0].data[0][0];
-                                scripts.push(script);
+                                func.scripts.push(script);
                                 cb_inner();
                             },
                             function(err){
@@ -248,7 +252,7 @@ and p.proname = '"+proc_name+"'";
                         }});
                         
                         async.series(calls_for_scripts, function(){
-                            callback(scripts);
+                            callback(func);
                         });
                     }
                     ///
@@ -262,7 +266,7 @@ and p.proname = '"+proc_name+"'";
 
             async.series(calls_for_oids, function(){
                 if (oids.length == 0){
-                    callback(oids);
+                    callback(null);
                 }
             });
         }, 
@@ -525,9 +529,9 @@ GROUP BY a.indexrelid, a.indisunique, d.amname, a.indrelid, a.indpred";
             } else {
                 // relation not found, try functions
                 self._findProc(id, connstr, password, object, 
-                function(procs){
-                    if (procs.length > 0){
-                        var funcs = {object_type: "function", object: procs, object_name: null};
+                function(func){
+                    if (func && func.scripts.length > 0){
+                        var funcs = {object_type: "function", object: func, object_name: null};
                         return callback(id, funcs);
                     } else {
                         return callback(id, ret);

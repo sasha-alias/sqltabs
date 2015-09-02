@@ -23,6 +23,7 @@ var Tab = function(id, connstr){
     this.objectInfo = null;
     this.historyItem = 0;
     this.newVersion = null;
+    this.tmpScript = null;
 
     this.getTitle = function(){
         if (this.filename != null){

@@ -60,10 +60,11 @@ var Actions = {
         });
     },
 
-    newTab: function(){
+    newTab: function(script){
         AppDispatcher.dispatch({
             eventName: 'select-tab',
             key: 0,
+            script: script,
         });
     },
 
