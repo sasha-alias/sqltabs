@@ -167,7 +167,7 @@ AppDispatcher.register( function(payload) {
         case 'toggle-find-box':
             TabsStore.searchVisible = !TabsStore.searchVisible;
             TabsStore.trigger('toggle-find-box');
-            if (TabsStore.searchVisible == false){
+            if (TabsStore.searchVisible === false){
                 TabsStore.trigger('change'); // set focus to editor
             }
             break;

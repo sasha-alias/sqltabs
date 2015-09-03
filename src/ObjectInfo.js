@@ -65,7 +65,7 @@ var ObjectInfo = React.createClass({
             <span className="object-info-name">
             <a href="#" onClick={function(){self.getInfo(info.object.schema_name+'.');}}>{info.object.schema_name}</a>.{info.object.function_name}
             </span>
-            &nbsp; <a href="#" onClick={function(){Actions.newTab(self.scripts.join('\n'));}}><span className="glyphicon glyphicon-edit" title="edit"/></a>
+            &nbsp; <a href="#" onClick={function(){Actions.newTab(self.scripts.join('\n---\n\n'));}}><span className="glyphicon glyphicon-edit" title="edit"/></a>
             <hr/>
             <div key={div_id} id={div_id}></div>
         </div>

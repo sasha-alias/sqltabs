@@ -207,6 +207,7 @@ and p.proname = '"+proc_name+"'";
             // find oids of functions using search_path
             var oids = [];
             var func = {};
+            var error = null;
 
             var calls_for_oids = search_path.map(function(item){return function(cb){
                 if (oids.length > 0){ // skip if already found
@@ -241,18 +242,26 @@ and p.proname = '"+proc_name+"'";
                             var query = "SELECT pg_get_functiondef("+oid+")";
                             client.sendQuery(query, 
                             function(result){
-                                var script = result.datasets[0].data[0][0];
-                                func.scripts.push(script);
+                                if (result.datasets[0].resultStatus == 'PGRES_FATAL_ERROR'){
+                                    error = true;
+                                    err_callback(id, result.datasets[0].resultErrorMessage);
+                                } else {
+                                    var script = result.datasets[0].data[0][0];
+                                    func.scripts.push(script);
+                                }
                                 cb_inner();
                             },
                             function(err){
                                 err_callback(id, err);
+                                cb_inner();
                             });
 
                         }});
                         
                         async.series(calls_for_scripts, function(){
-                            callback(func);
+                            if (error == null) {
+                                callback(func);
+                            } 
                         });
                     }
                     ///
@@ -537,13 +546,13 @@ GROUP BY a.indexrelid, a.indisunique, d.amname, a.indrelid, a.indpred";
                         return callback(id, ret);
                     }
                 }, 
-                function(err){
+                function(id, err){
                     return err_callback(id, err);
                 });
             }
         },
         function(err){
-            err_callback(err);
+            err_callback(id, err);
         });
 
 
