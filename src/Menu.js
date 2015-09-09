@@ -143,6 +143,9 @@ if (process.platform == 'darwin'){
         },
         {label: "Database",
          submenu:[
+            {label: "Database Info",
+             click: function(){Actions.getObjectInfo()},
+            },
             {label: "Run Script",
              accelerator: "Command+R",
              click: function(){Actions.execScript()},
@@ -255,6 +258,9 @@ if (process.platform == 'darwin'){
 
         {label: "Database",
          submenu:[
+            {label: "Database Info",
+             click: function(){Actions.getObjectInfo()},
+            },
             {label: "Run Script",
              accelerator: "Ctrl+R",
              click: function(){Actions.execScript()},

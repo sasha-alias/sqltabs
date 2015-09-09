@@ -26,6 +26,25 @@ var Executor = {
 
     },
 
+    // for internal use only: runs query and checks for error (not for rendering)
+    // returns only data of first dataset
+    _getData: function(id, connstr, password, query, callback, err_callback){
+        var client = this.getClient(id, connstr, password);
+        client.sendQuery(query, 
+            function(result){
+                if (result.datasets.length > 0 && result.datasets[0].resultStatus == 'PGRES_FATAL_ERROR'){
+                    err_callback(result.datasets[0].resultErrorMessage);
+                } else {
+                    callback(result.datasets[0].data);
+                }
+            }, 
+            function(err){
+                err_callback(err);
+            }
+        );
+
+    },
+
     cancelQuery: function(id){
         if (id in Clients){
             Clients[id].cancel();
@@ -134,8 +153,7 @@ var Executor = {
 
 
     _findRelation: function(id, connstr, password, object, callback, err_callback){
-
-        var client = this.getClient(id, connstr, password);
+        var self = this;
 
         query = "select n.nspname, c.relname, c.relkind, \
 pg_size_pretty(pg_relation_size(c.oid)) size, \
@@ -147,10 +165,10 @@ pg_namespace n \
 where c.oid = '"+object+"'::regclass \
 and n.oid = c.relnamespace;";
 
-        client.sendQuery(query, 
-        function(result){
-            if (result.datasets[0].data.length > 0){
-                var row = result.datasets[0].data[0];
+        this._getData(id, connstr, password, query, 
+        function(data){
+            if (data.length > 0){
+                var row = data[0];
                 var relation = {
                     schema: row[0],
                     relname: row[1],
@@ -159,13 +177,66 @@ and n.oid = c.relnamespace;";
                     total_size: row[4],
                     records: row[5],
                 };
-                callback(relation);
+
+                /// fill the relation object with details
+    
+                var get_columns = function(cb){
+                    self._getRelationColumns(id, connstr, password, object,
+                    function(columns){
+                        relation.columns = columns;
+                        cb();
+                    },
+                    err_callback);
+                };
+
+                var get_pk = function(cb){
+                    self._getRelationPK(id, connstr, password, object,
+                    function(pk){
+                        relation.pk = pk;
+                        cb();
+                    },
+                    err_callback);
+                };
+
+                var get_check_constraints = function(cb){
+                    self._getCheckConstraints(id, connstr, password, object,
+                    function(constraints){
+                        relation.check_constraints = constraints;
+                        cb();
+                    },
+                    err_callback);
+                };
+
+                var get_indexes = function(cb){
+                    self._getRelationIndexes(id, connstr, password, object,
+                    function(indexes){
+                        relation.indexes = indexes;
+                        cb();
+                    },
+                    err_callback);
+                };
+
+                var get_triggers = function(cb){
+                    self._getTriggers(id, connstr, password, object,
+                    function(triggers){
+                        relation.triggers = triggers;
+                        cb();
+                    },
+                    err_callback);
+                };
+
+                async.series([get_columns, get_pk, get_check_constraints, get_indexes, get_triggers],
+                function(){
+                    callback(relation);
+                }
+                );
+
             } else {
                 callback(null);
             }
         }, 
-        function(err){
-            err_callback(id, err);
+        function(err){ 
+            callback(null); // ignore error, behave like relation not found
         });
     },
 
@@ -306,8 +377,6 @@ AND objsubid = 0";
 
     _getRelationColumns: function(id, connstr, password, object, callback, err_callback){
 
-        var client = this.getClient(id, connstr, password);
-
         var query = 'SELECT \
     a.attname "name", \
     a.atttypid::regtype "type", \
@@ -325,11 +394,11 @@ WHERE a.attrelid = \''+object+'\'::regclass \
     AND a.attnum > 0 \
 ORDER BY a.attnum';
 
-        client.sendQuery(query, 
-        function(result){
+        this._getData(id, connstr, password, query, 
+        function(data){
             columns = [];
-            for (var i=0; i<result.datasets[0].data.length; i++){
-                var row = result.datasets[0].data[i];
+            for (var i=0; i<data.length; i++){
+                var row = data[i];
                 var column = {
                     name: row[0],
                     type: row[1],
@@ -343,14 +412,10 @@ ORDER BY a.attnum';
             }
             callback(columns);
         }, 
-        function(err){
-            err_callback(id, err);
-        });
+        err_callback);
     },
 
     _getRelationPK: function(id, connstr, password, object, callback, err_callback){
-
-        var client = this.getClient(id, connstr, password);
 
         var query = " \
 SELECT conname, conindid::regclass, array_agg(b.attname ORDER BY attnum) \
@@ -360,12 +425,12 @@ WHERE conrelid = '"+object+"'::regclass \
 AND contype = 'p' \
 GROUP BY conname, conindid;";
 
-        client.sendQuery(query,
-        function(result){
-            if (result.datasets[0].data.length == 0){
+        this._getData(id, connstr, password, query,
+        function(data){
+            if (data.length == 0){
                 callback(null);
             } else {
-                var row = result.datasets[0].data[0];
+                var row = data[0];
                 var pk = {
                     pk_name: row[0],
                     ind_name: row[1],
@@ -374,15 +439,11 @@ GROUP BY conname, conindid;";
                 callback(pk);
             }
         },
-        function(err){
-            err_callback(id, err);
-        });
+        err_callback);
 
     },
 
     _getCheckConstraints: function(id, connstr, password, object, callback, err_callback){
-
-        var client = this.getClient(id, connstr, password);
 
         var query = " \
 SELECT conname, consrc \
@@ -390,14 +451,14 @@ FROM pg_constraint \
 WHERE conrelid = '"+object+"'::regclass \
 AND contype = 'c'";
 
-        client.sendQuery(query,
-        function(result){
-            if (result.datasets[0].data.length == 0){
+        this._getData(id, connstr, password, query,
+        function(data){
+            if (data.length == 0){
                 callback(null);
             } else {
                 var constraints = [];
-                for (var i=0; i<result.datasets[0].data.length; i++){
-                    var row = result.datasets[0].data[i];
+                for (var i=0; i<data.length; i++){
+                    var row = data[i];
                     constraints.push({
                         name: row[0],
                         src: row[1],
@@ -406,15 +467,11 @@ AND contype = 'c'";
                 callback(constraints);
             }
         },
-        function(err){
-            err_callback(id, err);
-        });
+        err_callback);
 
     },
 
     _getRelationIndexes: function(id, connstr, password, object, callback, err_callback){
-
-        var client = this.getClient(id, connstr, password);
 
         var query = " \
 SELECT \
@@ -437,14 +494,14 @@ WHERE \
     AND d.OID = c.relam \
 GROUP BY a.indexrelid, a.indisunique, d.amname, a.indrelid, a.indpred";
 
-        client.sendQuery(query,
-        function(result){
-            if (result.datasets[0].data.length == 0){
+        this._getData(id, connstr, password, query,
+        function(data){
+            if (data.length == 0){
                 callback(null);
             } else {
                 var indexes = [];
-                for (var i=0; i<result.datasets[0].data.length; i++){
-                    var row = result.datasets[0].data[i];
+                for (var i=0; i<data.length; i++){
+                    var row = data[i];
                     indexes.push({
                         name: row[0],
                         unique: row[1],
@@ -457,9 +514,62 @@ GROUP BY a.indexrelid, a.indisunique, d.amname, a.indrelid, a.indpred";
                 callback(indexes);
             }
         },
-        function(err){
-            err_callback(id, err);
-        });
+        err_callback);
+    },
+
+    _getTriggers: function(id, connstr, password, object, callback, err_callback){
+            var query = " \
+select t.tgname, t.oid \
+from pg_trigger t, \
+pg_class c \
+where  \
+c.oid = '"+object+"'::regclass \
+and t.tgrelid = c.oid \
+order by 1 \
+";
+            this._getData(id, connstr, password, query, 
+            function(data){
+                if (data.length > 0){
+                    var triggers = data.map(function(item){
+                        return {trigger_name: item[0], oid: item[1]};
+                    });
+                    callback(triggers);
+                } else {
+                    callback(null);
+                }
+            },
+            err_callback);
+    },
+
+    _getTrigger: function(id, connstr, password, trigger_oid, callback, err_callback){
+
+        var trigger_name = null;
+        var table = null;
+        var script = null;
+
+        var query = ' \
+select tgname, (tgrelid::regclass)::text, pg_get_triggerdef(oid) \
+from pg_trigger t \
+where t.oid = '+trigger_oid;
+
+        this._getData(id, connstr, password, query,
+        function(data){
+            if (data.length > 0){
+                trigger_name = data[0][0];
+                table = data[0][1];
+                script = data[0][2]; 
+            }
+
+            var trigger = {
+                trigger_name: trigger_name,
+                table: table,
+                script: script,
+            };
+
+            callback(trigger);
+        },
+        err_callback);
+
     },
 
     getObjectInfo: function(id, connstr, password, object, callback, err_callback){
@@ -496,45 +606,31 @@ GROUP BY a.indexrelid, a.indisunique, d.amname, a.indrelid, a.indpred";
             return;
         }
 
+        // if starts with "trigger:" find trigger
+        if (object.indexOf('trigger:') == 0){
+
+            var ret = {object_type: 'trigger', object: null, object_name: null}
+            var oid = object.split(':')[1];
+
+            this._getTrigger(id, connstr, password, oid, 
+            function(trigger){
+                ret.object = trigger;
+                ret.object_name = trigger.trigger_name;
+                callback(id, ret);
+            },
+            err_callback);
+            return;
+        }
+
         // try to find relation
         self._findRelation(id, connstr, password, object,
         function(relation){
             var ret = {object_type: "relation", object: relation, object_name: object};
 
             if (relation != null){
-                self._getRelationColumns(id, connstr, password, object,
-                function(columns){
-                    ret.object.columns = columns;
 
-                    self._getRelationPK(id, connstr, password, object,
-                    function(pk){
-                        ret.object.pk = pk;
+                callback(id, ret);
 
-                        self._getCheckConstraints(id, connstr, password, object,
-                        function(constraints){
-                            ret.object.check_constraints = constraints;
-
-                            self._getRelationIndexes(id, connstr, password, object,
-                            function(indexes){
-                                ret.object.indexes = indexes;
-
-                                callback(id, ret);
-                            },
-                            function(err){
-                                err_callback(id, err);
-                            });
-                        },
-                        function(err){
-                            err_callback(id, err);
-                        });
-                    },
-                    function(err){
-                        err_callback(id, err);
-                    });
-                },
-                function(id, err){
-                    err_callback(id, err);
-                });
             } else {
                 // relation not found, try functions
                 self._findProc(id, connstr, password, object, 
@@ -661,11 +757,27 @@ ORDER BY 1 \
 
     _get_schema_info: function(id, connstr, password, schema_name, callback, err_callback){
         var self = this;
+        var current_database = null;
         var tables = [];
         var functions = [];
+        var triggers = [];
+
+        // get current dbname
+        var get_current_database = function(cb){
+            var query = "SELECT current_database()";
+
+            self._getData(id, connstr, password, query,
+            function(data){
+                if (data.length > 0){
+                    current_database = data[0][0];
+                }
+                cb();
+            },
+            err_callback);
+        };
+
         // get tables
         var get_tables = function(cb){
-            var client = self.getClient(id, connstr, password);
             var query = " \
 select c.relname from \
 pg_class c, \
@@ -675,22 +787,18 @@ and c.relnamespace = n.oid \
 and c.relkind = 'r' \
 order by 1 \
 ";
-            client.sendQuery(query,
-            function(result){
-                if (result.datasets[0].data.length > 0){
-                    tables = result.datasets[0].data.map(function(item){return item[0];});
+            self._getData(id, connstr, password, query,
+            function(data){
+                if (data.length > 0){
+                    tables = data.map(function(item){return item[0];});
                 }
                 cb();
             },
-            function(err){
-                err_callback(id, err);
-                cb();
-            });
+            err_callback);
         }
 
         // get functions
         var get_functions = function(cb){
-            var client = self.getClient(id, connstr, password);
             var query = " \
 select p.proname from \
 pg_proc p, \
@@ -700,25 +808,23 @@ n.nspname = '"+schema_name+"' \
 and p.pronamespace = n.oid \
 order by 1  \
 ";
-            client.sendQuery(query,
-            function(result){
-                if (result.datasets[0].data.length > 0){
-                    functions = result.datasets[0].data.map(function(item){return item[0];});
+            self._getData(id, connstr, password, query,
+            function(data){
+                if (data.length > 0){
+                    functions = data.map(function(item){return item[0];});
                 }
                 cb();
             },
-            function(err){
-                err_callback(id, err);
-                cb();
-            });
+            err_callback);
             
         }
 
-        async.series([get_tables, get_functions], function(){
+        async.series([get_current_database, get_tables, get_functions], function(){
             var schema = {
                 schema_name: schema_name,
                 tables: tables,
                 functions: functions,
+                current_database: current_database,
             };
             callback(schema);
         });

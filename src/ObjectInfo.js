@@ -35,7 +35,7 @@ var ObjectInfo = React.createClass({
             var script = '';
             for (var i=0; i<this.scripts.length; i++){
                 script += this.scripts[i];
-                script += '\n---\n\n';
+                script += ';\n---\n\n';
             }
             this.editor.session.setValue(script, -1);
         }
@@ -65,27 +65,49 @@ var ObjectInfo = React.createClass({
             <span className="object-info-name">
             <a href="#" onClick={function(){self.getInfo(info.object.schema_name+'.');}}>{info.object.schema_name}</a>.{info.object.function_name}
             </span>
-            &nbsp; <a href="#" onClick={function(){Actions.newTab(self.scripts.join('\n---\n\n'));}}><span className="glyphicon glyphicon-edit" title="edit"/></a>
+            &nbsp; <a href="#" onClick={function(){Actions.newTab(self.scripts.join(';\n---\n\n'));}}><span className="glyphicon glyphicon-edit" title="edit"/></a>
             <hr/>
             <div key={div_id} id={div_id}></div>
         </div>
         );
     },
 
+    render_trigger_info: function(info){
+        var self = this;
+        this.scripts = [info.object.script];
+        var div_id = "script_"+self.props.eventKey;
+
+        return (<div className="object-info-div">
+            Trigger &nbsp;
+            <span className="object-info-name"> {info.object_name} on &nbsp;
+            <a href="#" onClick={function(){self.getInfo(info.object.table);}}>{info.object.table}</a>
+            </span>
+            &nbsp; <a href="#" onClick={function(){Actions.newTab(self.scripts.join(';\n---\n\n'));}}><span className="glyphicon glyphicon-edit" title="edit"/></a>
+            <hr/>
+            <div key={div_id} id={div_id}></div>
+        </div>
+        );
+
+    },
+
     render_schema_info: function(info){
         var self = this;
+
         var tables = info.object.tables.map(function(item, idx){
             var id = "table_"+self.props.eventKey+"_"+idx;
             var full_object_name = info.object_name+'.'+item; // schema.table
             return <li key={id}><a href="#" onClick={function(){self.getInfo(full_object_name)}}>{item}</a></li>
         });
+
         var functions = info.object.functions.map(function(item, idx){
             var id = "function_"+self.props.eventKey+"_"+idx;
-            var full_object_name = info.object_name+'.'+item; // schema.table
+            var full_object_name = info.object_name+'.'+item; // schema.function
             return <li key={id}><a href="#" onClick={function(){self.getInfo(full_object_name)}}>{item}</a></li>
         });
 
-        return (<div className="object-info-div">Schema <span className="object-info-name">{info.object_name}</span>
+        return (<div className="object-info-div">Schema <span className="object-info-name">{info.object_name} </span>
+                at <a href="#" onClick={function(){self.getInfo()}}>{info.object.current_database}</a>
+                <hr/>
             <div>Tables:
                 <ul>
                     {tables}
@@ -115,6 +137,7 @@ var ObjectInfo = React.createClass({
             return <li key={id}>{item}</li>
         });
         return (<div className="object-info-div">Database <span className="object-info-name">{info.object_name}</span>
+            <hr/>
             <div>Schemas:
                 <ul>
                     {schemas}
@@ -268,6 +291,20 @@ var ObjectInfo = React.createClass({
                 var indexes = null;
             }
 
+            if (info.object.triggers != null){
+                var triggers = info.object.triggers.map(function(item, idx){
+                    var id = 'trigger_'+self.eventKey+'+'+idx;
+                    return <li key={id}><a href="#" onClick={function(){self.getInfo('trigger:'+item.oid);}}>{item.trigger_name}</a></li>;
+                });
+
+                triggers = <div>Triggers:<ul>
+                    {triggers} 
+                </ul></div>;
+
+            } else {
+                var triggers = null;
+            }
+
 
             return (
             <div className="object-info-div"> 
@@ -285,6 +322,7 @@ var ObjectInfo = React.createClass({
                 {pk}
                 {indexes}
                 {check_constraints}
+                {triggers}
                 <p> Records: <span className="ace_constant">{info.object.records}</span></p>
                 <p> Size: <span className="ace_constant">{info.object.size}</span> </p>
                 <p> Total Size: <span className="ace_constant">{info.object.total_size}</span></p>
@@ -295,6 +333,9 @@ var ObjectInfo = React.createClass({
 
         } else if (info.object_type == 'schema'){
             return this.render_schema_info(info);
+
+        } else if (info.object_type == 'trigger'){
+            return this.render_trigger_info(info);
 
         } else {
             return (
