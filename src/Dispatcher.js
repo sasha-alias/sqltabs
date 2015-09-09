@@ -179,6 +179,7 @@ AppDispatcher.register( function(payload) {
 
         case 'about':
             TabsStore.trigger('about');
+            break;
 
         case 'get-object-info':
             connstr = TabsStore.getConnstr(TabsStore.selectedTab);
