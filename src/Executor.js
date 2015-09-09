@@ -225,7 +225,21 @@ and n.oid = c.relnamespace;";
                     err_callback);
                 };
 
-                async.series([get_columns, get_pk, get_check_constraints, get_indexes, get_triggers],
+                var get_view_def = function(cb){
+                    if (relation.relkind == 'v'){
+                        var query = "select * from pg_get_viewdef('"+object+"')";
+                        self._getData(id, connstr, password, query,
+                        function(script){
+                            relation.script = 'CREATE OR REPLACE VIEW '+object+' AS \n'+script;
+                            cb();
+                        },
+                        err_callback);
+                    } else {
+                        cb();
+                    }
+                }
+
+                async.series([get_columns, get_pk, get_check_constraints, get_indexes, get_triggers, get_view_def],
                 function(){
                     callback(relation);
                 }
@@ -658,95 +672,81 @@ where t.oid = '+trigger_oid;
         var self = this;
 
         var current_database = null;
+        var version = null;
         var schemas = [];
         var databases = [];
         var roles = [];
 
         // get current dbname
         var get_current_database = function(cb){
-            var client = self.getClient(id, connstr, password);
-            var query = "SELECT current_database()";
+            var query = "SELECT current_database(), version()";
 
-            client.sendQuery(query,
-            function(result){
-                if (result.datasets[0].data.length > 0){
-                    current_database = result.datasets[0].data[0][0];
+            self._getData(id, connstr, password, query,
+            function(data){
+                if (data.length > 0){
+                    current_database = data[0][0];
+                    version = data[0][1];
                 }
                 cb();
             },
-            function(err){
-                err_callback(id, err);
-                cb();
-            });
+            err_callback);
         };
 
         // get schemas
         var get_schemas = function(cb){
-            var client = self.getClient(id, connstr, password);
             var query = " \
 SELECT nspname AS schema \
 FROM pg_namespace \
 ORDER BY 1 \
 ";
-
-            client.sendQuery(query,
-            function(result){
-                if (result.datasets[0].data.length > 0){
-                    schemas = result.datasets[0].data.map(function(item){return item[0];});
+            self._getData(id, connstr, password, query,
+            function(data){
+                if (data.length > 0){
+                    schemas = data.map(function(item){return item[0];});
                 }
                 cb();
             },
-            function(err){
-                err_callback(id, err);
-                cb();
-            });
+            err_callback);
         }
 
         // get roles
         var get_roles = function(cb){
-            var client = self.getClient(id, connstr, password);
             var query = " \
 SELECT rolname AS role \
 FROM pg_roles \
 ORDER BY 1 \
 ";
-            client.sendQuery(query,
-            function(result){
-                if (result.datasets[0].data.length > 0){
-                    roles = result.datasets[0].data.map(function(item){return item[0];});
+            self._getData(id, connstr, password, query,
+            function(data){
+                if (data.length > 0){
+                    roles = data.map(function(item){return item[0];});
                 }
                 cb();
             },
-            function(err){
-                err_callback(id, err);
-                cb();
-            });
+            err_callback);
         }
 
         // get databases
         var get_databases = function(cb){
-            var client = self.getClient(id, connstr, password);
             var query = " \
 SELECT datname AS db \
 FROM pg_database \
 ORDER BY 1 \
 ";
-            client.sendQuery(query,
-            function(result){
-                if (result.datasets[0].data.length > 0){
-                    databases = result.datasets[0].data.map(function(item){return item[0];});
+            self._getData(id, connstr, password, query,
+            function(data){
+                if (data.length > 0){
+                    databases = data.map(function(item){return item[0];});
                 }
                 cb();
             },
-            function(err){
-                err_callback(id, err);
-                cb();
-            });
+            err_callback);
         }
 
         async.series([get_current_database, get_schemas, get_roles, get_databases], function(){
             var database = {
                 dbname: current_database,
+                version: version,
                 schemas: schemas,
                 roles: roles,
                 databases: databases,
@@ -760,7 +760,7 @@ ORDER BY 1 \
         var current_database = null;
         var tables = [];
         var functions = [];
-        var triggers = [];
+        var views = [];
 
         // get current dbname
         var get_current_database = function(cb){
@@ -800,7 +800,7 @@ order by 1 \
         // get functions
         var get_functions = function(cb){
             var query = " \
-select p.proname from \
+select distinct p.proname from \
 pg_proc p, \
 pg_namespace n \
 where \
@@ -819,11 +819,30 @@ order by 1  \
             
         }
 
-        async.series([get_current_database, get_tables, get_functions], function(){
+        // get views
+        var get_views = function(cb){
+            var query = " \
+select viewname from \
+pg_views \
+where schemaname = '"+schema_name+"' \
+order by 1";
+
+            self._getData(id, connstr, password, query,
+            function(data){
+                if (data.length > 0){
+                    views = data.map(function(item){return item[0];});
+                }
+                cb();
+            },
+            err_callback);
+        }
+
+        async.series([get_current_database, get_tables, get_functions, get_views], function(){
             var schema = {
                 schema_name: schema_name,
                 tables: tables,
                 functions: functions,
+                views: views,
                 current_database: current_database,
             };
             callback(schema);
