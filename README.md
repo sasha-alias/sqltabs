@@ -9,20 +9,16 @@ In order to make a custom build follow the following steps.
 1. Install [npm](https://www.npmjs.com).
 
 2. Install [electron](http://electron.atom.io)
-
 ``` bash
     npm install electron-prebuilt -g
 ```
 
 3. Install jsx
-
 ``` bash
     npm install -g jsx
 ```
 
 4. Run the following script (beforehand replace value "0.25.2" in the script with electron version you have):
-
-
 ``` bash
 export npm_config_disturl=https://atom.io/download/atom-shell
 export npm_config_target=0.25.2
@@ -34,7 +30,6 @@ jsx src/ build/
 ```
 
 5. Run application:
-
 ``` bash
 electron .
 ```
