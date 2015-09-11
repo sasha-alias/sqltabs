@@ -17,6 +17,7 @@ In order to make a custom build follow the following steps.
         npm install -g jsx
 
 4. Run the following script (beforehand replace value "0.25.2" in the script with electron version you have):
+
         export npm_config_disturl=https://atom.io/download/atom-shell
         export npm_config_target=0.25.2
         export npm_config_arch=x64
