@@ -12,7 +12,7 @@
     "c3": "0.4.*",
     "flux": "2.0.1",
     "jquery": "2.1.3",
-    "libpq": ">=1.5.1",
+    "libpq": "git+https://github.com/sasha-alias/node-libpq.git",
     "lowdb": "0.7.2",
     "marked": "^0.3.3",
     "microevent": "1.0.0",

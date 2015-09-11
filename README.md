@@ -1,45 +1,34 @@
 # PGTABS
 
-Tabbed SQL interface for Postrgesql.
+Rich SQL console for Postgresql. Home [www.sqltabs.com](http://www.sqltabs.com)
 
 ![](/pgtabs.png?raw=true)
 
 ## Building
-Project is under development. There are no platform builds provided yet.
 
 In order to make a custom build follow the following steps.
 
-Install [npm](https://www.npmjs.com).
-Install [electron](http://electron.atom.io)
+1. Install [npm](https://www.npmjs.com).
+
+2. Install [electron](http://electron.atom.io)
 
     npm install electron-prebuilt -g
 
-Install jsx
+3. Install jsx
 
     npm install -g jsx
 
-Run (replace 0.25.2 with electron version you have):
+4. Run the following script (beforehand replace value "0.25.2" in the script with electron version you have):
 
-    git clone https://github.com/sasha-alias/pgtabs
-    cd pgtabs
+    export npm_config_disturl=https://atom.io/download/atom-shell
+    export npm_config_target=0.25.2
+    export npm_config_arch=x64
+    git clone https://github.com/sasha-alias/sqltabs
+    cd sqltabs
     npm install
-    npm install --save-dev electron-rebuild
-    ./node_modules/.bin/electron-rebuild --version 0.25.2
     jsx src/ build/
 
+5. Run application:
+
     electron .
-
-## Release notes
-
-### v0.2.0
-
-- Changeable font size
-- Text search in editor
-- Display server notices (RAISE NOTICE/WARNING)
-- About window
-
-### v0.1.0
-
-first basic release
-
 
