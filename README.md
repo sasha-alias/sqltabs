@@ -12,31 +12,30 @@ In order to run SQL Tabs from source code follow the next steps:
 
         npm install electron-prebuilt -g
 
-3. Install jsx - react javascript extension the application written with:
+3. Install jsx - react javascript extension the application is written with:
 
         npm install -g jsx
 
-4. Get the code and install dependencies:
+4. Get the code, install dependencies and build the application:
 
         git clone https://github.com/sasha-alias/sqltabs
         cd sqltabs
         npm install --target=$(electron -v | sed s/v//)
 
-5. Build the application itself:
-
-        jsx src/ build/
-
-6. Run the application:
+5. Run the application:
 
         electron .
 
 
-When you make changes in the source code under *src/* directory you need to repeat the last 2 steps.
+When you make changes in the source code under *src/* directory it's enough to rebuild only application with the command:
+
+        jsx src/ build/
+
 During the development it's convenient to have launched in the separate session the following:
 
         jsx --watch src/ build/
 
-Thus you can skip a manual execution of step 5. The code will be rebuild automatically on changes.
+Thus you can skip a manual rebuild. The code will be rebuild automatically on changes.
 
 
 Contributions are welcome.

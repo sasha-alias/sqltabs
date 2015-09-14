@@ -29,5 +29,8 @@
   },
   "devDependencies": {
     "electron-rebuild": "^0.1.4"
+  },
+  "scripts": {
+    "postinstall": "jsx src/ build/"
   }
 }
