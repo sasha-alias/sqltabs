@@ -27,3 +27,11 @@
 .omitted-message{
     color: rgb(147, 15, 128);
 }
+
+.hsplitter{
+    background-color: #dcdcdc;
+}
+
+.vsplitter{
+    background-color: #dcdcdc;
+}

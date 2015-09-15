@@ -56,7 +56,7 @@ var TabContent = React.createClass({
 
                 <TabToolbar eventKey={this.props.eventKey}/>
 
-                <TabSplit>
+                <TabSplit eventKey={this.props.eventKey}>
 
                     <Editor name={'editor-'+this.props.eventKey} theme={this.state.theme} eventKey={this.props.eventKey}/>
 

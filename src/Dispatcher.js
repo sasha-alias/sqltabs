@@ -258,6 +258,10 @@ AppDispatcher.register( function(payload) {
             TabsStore.trigger('new-version-available');
             break;
 
+        case 'switch-view':
+            TabsStore.trigger('switch-view-'+TabsStore.selectedTab);
+            break;
+
     }
     return true; // Needed for Flux promise resolution
 }); 

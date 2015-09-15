@@ -292,6 +292,12 @@ var Actions = {
             version: version,
         });
     },
+
+    switchView: function(){
+        AppDispatcher.dispatch({
+            eventName: 'switch-view',
+        });
+    }
 }
 
 module.exports = Actions;

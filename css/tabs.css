@@ -76,7 +76,20 @@ body{
 }
 
 .tab-split-container{
-    width: 100%;
+    display: inline-block; 
+}
+
+.hsplitter {
+    cursor: ns-resize;
+    height: 3px;
+    width: 100;
+}
+
+.vsplitter {
+    display: inline-block; 
+    cursor: ew-resize;
+    width: 3px;
+    height: 100%;
 }
 
 .tab-editor {
@@ -84,11 +97,6 @@ body{
     width: 100%;
     overflow: scroll;
     border:1px solid;
-}
-
-.hsplitter {
-    cursor: ns-resize;
-    height: 3px;
 }
 
 .output-console {
