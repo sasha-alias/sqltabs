@@ -45,6 +45,10 @@ SignalsDispatcher.register(function(payload){
         case 'object-info':
             TabsStore.trigger('object-info-'+TabsStore.selectedTab);
             break
+        case 'editor-resize':
+            TabsStore.trigger('editor-resize');
+            break;
+
     };
     return true;
 });
@@ -132,10 +136,6 @@ AppDispatcher.register( function(payload) {
                 payload.err_callback
             );
             TabsStore.trigger('change');
-
-        case 'editor-resize':
-            TabsStore.trigger('editor-resize');
-            break;
 
         case 'run-query':
             connstr = TabsStore.getConnstr(payload.key);

@@ -224,7 +224,10 @@ if (process.platform == 'darwin'){
              accelerator: "Command+[",
              click: function(){Actions.previosTab();},
             },
-            {label: "Switch Tab View", click: function(){Actions.switchView();}},
+            {label: "Switch Tab View", 
+             accelerator: "Command+\\",
+             click: function(){Actions.switchView();}
+            },
         ]
         },
     ];

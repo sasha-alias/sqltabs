@@ -92,6 +92,7 @@ var TabSplit = React.createClass({
                 type: 'horizontal'
             });
         }
+        TabActions.resize(this.props.eventKey);
     },
 
     mouseDownHandler: function(e){

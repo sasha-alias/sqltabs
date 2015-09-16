@@ -129,7 +129,7 @@ var Actions = {
     },
 
     resize: function(key){
-        AppDispatcher.dispatch({
+        SignalsDispatcher.dispatch({
             eventName: 'editor-resize',
             key: key,
         });
