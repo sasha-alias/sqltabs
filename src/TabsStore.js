@@ -47,10 +47,15 @@ var Tab = function(id, connstr){
             var ret = this.filename;
         } else {
             if (typeof(this.connstr) != 'undefined') {
-                    if (this.connstr.length > 30){
-                        var ret = '[...'+this.connstr.substr(this.connstr.length-20)+' ]';
+
+                    if (this.connstr.indexOf('---') != -1){ // show alias
+                        var ret = '[ '+this.connstr.match(/---\s*(.*)/)[1]+' ]';
                     } else {
-                        var ret = '[ '+this.connstr+' ]';
+                        if (this.connstr.length > 30){ // cut too long connstr
+                            var ret = '[...'+this.connstr.substr(this.connstr.length-20)+' ]';
+                        } else {
+                            var ret = '[ '+this.connstr+' ]';
+                        }
                     }
             } else {
                 return '';

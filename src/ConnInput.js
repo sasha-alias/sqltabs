@@ -141,8 +141,21 @@ var ConnInput = React.createClass({
         var self = this;
 
         var history = this.state.history.map(function(item, i){
+
+            var meta_start = item.indexOf('---'); // extension of connect string: user:port@db --- alias of connect string
+            if (meta_start != -1){
+                var conn_str = item.substr(0, meta_start);
+                var alias = item.match(/---\s*(.*)/)[1]+':';
+            } else {
+                var conn_str = item;
+                var alias = null;
+            }
             var hilighted = (i==self.state.hilight)? ' conn_history_item_active' : '';
-            return <li data-idx={i} onMouseOver={self.itemMouseOverHandler} onClick={self.pickHandler} className={"conn_history_item"+hilighted} key={'connhist'+i}>{item}</li>;
+            return <li data-idx={i} 
+                onMouseOver={self.itemMouseOverHandler} 
+                onClick={self.pickHandler} 
+                className={"conn_history_item"+hilighted} 
+                key={'connhist'+i}><b>{alias}</b> {conn_str}</li>;
         });
 
         if (this.state.active && TabsStore.connectionHistory.length > 0){

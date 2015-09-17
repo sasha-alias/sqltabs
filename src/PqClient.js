@@ -174,6 +174,10 @@ var Response = function(query){
 // normalizes connect string: ensures protocol, and substitutes password
 var normalizeConnstr = function(connstr, password){
     if (connstr){
+        var meta_start = connstr.indexOf('---'); // cut sqltabs extension of connect string
+        if (meta_start != -1){
+            connstr = connstr.substr(0, meta_start);
+        }
         if (connstr.lastIndexOf('postgres://', 0) !== 0) {
             connstr = 'postgres://'+connstr;
             parsed = url.parse(connstr);
@@ -185,6 +189,7 @@ var normalizeConnstr = function(connstr, password){
                 (parsed.path == null) ? '' : parsed.path
             )
         }
+
         return connstr;
     }
 };

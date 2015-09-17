@@ -115,7 +115,7 @@ var HistoryCarousel = React.createClass({
     },
 
     changeThemeHandler: function(){
-        if (typeof(this.editor) != 'undefined'){
+        if (typeof(this.editor) != 'undefined' && this.editor != null){
             this.editor.setTheme('ace/theme/' + TabsStore.getEditorTheme());
         }
     },
