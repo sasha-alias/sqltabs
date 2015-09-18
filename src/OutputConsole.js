@@ -165,7 +165,7 @@ var OutputConsole = React.createClass({
             var id = this.state.info.object_name;
         }
         return (
-            <div className="output-console">
+            <div id={"output-console-"+this.props.eventKey} className="output-console">
                 <ObjectInfo key={id} info={this.state.info} eventKey={this.props.eventKey}/>
             </div>
         );

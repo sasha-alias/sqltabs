@@ -6,6 +6,10 @@ function openExternal(url){
     require('shell').openExternal(url);
 }
 
+function scrollTo(div, to){
+    return $(div).animate({scrollTop: $(to).position().top - $(div).parent().offset().top}, 300);
+}
+
 function mount_charts(){
 
     $("input[type=hidden]").each( function(idx, item){

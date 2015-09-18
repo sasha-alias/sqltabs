@@ -90,3 +90,18 @@ table {
     background-color: #5e5e5e;
     color: #ffffff
 }
+
+.nav-pills > li > a{
+    background-color: #5BC0DE;
+    background-image: none;
+}
+
+.nav-pills > li > a:focus{
+    background-color: #5BC0DE;
+    background-image: none;
+}
+
+.nav-pills > li > a:hover{
+    background-color: #5BC0DE;
+    background-image: none;
+}

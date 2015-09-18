@@ -271,3 +271,7 @@ body{
 .cloud-error{
     word-break: break-all;
 }
+
+.schema-nav{
+    padding-top: 10px;
+}

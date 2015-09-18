@@ -19,6 +19,7 @@ var TabsStore = require('./TabsStore');
 var Actions = require('./Actions');
 var React = require('react');
 var Ace = require('brace');
+var $ = require('jquery');
 require('brace/mode/pgsql');
 require('brace/theme/chrome');
 require('brace/theme/idle_fingers');
@@ -128,20 +129,38 @@ var ObjectInfo = React.createClass({
             return <li key={id}><a href="#" onClick={function(){self.getInfo(full_object_name)}}>{item}</a></li>
         });
 
+        var gotop = <a href="#" onClick={function(){scrollTo(
+                    '#output-console-'+self.props.eventKey, "#output-console-"+self.props.eventKey
+                    )}}><span className="glyphicon glyphicon-arrow-up"/></a>;
+
         return (<div className="object-info-div">Schema <span className="object-info-name">{info.object_name} </span>
                 at <a href="#" onClick={function(){self.getInfo()}}>{info.object.current_database}</a>
+
+                <ul className="schema-nav nav nav-pills">
+                  <li role="presentation"><a href="#" onClick={function(){
+                      scrollTo('#output-console-'+self.props.eventKey, '#tables-'+self.props.eventKey);
+                  }}> Tables ({tables.length}) </a></li>
+
+                  <li role="presentation"><a href="#" onClick={function(){
+                      scrollTo('#output-console-'+self.props.eventKey, '#functions-'+self.props.eventKey);
+                  }}> Functions ({functions.length}) </a></li>
+
+                  <li role="presentation"><a href="#" onClick={function(){
+                      scrollTo('#output-console-'+self.props.eventKey, '#views-'+self.props.eventKey);
+                  }}> Views ({views.length}) </a></li>
+                </ul>
                 <hr/>
-            <div>Tables:
+            <div id={"tables-"+this.props.eventKey}> {gotop} Tables:
                 <ul>
                     {tables}
                 </ul>
             </div>
-            <div>Functions:
+            <div id={"functions-"+this.props.eventKey}> {gotop} Functions:
                 <ul>
                     {functions}
                 </ul>
             </div>
-            <div>Views:
+            <div id={"views-"+this.props.eventKey}> {gotop} Views:
                 <ul>
                     {views}
                 </ul>
