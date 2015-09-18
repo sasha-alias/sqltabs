@@ -240,11 +240,21 @@ body{
 }
 
 .history-header td{
-    text-align: right;
+    text-align: center;
 }
 
 .history-header tr td:first-child{
     text-align: left;
+}
+
+.history-header tr td:last-child{
+    width: 80px;
+    padding-left: 20px;
+
+}
+
+.history-filter{
+    width: 100%;
 }
 
 .markdown-block{

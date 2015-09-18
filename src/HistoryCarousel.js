@@ -30,7 +30,7 @@ require('brace/keybinding/vim');
 var HistoryCarousel = React.createClass({
 
     getInitialState: function(){
-        return {hidden: true, idx: 0}
+        return {hidden: true, idx: 0, "filter": "", found: true}
     },
 
     componentDidMount: function(){
@@ -64,6 +64,11 @@ var HistoryCarousel = React.createClass({
             if (item != null){
                 this.editor.session.setValue(item.query, -1);
             }
+
+            if (this.state.filter != ""){
+                this.editor.findAll(this.state.filter, {caseSensitive: false});
+            }
+
         }
     },
 
@@ -80,38 +85,141 @@ var HistoryCarousel = React.createClass({
         });
     },
 
+    cleanFilter: function(){
+        var history_filter = React.findDOMNode(this.refs.history_filter);
+        history_filter.value = "";
+        this.setState({filter: "", idx: 0, found: true});
+    },
+
     hide: function(){
         React.findDOMNode(document.body).removeEventListener("keydown", this.keyPressHandler);
         this.setState({hidden: true});
         this.editor = null;
     },
 
-    keyPressHandler: function(e){
-        if (e.keyCode == 38){ // up
+    escHandler: function(){
+        if (this.state.filter != ""){
+            this.cleanFilter(); 
+            return;
+        }
+        this.hide();
+    },
+
+    goUp: function(next){ 
+        if (this.state.filter == ""){ // just go to next item
             var next_item  = History.get(this.state.idx+1);
             if (next_item != null){
                 this.setState({idx: this.state.idx+1}); 
             }
+        } else { // go to next item matching a filter
+            if (this.state.idx < History.length()){
+                if (next){ // start from next item
+                    var idx = this.state.idx+1; 
+                } else { // start from current item
+                    var idx = this.state.idx; 
+                }
+
+                var found = false;
+                while (idx < History.length()){
+                    var item = History.get(idx); 
+                    var filtered = item.query.search(new RegExp(this.state.filter, "i"));
+
+                    if (filtered == -1){
+                        idx++;
+                    } else {
+                        found = true;
+                        break;
+                    }
+                }
+                if (found){
+                    this.setState({found: true, idx: idx});
+                } else {
+                    this.setState({found: false});
+                }
+            }
+        }
+    },
+
+    goDown: function(){
+        if (this.state.filter == ""){
+            var prev_item  = History.get(this.state.idx-1);
+            if (prev_item != null){
+                this.setState({idx: this.state.idx-1}); 
+            }
+        } else {
+            if (this.state.idx > 0){
+                var idx = this.state.idx-1;
+                var found = false;
+                while (idx >= 0){
+                    var item = History.get(idx);
+                    var filtered = item.query.search(new RegExp(this.state.filter, "i"));
+
+                    if (filtered == -1){
+                        idx--;
+                    } else {
+                        found = true;
+                        break;
+                    }
+                }
+                if (found){
+                    this.setState({found: true, idx: idx});
+                } else {
+                    this.setState({found: false});
+                }
+            }
+        }
+    },
+
+    pick: function(){
+        Actions.pasteHistoryItem(this.state.idx);
+        this.cleanFilter();
+        this.hide();
+    },
+
+    keyPressHandler: function(e){
+        if (e.keyCode == 38){ // up
+            this.goUp(true);
             e.preventDefault();
             e.stopPropagation();
             return;
         }
         if (e.keyCode == 40){ // down
-            var prev_item  = History.get(this.state.idx-1);
-            if (prev_item != null){
-                this.setState({idx: this.state.idx-1}); 
-            }
+            this.goDown();
             e.preventDefault();
             e.stopPropagation();
             return;
         }
         if (e.keyCode == 13){ // enter
-            Actions.pasteHistoryItem(this.state.idx);
             e.preventDefault();
             e.stopPropagation();
-            this.hide();
+            this.pick();
             return;
         }
+
+        // filter
+        var charStr = String.fromCharCode(e.keyCode);
+        if (this.state.filter == "" && /[a-z0-9]/i.test(charStr)) {
+            var history_filter = React.findDOMNode(this.refs.history_filter);
+            history_filter.focus();
+        }
+
+    },
+
+    searchKeyHandler: function(e){
+        if (e.keyCode == 13){ // enter
+            e.preventDefault();
+            e.stopPropagation();
+            this.pick(true);
+            return;
+        }
+    },
+
+    filterChangeHandler: function(){
+        var history_filter = React.findDOMNode(this.refs.history_filter);
+        var filter = history_filter.value;
+        this.setState({filter: filter}, function(){
+            this.goUp(false);
+        });
     },
 
     changeThemeHandler: function(){
@@ -132,6 +240,13 @@ var HistoryCarousel = React.createClass({
                 var time = d.toLocaleTimeString();
                 var date = d.toLocaleDateString();
             } else {
+
+                if (this.state.filter != ""){
+                    var filter = <p>Filter: <b>{this.state.filter}</b></p>
+                } else {
+                    var filter = null;
+                }
+
                 return ( 
                 <div className="static-modal"> 
 
@@ -140,11 +255,12 @@ var HistoryCarousel = React.createClass({
                       backdrop={false}
                       animation={false}
                       container={document.body}
-                      onRequestHide={this.hide}
+                      onRequestHide={this.escHandler}
                       >
 
                       <div className='modal-body'>
-                      <p> Queries history is empty </p>
+                      <p> No history queries found </p>
+                      {filter}
                       </div>
 
                     </Modal>
@@ -167,6 +283,12 @@ var HistoryCarousel = React.createClass({
                     </span>;
             }
 
+            if (this.state.found){
+                var found = null;
+            } else {
+                var found = <div className="alert alert-info">no more results found</div>;
+            }
+
             return (
             <div className="static-modal"> 
 
@@ -175,7 +297,7 @@ var HistoryCarousel = React.createClass({
                   backdrop={false}
                   animation={false}
                   container={document.body}
-                  onRequestHide={this.hide}
+                  onRequestHide={this.escHandler}
                   >
 
                   <div className='modal-body'>
@@ -185,9 +307,15 @@ var HistoryCarousel = React.createClass({
                       <span>{date}  </span>
                       </td>
                       <td>
+                      <input className="history-filter" type="text" onChange={this.filterChangeHandler} placeholder="filter" ref="history_filter" onKeyDown={this.searchKeyHandler}></input>
+                      </td>
+                      <td>
                       {arrows}
-                      </td></tr>
+                      </td>
+                      </tr>
                       </table>
+                      <hr/>
+                      {found}
                       <div id="history_view" className="history-view">
                       </div>
                   </div>
