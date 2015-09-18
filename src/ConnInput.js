@@ -155,7 +155,7 @@ var ConnInput = React.createClass({
                 onMouseOver={self.itemMouseOverHandler} 
                 onClick={self.pickHandler} 
                 className={"conn_history_item"+hilighted} 
-                key={'connhist'+i}><b>{alias}</b> {conn_str}</li>;
+                key={'connhist'+i}><span className="conn_item_alias">{alias}</span> {conn_str}</li>;
         });
 
         if (this.state.active && TabsStore.connectionHistory.length > 0){

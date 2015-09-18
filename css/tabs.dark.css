@@ -45,6 +45,10 @@
     color: rgb(240, 240, 240);
 }
 
+.conn_item_alias{
+    color: #5BC0DE;
+}
+
 .ace_comment{
     font-style: italic;
     color: #BC9458;
@@ -80,4 +84,9 @@ table {
 
 .hsplitter {
     background-color: #5e5e5e;
+}
+
+.history-filter{
+    background-color: #5e5e5e;
+    color: #ffffff
 }

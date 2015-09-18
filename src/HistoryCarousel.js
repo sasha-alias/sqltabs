@@ -307,7 +307,7 @@ var HistoryCarousel = React.createClass({
                       <span>{date}  </span>
                       </td>
                       <td>
-                      <input className="history-filter" type="text" onChange={this.filterChangeHandler} placeholder="filter" ref="history_filter" onKeyDown={this.searchKeyHandler}></input>
+                      <input className="history-filter form-control" type="text" onChange={this.filterChangeHandler} placeholder="filter" ref="history_filter" onKeyDown={this.searchKeyHandler}></input>
                       </td>
                       <td>
                       {arrows}

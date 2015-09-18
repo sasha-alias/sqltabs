@@ -171,6 +171,10 @@ body{
     padding-left: 10px;
 }
 
+.conn_item_alias{
+    font-weight: bold;
+}
+
 .c3-legend-item{
     font-size: inherit;
 }
@@ -255,6 +259,9 @@ body{
 
 .history-filter{
     width: 100%;
+    font-weight: bold;
+    font-size: inherit;
+    min-height: inherit;
 }
 
 .markdown-block{
