@@ -60,17 +60,28 @@ var OutputConsole = React.createClass({
         TabsStore.unbind('object-info-received-'+this.props.eventKey, this.objectInfoReceived);
     },
 
+    tick: function(){
+        var time = Math.round((this.state.executing + 0.1)*10)/10;
+        this.setState({message: "# Executing ... "+time+"s", executing: time,});
+    },
+
     queryStarted: function(){
-        this.setState({updatable: true});   // first make component updatable
-        this.setState({                     // second change state so it's get rerendered
-            message: "#Executing ...", 
-            result: null,
-            error: null,
-            info: null,
-        }); 
+        this.timer = setInterval(this.tick, 100);
+        this.setState({updatable: true}, function(){    // first make component updatable
+            this.setState({                             // second change state so it's get rerendered
+                message: "# Executing ...", 
+                result: null,
+                error: null,
+                info: null,
+                executing: 0,
+            }); 
+        }
+        );  
     },
 
     queryFinished: function(){
+        clearInterval(this.timer);
+
         this.setState({
             message: null,
             result: TabsStore.getResult(this.props.eventKey), 
@@ -81,6 +92,7 @@ var OutputConsole = React.createClass({
     },
 
     queryError: function(){
+        clearInterval(this.timer);
         this.setState({error: TabsStore.getError(this.props.eventKey)});
     },
 
@@ -89,14 +101,16 @@ var OutputConsole = React.createClass({
     },
 
     objectInfoReceived: function(){
-        this.setState({updatable: true});   // first make component updatable
-        this.setState({
-            message: null,
-            result: null,
-            error: null,
-            info: TabsStore.getObjectInfo(),
-            updatable: false,
-        });
+        clearInterval(this.timer);
+        this.setState({updatable: true}, function(){ // first make component updatable
+            this.setState({
+                message: null,
+                result: null,
+                error: null,
+                info: TabsStore.getObjectInfo(),
+                updatable: false,
+            });
+        });   
     },
 
     getRenderer: function(query){

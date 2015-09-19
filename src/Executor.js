@@ -158,7 +158,7 @@ var Executor = {
         query = "select n.nspname, c.relname, c.relkind, \
 pg_size_pretty(pg_relation_size(c.oid)) size, \
 pg_size_pretty(pg_total_relation_size(c.oid)) total_size, \
-reltuples \
+reltuples::bigint \
 from  \
 pg_class c, \
 pg_namespace n \
