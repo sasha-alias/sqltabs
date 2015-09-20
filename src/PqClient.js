@@ -50,6 +50,15 @@ var Client = function(connstr, password){
         return self.pq.cancel();
     };
 
+    this.silentCancel = function(){
+        self.callback = function(){};
+        self.cancel();
+    };
+
+    this.isBusy = function(){
+        return self.pq.isBusy();
+    };
+
     this.raiseError = function(err){
         self.error = true;
         self.finished = true;
@@ -176,7 +185,7 @@ var normalizeConnstr = function(connstr, password){
     if (connstr){
         var meta_start = connstr.indexOf('---'); // cut sqltabs extension of connect string
         if (meta_start != -1){
-            connstr = connstr.substr(0, meta_start);
+            connstr = connstr.substr(0, meta_start).trim();
         }
         if (connstr.lastIndexOf('postgres://', 0) !== 0) {
             connstr = 'postgres://'+connstr;

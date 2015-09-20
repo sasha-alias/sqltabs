@@ -66,7 +66,9 @@ var OutputConsole = React.createClass({
     },
 
     queryStarted: function(){
-        this.timer = setInterval(this.tick, 100);
+        if (typeof(this.timer) != 'undefined'){
+            clearInterval(this.timer);
+        }
         this.setState({updatable: true}, function(){    // first make component updatable
             this.setState({                             // second change state so it's get rerendered
                 message: "# Executing ...", 
@@ -74,6 +76,8 @@ var OutputConsole = React.createClass({
                 error: null,
                 info: null,
                 executing: 0,
+            }, function(){
+                this.timer = setInterval(this.tick, 100);
             }); 
         }
         );  

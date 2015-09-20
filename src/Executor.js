@@ -9,6 +9,11 @@ var Executor = {
 
         if (id in Clients && Clients[id].connstr == connstr){
             var client = Clients[id];
+            if (client.isBusy()){ // when previous query is running
+                client.silentCancel(); // just drop it
+                var client = new PqClient(connstr, password); // and get new client, so async errors won't come in
+                Clients[id] = client;
+            }
             client.setPassword(password);
         } else {
             var client = new PqClient(connstr, password);
@@ -76,9 +81,9 @@ var Executor = {
 
         var client = this.getClient(id, connstr, password);
 
-        client.sendQuery("select version()", 
+        client.sendQuery("select 0 as connected where 1=0", 
             function(result){
-                callback(id, result);
+                callback(id, [result]);
             }, 
             function(err){
                 if (err.message.indexOf("no password supplied")>-1){
