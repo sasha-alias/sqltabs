@@ -23,6 +23,7 @@ var TabSplit = require('./TabSplit');
 var Editor = require('./Editor');
 var TabToolbar = require('./TabToolbar');
 var SearchBox = require('./SearchBox');
+var Project = require('./Project');
 
 var TabContent = React.createClass({
 
@@ -56,12 +57,16 @@ var TabContent = React.createClass({
 
                 <TabToolbar eventKey={this.props.eventKey}/>
 
-                <TabSplit eventKey={this.props.eventKey}>
+                <TabSplit eventKey={this.props.eventKey} type="vertical" h1="25%">
+                    <Project eventKey={this.props.eventKey}/>
 
-                    <Editor name={'editor-'+this.props.eventKey} theme={this.state.theme} eventKey={this.props.eventKey}/>
+                    <TabSplit eventKey={this.props.eventKey}>
 
-                    <OutputConsole eventKey={this.props.eventKey}/>
+                        <Editor name={'editor-'+this.props.eventKey} theme={this.state.theme} eventKey={this.props.eventKey}/>
 
+                        <OutputConsole eventKey={this.props.eventKey}/>
+
+                    </TabSplit>
                 </TabSplit>
 
                 <SearchBox eventKey={this.props.eventKey}/>

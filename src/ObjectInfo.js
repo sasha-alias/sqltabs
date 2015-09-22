@@ -131,7 +131,7 @@ var ObjectInfo = React.createClass({
 
         var gotop = <a href="#" onClick={function(){scrollTo(
                     '#output-console-'+self.props.eventKey, "#output-console-"+self.props.eventKey
-                    )}}><span className="glyphicon glyphicon-arrow-up"/></a>;
+                    )}}><span className="glyphicon glyphicon-circle-arrow-up"/></a>;
 
         return (<div className="object-info-div">Schema <span className="object-info-name">{info.object_name} </span>
                 at <a href="#" onClick={function(){self.getInfo()}}>{info.object.current_database}</a>

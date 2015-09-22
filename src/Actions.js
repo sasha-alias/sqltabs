@@ -297,7 +297,8 @@ var Actions = {
         AppDispatcher.dispatch({
             eventName: 'switch-view',
         });
-    }
+    },
+
 }
 
 module.exports = Actions;

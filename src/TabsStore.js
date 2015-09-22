@@ -76,6 +76,7 @@ var _TabsStore = function(){
     this.renderer = 'plain'; // plain or auto
 
     this.connectionHistory = (Config.getConnHistory() || []);
+    this.projects = (Config.getProjects() || []);
 
     this.getAll = function(){return this.tabs;};
 
@@ -306,6 +307,20 @@ var _TabsStore = function(){
     this.getCloudError = function(){
         return this.cloudError;
     };
+
+    this.addProject = function(dirname, alias){
+        this.projects.push({path: dirname, alias: alias});
+        Config.saveProjects(this.projects);
+    }
+
+    this.getProjects = function(){
+        return this.projects;
+    }
+
+    this.removeProject = function(idx){
+        this.projects.splice(idx, 1);
+        Config.saveProjects(this.projects);
+    }
 
         
     // restore recent connection string on startup

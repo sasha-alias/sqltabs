@@ -62,11 +62,26 @@ var TabSplit = React.createClass({
 
     getInitialState: function(){
 
+        if (typeof(this.props.type) == 'undefined'){
+            var type = "horizontal";
+        } else {
+            var type = this.props.type;
+        }
+
+        if (typeof(this.props.h1) == 'undefined'){
+            var h1 = "50%";
+            var h2 = "calc(50% - 5px)";
+        } else {
+            var h1 = this.props.h1;
+            var h2 = "calc(100% - 5px - "+this.props.h1+")";
+        }
+
+
         return {
             drag: false, 
-            h1: "50%", 
-            h2: "49%",
-            type: "horizontal"
+            h1: h1,
+            h2: h2,
+            type: type,
         };
     },
 
@@ -82,13 +97,13 @@ var TabSplit = React.createClass({
         if (this.state.type == 'horizontal'){
             this.setState({
                 h1: '50%',
-                h2: '49%',
+                h2: 'calc(50% - 5px)',
                 type: 'vertical'
             });
         } else {
             this.setState({
                 h1: '50%',
-                h2: '49%',
+                h2: 'calc(50% - 5px)',
                 type: 'horizontal'
             });
         }
@@ -114,7 +129,7 @@ var TabSplit = React.createClass({
             if (this.state.drag){
 
                 var h1 = e.pageY - pos.top;
-                var h2 = h - h1;
+                var h2 = h - h1 - 5;
                 if (h1 > 15 && h2 > 15) {
                     this.setState({
                         h1: h1,
@@ -123,14 +138,14 @@ var TabSplit = React.createClass({
                     TabActions.resize(this.props.eventKey);
                 }
             }
-        } else {
+        } else { // vertical
             var pos = $(this.getDOMNode()).offset();
             var h = $(this.getDOMNode()).width();
 
             if (this.state.drag){
 
                 var h1 = e.pageX - pos.left;
-                var h2 = h - h1 - 20;
+                var h2 = h - h1 - 5;
                 if (h1 > 15 && h2 > 15) {
                     this.setState({
                         h1: h1,

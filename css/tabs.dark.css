@@ -105,3 +105,22 @@ table {
     background-color: #5BC0DE;
     background-image: none;
 }
+
+.project-folder:hover{
+    background-color: #5BC0DE;
+    color: #ffffff;
+}
+
+.project-file:hover{
+    background-color: #5BC0DE;
+    color: #ffffff;
+}
+
+.project-button:hover{
+    background-color: #5e5e5e;
+    color: #ffffff;
+}
+
+.project-button-remove:hover{
+    color: #ffffff;
+}

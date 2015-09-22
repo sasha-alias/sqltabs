@@ -71,6 +71,15 @@ var Conf = {
         this.saveSync();
     },
 
+    getProjects: function(){
+        return config.projects;
+    },
+
+    saveProjects: function(projects){
+        config.projects = projects;
+        this.saveSync();
+    },
+
     saveSync: function(){
         fs.unwatchFile(config_path);
         db.saveSync();
