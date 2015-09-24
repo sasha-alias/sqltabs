@@ -35,3 +35,19 @@
 .vsplitter{
     background-color: #dcdcdc;
 }
+
+.project-folder:hover{
+    background-color: #DDDDDD;
+}
+
+.project-file:hover{
+    background-color: #DDDDDD;
+}
+
+.project-button:hover{
+    background-color: #DDDDDD;
+}
+
+.project-button-remove:hover{
+    color: #000000;
+}

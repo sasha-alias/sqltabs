@@ -124,3 +124,7 @@ table {
 .project-button-remove:hover{
     color: #ffffff;
 }
+
+.toolbar-button:hover{
+    color: #ffffff;
+}

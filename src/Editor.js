@@ -54,6 +54,7 @@ var Editor = React.createClass({
         TabsStore.bind('change-mode', this.changeHandler);
         TabsStore.bind('open-file-'+this.props.eventKey, this.fileOpenHandler);
         TabsStore.bind('save-file-'+this.props.eventKey, this.fileSaveHandler);
+        TabsStore.bind('close-file-'+this.props.eventKey, this.fileCloseHandler);
         TabsStore.bind('execute-script-'+this.props.eventKey, this.execHandler);
         TabsStore.bind('execute-block-'+this.props.eventKey, this.execBlockHandler);
         TabsStore.bind('execute-all-'+this.props.eventKey, this.execAllHandler);
@@ -114,6 +115,7 @@ var Editor = React.createClass({
         TabsStore.unbind('change-mode', this.changeMode);
         TabsStore.unbind('open-file-'+this.props.eventKey, this.fileOpenHandler);
         TabsStore.unbind('save-file-'+this.props.eventKey, this.fileSaveHandler);
+        TabsStore.unbind('save-file-'+this.props.eventKey, this.fileCloseHandler);
         TabsStore.unbind('execute-script-'+this.props.eventKey, this.execHandler);
         TabsStore.unbind('execute-block-'+this.props.eventKey, this.execBlockHandler);
         TabsStore.unbind('execute-all-'+this.props.eventKey, this.execAllHandler);
@@ -232,6 +234,10 @@ var Editor = React.createClass({
                 return console.log(err);
             }
         }); 
+    },
+
+    fileCloseHandler: function(){
+        this.editor.setValue('');
     },
 
     findNext: function(){

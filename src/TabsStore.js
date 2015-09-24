@@ -210,7 +210,9 @@ var _TabsStore = function(){
     };
 
     this.setResult = function(id, result){
-        this.tabs[id].result = result;
+        if (typeof(this.tabs[id]) != 'undefined'){
+            this.tabs[id].result = result;
+        }
     };
 
     this.getResult = function(id){
@@ -237,6 +239,10 @@ var _TabsStore = function(){
 
     this.saveFile = function(filename){
         this.tabs[this.selectedTab].filename = filename;
+    }
+
+    this.closeFile = function(){
+        this.tabs[this.selectedTab].filename = null;
     }
 
     this.getEditorFile = function(id){

@@ -196,6 +196,12 @@ var Actions = {
         });
     },
 
+    closeFile: function(){
+        AppDispatcher.dispatch({
+            eventName: 'close-file',
+        });
+    },
+
     gotoConnstr: function(){
         AppDispatcher.dispatch({
             eventName: 'goto-connstr',
@@ -298,6 +304,12 @@ var Actions = {
             eventName: 'switch-view',
         });
     },
+
+    toggleProject: function(){
+        AppDispatcher.dispatch({
+            eventName: 'toggle-project',
+        });
+    }
 
 }
 

@@ -114,6 +114,9 @@ if (process.platform == 'darwin'){
              accelerator: "Command+Shift+S",
              click: function(){saveFileAs();},
             },
+            {label: "Close File",
+             click: function(){Actions.closeFile()},
+            },
             {type: 'separator'},
             {label: "New Tab",
              accelerator: "Command+T",
@@ -228,6 +231,10 @@ if (process.platform == 'darwin'){
              accelerator: "Command+\\",
              click: function(){Actions.switchView();}
             },
+            {label: "Toggle Project", 
+             accelerator: "Command+P",
+             click: function(){Actions.toggleProject();}
+            },
         ]
         },
     ];
@@ -258,6 +265,9 @@ if (process.platform == 'darwin'){
             {label: "Save As",
              accelerator: "Ctrl+Shift+S",
              click: function(){saveFileAs();},
+            },
+            {label: "Close File",
+             click: function(){Actions.closeFile()},
             },
             {type: 'separator'},
             {label: "New Tab",
@@ -347,6 +357,8 @@ if (process.platform == 'darwin'){
              click: function(){Actions.previosTab();},
             },
             {label: "Switch Tab View", click: function(){Actions.switchView();}},
+            {label: "Toggle Project", click: function(){Actions.toggleProject();},
+            },
         ]
         },
 	

@@ -5,6 +5,7 @@ var remote = require('remote');
 var dialog = remote.require('dialog');
 var fs = require('fs');
 var path = require('path');
+var async = require('async');
 
 var Project = React.createClass({
 
@@ -12,7 +13,29 @@ var Project = React.createClass({
         return {
             projects: TabsStore.getProjects(),
             current_path: null,
+            collapsed: true,
         };
+    },
+
+    componentDidMount: function(){
+        TabsStore.bind('font-size-changed', this.resize); 
+    },
+
+    componentWillUnmount: function(){
+        TabsStore.unbind('font-size-changed', this.resize); 
+    },
+
+    componentDidUpdate: function(){
+        this.resize(); 
+    },
+
+    resize: function(){
+        var project_list = React.findDOMNode(this.refs.project_list);
+        var files_list = React.findDOMNode(this.refs.project_files_list);
+        $(files_list).height(
+            $(project_list).parent().height() - 
+            $(project_list).height() - 25
+        );
     },
 
     update: function(){
@@ -35,9 +58,18 @@ var Project = React.createClass({
     },
 
     toolbar: function(){
-        return <div className="project-toolbar"> 
-            <a href="#" onClick={this.addProjectHandler}> <span className="glyphicon glyphicon-plus-sign"/> </a>
+        if (this.state.current_path != null){
+            var path = <div><span className="project-current-path">{this.state.current_path}</span></div>
+        } else {
+            var path = null;
+        }
+
+        return (
+        <div className="project-toolbar"> 
+                <a href="#" onClick={this.addProjectHandler}> <span className="glyphicon glyphicon-plus-sign"/> </a>
+            {path}
         </div>
+        );
     },
 
     removeProjectHandler: function(idx){
@@ -53,6 +85,24 @@ var Project = React.createClass({
 
     loadPath: function(path){
         this.setState({current_path: path});
+    },
+
+    openFileHandler: function(e, file_path){
+        if (e.shiftKey){
+            var existing_tab = TabsStore.getTabByFilename(file_path);
+            if ( existing_tab != null){
+                Actions.select(existing_tab);
+            } else {
+
+                chain = [
+                    function(done){Actions.newTab(); done();},
+                    function(done){Actions.openFile(file_path); done();},
+                ];
+                async.series(chain);
+            }
+        } else {
+            Actions.openFile(file_path);
+        }
     },
 
     renderPath: function(){
@@ -85,11 +135,7 @@ var Project = React.createClass({
                     </div>;
                     ret_dirs.push(item);
                 } else {
-                    var item = <div className="project-file" key={key} onClick={
-                        function(){
-                            Actions.openFile(file_path);
-                        } 
-                    }
+                    var item = <div className="project-file" key={key} onClick={function(event){self.openFileHandler(event, file_path)}}
                     > {file_name} </div>
                     ret_files.push(item);
                 }
@@ -97,7 +143,7 @@ var Project = React.createClass({
             });
 
             var list = ret_parent.concat(ret_dirs.concat(ret_files));
-            return <div className="project-files-list"> <span className="project-current-path">{this.state.current_path}</span>
+            return <div className="project-files-list" ref="project_files_list"> 
             {list}
             </div>
         }
@@ -116,10 +162,9 @@ var Project = React.createClass({
         var files = this.renderPath();
 
         return <div className="project-div">
-            <div className="project-list">
+            <div className="project-list" ref="project_list">
                 {projects}
                 {this.toolbar()}
-                <hr/>
             </div>
             {files}
         </div>

@@ -25,8 +25,10 @@ var Splitter = React.createClass({
     render: function(){
         if (this.props.type == 'horizontal'){
             var classname = "hsplitter";
-        } else {
+        } else if (this.props.type == "vertical" ) {
             var classname = "vsplitter";
+        } else {
+            return null;
         }
 
         return (
@@ -76,21 +78,34 @@ var TabSplit = React.createClass({
             var h2 = "calc(100% - 5px - "+this.props.h1+")";
         }
 
+        if (this.props.project){
+            h1 = 0;
+            h2 = "calc(100% - 5px)";
+        }
 
         return {
             drag: false, 
             h1: h1,
             h2: h2,
             type: type,
+            project_visible: false,
         };
     },
 
     componentDidMount: function(){
-        TabsStore.bind('switch-view-'+this.props.eventKey, this.switchViewHandler);
+        if (this.props.project){
+            TabsStore.bind('toggle-project-'+this.props.eventKey, this.toggleProjectHandler);
+        } else {
+            TabsStore.bind('switch-view-'+this.props.eventKey, this.switchViewHandler);
+        }
     },
 
     componentWillUnmount: function(){
-        TabsStore.unbind('switch-view-'+this.props.eventKey, this.switchViewHandler);
+        if (this.props.project){
+            TabsStore.unbind('toggle-project-'+this.props.eventKey, this.toggleProjectHandler);
+        } else {
+            TabsStore.unbind('switch-view-'+this.props.eventKey, this.switchViewHandler);
+        }
     },
 
     switchViewHandler: function(){
@@ -110,8 +125,23 @@ var TabSplit = React.createClass({
         TabActions.resize(this.props.eventKey);
     },
 
+    toggleProjectHandler: function(){
+        if (this.state.project_visible){
+            this.setState({
+                h1: 0,
+                h2: "calc(100% - 5px)",
+                project_visible: false,
+            });
+        } else {
+            this.setState({
+                h1: '20%',
+                h2: 'calc(80% - 5px)',
+                project_visible: true,
+            });
+        }
+    },
+
     mouseDownHandler: function(e){
-        var pos = $(this.getDOMNode()).offset();
         this.setState({
           drag: true,
         });
@@ -171,6 +201,12 @@ var TabSplit = React.createClass({
 
     render: function(){
 
+        if (this.props.project && !this.state.project_visible){
+            var splitter_type = "invisible"; 
+        } else {
+            var splitter_type = this.state.type;
+        }
+
         return (
         <div className="tab-split"
           onMouseMove={this.mouseMoveHandler}
@@ -180,7 +216,7 @@ var TabSplit = React.createClass({
           <Container type={this.state.type} h={this.state.h1}> 
             {this.props.children[0]}
           </Container>
-          <Splitter type={this.state.type}
+          <Splitter type={splitter_type}
               mouseDownHandler={this.mouseDownHandler}
           />
           <Container type={this.state.type} h={this.state.h2}>
@@ -188,6 +224,7 @@ var TabSplit = React.createClass({
           </Container>
         </div>
         );
+
     },
 });
 

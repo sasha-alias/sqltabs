@@ -173,8 +173,10 @@ var ConnInput = React.createClass({
 
 
         return (
-            <div>
+            <div className="input-connstr-div"> 
+                
                 <form className="tab-toolbar-form" onSubmit={this.connectionSubmitHandler}>
+
                     <input
                         className="input-connstr form-control"
                         ref="connInput"

@@ -54,6 +54,7 @@ var OutputConsole = React.createClass({
     },
 
     componentWillUnmount: function(){
+        clearInterval(this.timer);
         TabsStore.unbind('query-started-'+this.props.eventKey, this.queryStarted);
         TabsStore.unbind('query-finished-'+this.props.eventKey, this.queryFinished);
         TabsStore.unbind('query-error-'+this.props.eventKey, this.queryError);

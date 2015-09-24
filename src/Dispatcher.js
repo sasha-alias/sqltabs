@@ -171,6 +171,11 @@ AppDispatcher.register( function(payload) {
             TabsStore.trigger('change');
             break;
 
+        case 'close-file':
+            TabsStore.closeFile();
+            TabsStore.trigger('close-file-'+TabsStore.selectedTab);
+            TabsStore.trigger('change');
+
         case 'goto-connstr':
             TabsStore.trigger('goto-connstr-'+TabsStore.selectedTab);
             break;
@@ -179,6 +184,7 @@ AppDispatcher.register( function(payload) {
             TabsStore.setFontSize(payload.size);
             Config.saveFontSize(payload.size);
             document.body.style.fontSize = payload.size;
+            TabsStore.trigger('font-size-changed');
             break;
 
         case 'toggle-find-box':
@@ -260,6 +266,10 @@ AppDispatcher.register( function(payload) {
 
         case 'switch-view':
             TabsStore.trigger('switch-view-'+TabsStore.selectedTab);
+            break;
+
+        case 'toggle-project':
+            TabsStore.trigger('toggle-project-'+TabsStore.selectedTab);
             break;
 
     }

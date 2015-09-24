@@ -29,7 +29,8 @@ var TabContent = React.createClass({
 
     getInitialState: function(){
         return {
-            theme: TabsStore.theme
+            theme: TabsStore.theme,
+            project: false,
         };
     },
 
@@ -57,22 +58,26 @@ var TabContent = React.createClass({
 
                 <TabToolbar eventKey={this.props.eventKey}/>
 
-                <TabSplit eventKey={this.props.eventKey} type="vertical" h1="25%">
-                    <Project eventKey={this.props.eventKey}/>
+                <div className="tab-content-without-toolbar">
+                    <TabSplit eventKey={this.props.eventKey} type="vertical" project="true">
 
-                    <TabSplit eventKey={this.props.eventKey}>
+                        <Project eventKey={this.props.eventKey}/>
 
-                        <Editor name={'editor-'+this.props.eventKey} theme={this.state.theme} eventKey={this.props.eventKey}/>
+                        <TabSplit key={"tab-content-inner-"+this.props.eventKey} eventKey={this.props.eventKey}>
 
-                        <OutputConsole eventKey={this.props.eventKey}/>
+                            <Editor name={'editor-'+this.props.eventKey} theme={this.state.theme} eventKey={this.props.eventKey}/>
 
+                            <OutputConsole eventKey={this.props.eventKey}/>
+
+                        </TabSplit>
                     </TabSplit>
-                </TabSplit>
+                </div>
 
                 <SearchBox eventKey={this.props.eventKey}/>
 
             </div>
         );
+
     }
 });
 

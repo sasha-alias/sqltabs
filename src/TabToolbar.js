@@ -16,16 +16,21 @@
 */
 
 var React = require('react');
-var TabActions = require('./Actions');
+var Actions = require('./Actions');
 var TabsStore = require('./TabsStore');
 var ConnInput = require('./ConnInput');
 
 var TabToolbar = React.createClass({
 
+    toggleProject: function(){
+        Actions.toggleProject();
+    },
+
     render: function(){
 
         return (
         <div className="tab-toolbar"> 
+            <div className="toolbar-button" onClick={this.toggleProject}><span className="glyphicon glyphicon-menu-hamburger"/></div>
             <ConnInput eventKey={this.props.eventKey}/>
         </div>
         );
