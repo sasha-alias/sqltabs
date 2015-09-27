@@ -10,6 +10,36 @@ function scrollTo(div, to){
     return $(div).animate({scrollTop: $(to).position().top - $(div).parent().offset().top}, 300);
 }
 
+function scrollToDown(div, to){
+    var scroll = $(div).scrollTop();
+    var position = $(to).offset().top - $(div).offset().top;
+    if (position < 0){ // id scrolled away up
+        return $(div).scrollTop(position);
+    }
+    if (position > $(div).height()){ // if scrolled away down
+        return $(div).scrollTop(position);
+    }
+    if (position > $(div).height() - 2*$(to).height()){
+        return $(div).scrollTop(scroll + $(to).height());
+    }
+}
+
+function scrollToUp(div, to){
+    var scroll = $(div).scrollTop();
+    var position = $(to).offset().top - $(div).offset().top;
+
+    if (position + $(to).height() < 0){ // if scrolled away up
+        return $(div).scrollTop(position);
+    }
+    if (position > $(div).height()){ // if scrolled away down
+        return $(div).scrollTop(position);
+    }
+    if (position - $(to).height() < 0){ 
+        return $(div).scrollTop(scroll - $(to).height());
+    }
+}
+
+
 function mount_charts(){
 
     $("input[type=hidden]").each( function(idx, item){

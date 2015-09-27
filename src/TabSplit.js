@@ -94,6 +94,8 @@ var TabSplit = React.createClass({
 
     componentDidMount: function(){
         if (this.props.project){
+            TabsStore.bind('show-project-'+this.props.eventKey, this.showProjectHandler);
+            TabsStore.bind('hide-project-'+this.props.eventKey, this.hideProjectHandler);
             TabsStore.bind('toggle-project-'+this.props.eventKey, this.toggleProjectHandler);
         } else {
             TabsStore.bind('switch-view-'+this.props.eventKey, this.switchViewHandler);
@@ -102,6 +104,8 @@ var TabSplit = React.createClass({
 
     componentWillUnmount: function(){
         if (this.props.project){
+            TabsStore.unbind('show-project-'+this.props.eventKey, this.showProjectHandler);
+            TabsStore.unbind('hide-project-'+this.props.eventKey, this.hideProjectHandler);
             TabsStore.unbind('toggle-project-'+this.props.eventKey, this.toggleProjectHandler);
         } else {
             TabsStore.unbind('switch-view-'+this.props.eventKey, this.switchViewHandler);
@@ -125,19 +129,27 @@ var TabSplit = React.createClass({
         TabActions.resize(this.props.eventKey);
     },
 
+    showProjectHandler: function(){
+        this.setState({
+            h1: '20%',
+            h2: 'calc(80% - 5px)',
+            project_visible: true,
+        });
+    },
+
+    hideProjectHandler: function(){
+        this.setState({
+            h1: 0,
+            h2: "calc(100% - 5px)",
+            project_visible: false,
+        });
+    },
+
     toggleProjectHandler: function(){
         if (this.state.project_visible){
-            this.setState({
-                h1: 0,
-                h2: "calc(100% - 5px)",
-                project_visible: false,
-            });
+            this.hideProjectHandler();
         } else {
-            this.setState({
-                h1: '20%',
-                h2: 'calc(80% - 5px)',
-                project_visible: true,
-            });
+            this.showProjectHandler();
         }
     },
 

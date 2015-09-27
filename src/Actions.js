@@ -305,11 +305,29 @@ var Actions = {
         });
     },
 
+    showProject: function(){
+        AppDispatcher.dispatch({
+            eventName: 'show-project',
+        });
+    },
+
+    hideProject: function(){
+        AppDispatcher.dispatch({
+            eventName: 'hide-project',
+        });
+    },
+
     toggleProject: function(){
         AppDispatcher.dispatch({
             eventName: 'toggle-project',
         });
-    }
+    },
+
+    focusEditor: function(){
+        SignalsDispatcher.dispatch({
+            eventName: 'focus-editor',
+        });
+    },
 
 }
 

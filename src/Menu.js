@@ -231,9 +231,13 @@ if (process.platform == 'darwin'){
              accelerator: "Command+\\",
              click: function(){Actions.switchView();}
             },
-            {label: "Toggle Project", 
+            {label: "Show Project", 
              accelerator: "Command+P",
-             click: function(){Actions.toggleProject();}
+             click: function(){Actions.showProject();}
+            },
+            {label: "Hide Project", 
+             accelerator: "Command+Shift+P",
+             click: function(){Actions.hideProject();}
             },
         ]
         },

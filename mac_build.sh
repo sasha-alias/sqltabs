@@ -1,3 +1,4 @@
+#!/bin/bash
 rm -rf .build
 mkdir .build
 jsx src/ build/

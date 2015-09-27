@@ -6,6 +6,7 @@ var dialog = remote.require('dialog');
 var fs = require('fs');
 var path = require('path');
 var async = require('async');
+var $ = require('jquery');
 
 var Project = React.createClass({
 
@@ -13,19 +14,39 @@ var Project = React.createClass({
         return {
             projects: TabsStore.getProjects(),
             current_path: null,
-            collapsed: true,
+            active: {type: "project", idx: -1},
+            focused: false,
+            files: [],
         };
     },
 
     componentDidMount: function(){
+        TabsStore.bind('show-project-'+this.props.eventKey, this.showProjectHandler);
+        TabsStore.bind('hide-project-'+this.props.eventKey, this.hideProjectHandler);
         TabsStore.bind('font-size-changed', this.resize); 
+        React.findDOMNode(this.refs.project_div).addEventListener("keydown", this.keyPressHandler);
+
     },
 
     componentWillUnmount: function(){
+        TabsStore.unbind('show-project-'+this.props.eventKey, this.showProjectHandler);
+        TabsStore.unbind('hide-project-'+this.props.eventKey, this.hideProjectHandler);
         TabsStore.unbind('font-size-changed', this.resize); 
+        React.findDOMNode(this.refs.project_div).removeEventListener("keydown", this.keyPressHandler);
+    },
+
+    showProjectHandler: function(){
+        this.setState({focused: true}, function(){
+            React.findDOMNode(this.refs.project_div).focus();
+        });
+    },
+
+    hideProjectHandler: function(){
+        Actions.focusEditor();
     },
 
     componentDidUpdate: function(){
+
         this.resize(); 
     },
 
@@ -33,13 +54,123 @@ var Project = React.createClass({
         var project_list = React.findDOMNode(this.refs.project_list);
         var files_list = React.findDOMNode(this.refs.project_files_list);
         $(files_list).height(
-            $(project_list).parent().height() - 
-            $(project_list).height() - 25
+            $(project_list).parent().height() - $(project_list).height() - 25
         );
     },
 
     update: function(){
         this.setState({projects: TabsStore.getProjects()}); 
+    },
+
+    keyPressHandler: function(e){
+        if (e.keyCode == 38){ // up
+            this.goPrev();
+        }
+        if (e.keyCode == 40){ // down
+            this.goNext();
+        }
+        if (e.keyCode == 13){ // enter
+            this.enterHandler(e);
+        }
+        if (e.keyCode == 39){ // right arrow
+            this.viewFile(); 
+        }
+        if (e.keyCode == 8){ // backspace
+            this.goDirUp();
+        }
+    },
+
+    viewFile: function(){
+        var self = this;
+        if (this.state.active.type == "file" && this.state.active.idx >= 0 && this.state.active.idx < this.state.files.length){
+            var item = this.state.files[this.state.active.idx];
+            if (!item.dir){
+                Actions.openFile(item.path);
+                setTimeout(
+                    function(){ $("#project_div_"+self.props.eventKey).focus();},
+                1);
+
+            }
+        }
+    },
+
+    goDirUp: function(){
+        if (this.state.active.type == "file" && this.state.active.idx >= 0 && this.state.active.idx < this.state.files.length){
+            var item = this.state.files[this.state.active.idx];
+            var p = path.dirname(this.state.current_path);
+            this.clickFolderHandler(p);
+        }
+    },
+
+    goPrev: function(){
+        // next project
+        if (this.state.active.type == "project" && this.state.active.idx > 0){
+            return this.setState({active: {type: "project", idx: this.state.active.idx-1}});
+        }
+
+        // next file
+        if (this.state.active.type == "file" && this.state.active.idx > 0){
+            return this.setState({active: {type: "file", idx: this.state.active.idx-1}},
+            function(){
+                scrollToUp("#project-files-list-"+this.props.eventKey, '#project_file_'+this.props.eventKey+'_'+this.state.active.idx);
+            }
+            );
+        }
+
+        // switch to projects
+        if (this.state.active.type == "file" && this.state.active.idx == 0 && this.state.projects.length > 0){
+            return this.setState({active: {type: "project", idx: this.state.projects.length-1}});
+        }
+    },
+
+    goNext: function(){
+        // next project
+        if (this.state.active.type == "project" && this.state.active.idx < this.state.projects.length-1){
+            return this.setState({active: {type: "project", idx: this.state.active.idx+1}});
+        }
+        
+        // next file
+        if (this.state.active.type == "file" && this.state.active.idx < this.state.files.length-1){
+            return this.setState({active: {type: "file", idx: this.state.active.idx+1}},
+            function(){
+                scrollToDown("#project-files-list-"+this.props.eventKey, '#project_file_'+this.props.eventKey+'_'+this.state.active.idx);
+            }
+            );
+        }
+
+        // switch from projects to files
+        if (this.state.active.type == "project" && this.state.active.idx >= this.state.projects.length-1 && this.state.files.length > 0){
+            return this.setState({active: {type: "file", idx: 0}});
+        }
+
+    },
+
+    enterHandler: function(e){
+        var self = this;
+        // load project
+        if (this.state.active.type == "project" && this.state.active.idx >= 0 && this.state.active.idx < this.state.projects.length){
+            var p = TabsStore.projects[this.state.active.idx].path;
+            var files = this.loadPath(p);
+            this.setState({
+                current_path: p,
+                files: files,
+                active: {type: "file", idx: 0},
+            });
+            return;
+        }
+
+        // open file/dir
+        if (this.state.active.type == "file" && this.state.active.idx >= 0 && this.state.active.idx < this.state.files.length){
+            var item = this.state.files[this.state.active.idx];
+            if (item.path == ".."){
+                var p = path.dirname(this.state.current_path);
+                this.clickFolderHandler(p);
+            } else if (item.dir) {
+                this.clickFolderHandler(item.path);
+            } else {
+                Actions.openFile(item.path);
+            }
+        }
     },
 
     addProjectHandler: function(){
@@ -53,6 +184,7 @@ var Project = React.createClass({
                     TabsStore.addProject(dirname, alias);
                     self.update();
                 }
+                $("#project_div_"+self.props.eventKey).focus(); // move focus out of link, to prevent open dialog on enter
             }
         );
     },
@@ -77,14 +209,44 @@ var Project = React.createClass({
         this.update();
     },
 
-
     loadProjectHandler: function(idx){
         var path = TabsStore.projects[idx].path;
-        this.setState({current_path: path});
+        var files = this.loadPath(path);
+        this.setState({
+            current_path: path,
+            files: files,
+            active: {type: "file", idx: 0},
+        });
     },
 
-    loadPath: function(path){
-        this.setState({current_path: path});
+    clickFolderHandler: function(p){
+        if (p == '..'){
+            var p = path.dirname(this.state.current_path);
+        }
+        var files = this.loadPath(p);
+        this.setState({
+            current_path: p,
+            files: files,
+            active: {type: "file", idx: 0},
+        });
+    },
+
+    loadPath: function(p){
+        var dirs = [{path: '..', dir: true}];
+        var files = [];
+        
+        var ls = fs.readdirSync(p);
+        ls.forEach(function(file_name, idx){
+            var file_path = path.join(p, file_name);
+            var isdir = fs.lstatSync(file_path).isDirectory();
+            if (isdir){
+                dirs.push({path: file_path, dir: isdir});
+            } else {
+                files.push({path: file_path, dir: isdir});
+            }
+        });
+        var all_list = dirs.concat(files);
+        return all_list;
     },
 
     openFileHandler: function(e, file_path){
@@ -110,63 +272,71 @@ var Project = React.createClass({
         if (this.state.current_path == null){
             return null;
         } else {
+            var ret = [];
 
-            var ret_dirs = [];
-            var ret_files = []
-            var ret_parent = [
-                <div className="project-folder" key={"project-file-..-"+this.props.eventKey} onClick={function(){
-                    var prev = path.join(self.state.current_path, '..');
-                    self.loadPath(prev);
-                }}>..</div>
-            ];
-            var files = fs.readdirSync(this.state.current_path);
+            this.state.files.forEach(function(item, idx){
+                var file_name = path.basename(item.path);
+                var file_path = item.path;
+                var isdir = item.dir;
+                var key = "project_file_"+self.props.eventKey+"_"+idx;
 
-            files.forEach(function(file_name, idx){
-                var file_path = path.join(self.state.current_path, file_name);
-                var isdir = fs.lstatSync(file_path).isDirectory();
-                var key = "project-file-"+self.props.eventKey+"-"+file_path;
+                if (self.state.active.type == 'file' && self.state.active.idx == idx){
+                    var active_cls = " project-button-active";
+                } else {
+                    var active_cls = "";
+                }
 
                 if (isdir){
-                    var item = <div className="project-folder" key={key} onClick={
+                    var item = <div id={key} className={"project-folder"+active_cls} key={key} onClick={
                         function(){
-                            self.loadPath(file_path);
+                            self.clickFolderHandler(file_path);
                         }}>
                         <span className="project-folder-icon glyphicon glyphicon-folder-close"/> {file_name}
                     </div>;
-                    ret_dirs.push(item);
+                    ret.push(item);
                 } else {
-                    var item = <div className="project-file" key={key} onClick={function(event){self.openFileHandler(event, file_path)}}
+                    var item = <div id={key} className={"project-file"+active_cls} key={key} onClick={function(event){self.openFileHandler(event, file_path)}}
                     > {file_name} </div>
-                    ret_files.push(item);
+                    ret.push(item);
                 }
 
             });
 
-            var list = ret_parent.concat(ret_dirs.concat(ret_files));
-            return <div className="project-files-list" ref="project_files_list"> 
-            {list}
+            return <div id={"project-files-list-"+this.props.eventKey} className="project-files-list" ref="project_files_list"> 
+            {ret}
             </div>
         }
     },
 
-    render: function(){
+    renderProjects: function(){
         var self = this;
 
         var projects = this.state.projects.map(function(item, idx){
-            return <div key={"project_"+self.props.eventKey+"_"+idx}> 
-                <div className="project-button" onClick={function(){self.loadProjectHandler(idx)}}> {item.alias} </div>
-                <div className="project-button-remove" onClick={function(){self.removeProjectHandler(idx)}}> <span className="glyphicon glyphicon-remove-sign"/></div>
-            </div>;
+            if (self.state.active.type == "project" && self.state.active.idx == idx){
+                return <div key={"project_"+self.props.eventKey+"_"+idx}> 
+                    <div className="project-button project-button-active" onClick={function(){self.loadProjectHandler(idx)}}> {item.alias} </div>
+                    <div className="project-button-remove" onClick={function(){self.removeProjectHandler(idx)}}> <span className="glyphicon glyphicon-minus-sign"/></div>
+                </div>;
+            } else {
+                return <div key={"project_"+self.props.eventKey+"_"+idx}> 
+                    <div className="project-button" onClick={function(){self.loadProjectHandler(idx)}}> {item.alias} </div>
+                    <div className="project-button-remove" onClick={function(){self.removeProjectHandler(idx)}}> <span className="glyphicon glyphicon-minus-sign"/></div>
+                </div>;
+            }
+
         });
 
-        var files = this.renderPath();
+        return projects;
+    },
 
-        return <div className="project-div">
+    render: function(){
+
+        return <div id={"project_div_"+this.props.eventKey} ref="project_div" tabIndex="0" className="project-div">
             <div className="project-list" ref="project_list">
-                {projects}
+                {this.renderProjects()}
                 {this.toolbar()}
             </div>
-            {files}
+            {this.renderPath()}
         </div>
     },
 

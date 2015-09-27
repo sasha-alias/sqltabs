@@ -125,6 +125,11 @@ table {
     color: #ffffff;
 }
 
+.project-button-active{
+    background-color: #5BC0DE;
+    color: #ffffff;
+}
+
 .toolbar-button:hover{
     color: #ffffff;
 }

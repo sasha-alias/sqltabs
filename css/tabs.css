@@ -157,7 +157,7 @@ body{
 }
 
 .table-resultset td {
-  white-space: pre;
+  white-space: pre-wrap;
 }
 
 .duration-div {

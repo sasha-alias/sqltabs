@@ -61,6 +61,7 @@ var Editor = React.createClass({
         TabsStore.bind('editor-find-next', this.findNext);
         TabsStore.bind('object-info-'+this.props.eventKey, this.objectInfoHandler);
         TabsStore.bind('paste-history-item-'+this.props.eventKey, this.pasteHistoryHandler);
+        TabsStore.bind('focus-editor-'+this.props.eventKey, this.focusEditorHandler);
 
         this.editor.commands.addCommand({
             name: "find",
@@ -122,6 +123,7 @@ var Editor = React.createClass({
         TabsStore.unbind('editor-find-next', this.findNext);
         TabsStore.unbind('object-info-'+this.props.eventKey, this.objectInfoHandler);
         TabsStore.unbind('paste-history-item-'+this.props.eventKey, this.pasteHistoryHandler);
+        TabsStore.unbind('focus-editor-'+this.props.eventKey, this.focusEditorHandler);
     },
 
     execHandler: function(editor) {
@@ -300,6 +302,10 @@ var Editor = React.createClass({
             var position = this.editor.getCursorPosition();
             this.editor.getSession().insert(position, item.query);
         }
+    },
+
+    focusEditorHandler: function(){
+        this.editor.focus();
     },
 
     resize: function(){

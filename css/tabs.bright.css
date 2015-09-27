@@ -36,6 +36,14 @@
     background-color: #dcdcdc;
 }
 
+.project-toolbar a{
+    color: #666666;
+}
+
+.project-toolbar a:hover{
+    color: black;
+}
+
 .project-folder:hover{
     background-color: #DDDDDD;
 }
@@ -45,6 +53,10 @@
 }
 
 .project-button:hover{
+    background-color: #DDDDDD;
+}
+
+.project-button-active{
     background-color: #DDDDDD;
 }
 

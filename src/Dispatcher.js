@@ -48,6 +48,9 @@ SignalsDispatcher.register(function(payload){
         case 'editor-resize':
             TabsStore.trigger('editor-resize');
             break;
+        case 'focus-editor':
+            TabsStore.trigger('focus-editor-'+TabsStore.selectedTab);
+            break;
 
     };
     return true;
@@ -266,6 +269,14 @@ AppDispatcher.register( function(payload) {
 
         case 'switch-view':
             TabsStore.trigger('switch-view-'+TabsStore.selectedTab);
+            break;
+
+        case 'show-project':
+            TabsStore.trigger('show-project-'+TabsStore.selectedTab);
+            break;
+
+        case 'hide-project':
+            TabsStore.trigger('hide-project-'+TabsStore.selectedTab);
             break;
 
         case 'toggle-project':
