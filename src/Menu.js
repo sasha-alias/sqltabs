@@ -360,9 +360,19 @@ if (process.platform == 'darwin'){
              accelerator: "Ctrl+Shift+Tab",
              click: function(){Actions.previosTab();},
             },
-            {label: "Switch Tab View", click: function(){Actions.switchView();}},
-            {label: "Toggle Project", click: function(){Actions.toggleProject();},
+            {label: "Switch Tab View", 
+             accelerator: "Alt+\\",
+             click: function(){Actions.switchView();}
             },
+            {label: "Show Project", 
+             accelerator: "Alt+P",
+             click: function(){Actions.showProject();}
+            },
+            {label: "Hide Project", 
+             accelerator: "Alt+Shift+P",
+             click: function(){Actions.hideProject();}
+            },
+,
         ]
         },
 	
