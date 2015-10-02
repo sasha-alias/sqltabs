@@ -37,7 +37,7 @@ var Project = React.createClass({
 
     showProjectHandler: function(){
         this.setState({focused: true}, function(){
-            React.findDOMNode(this.refs.project_div).focus();
+            React.findDOMNode(this.refs.hidden).focus();
         });
     },
 
@@ -54,7 +54,7 @@ var Project = React.createClass({
         var project_list = React.findDOMNode(this.refs.project_list);
         var files_list = React.findDOMNode(this.refs.project_files_list);
         $(files_list).height(
-            $(project_list).parent().height() - $(project_list).height() - 25
+            $(project_list).parent().height() - $(project_list).height() - $(".tab-navigator").height()
         );
     },
 
@@ -198,6 +198,7 @@ var Project = React.createClass({
 
         return (
         <div className="project-toolbar"> 
+            <div ref="hidden" tabIndex="0"/>
                 <a href="#" onClick={this.addProjectHandler}> <span className="glyphicon glyphicon-plus-sign"/> </a>
             {path}
         </div>

@@ -142,7 +142,12 @@ var ConnInput = React.createClass({
 
         var history = this.state.history.map(function(item, i){
 
-            var meta_start = item.indexOf('---'); // extension of connect string: user:port@db --- alias of connect string
+            if (item != null){
+                var meta_start = item.indexOf('---'); // extension of connect string: user:port@db --- alias of connect string
+            } else {
+                var meta_start = -1;
+            }
+
             if (meta_start != -1){
                 var conn_str = item.substr(0, meta_start);
                 var alias = item.match(/---\s*(.*)/)[1]+':';

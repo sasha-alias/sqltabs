@@ -46,7 +46,7 @@ var Tab = function(id, connstr){
         if (this.filename != null){
             var ret = this.filename;
         } else {
-            if (typeof(this.connstr) != 'undefined') {
+            if (typeof(this.connstr) != 'undefined' && this.connstr != null) {
 
                     if (this.connstr.indexOf('---') != -1){ // show alias
                         var ret = '[ '+this.connstr.match(/---\s*(.*)/)[1]+' ]';
