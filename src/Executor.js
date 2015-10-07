@@ -1,5 +1,6 @@
 var async = require('async');
 var PqClient = require('./PqClient');
+var words = require('./keywords.js');
 
 var Clients={};
 
@@ -854,6 +855,36 @@ order by 1";
         });
 
   
+    },
+
+    getCompletionWords: function(callback){
+        var query = "SELECT DISTINCT word FROM ( \
+SELECT nspname AS word FROM pg_namespace UNION \
+SELECT relname FROM pg_class UNION \
+SELECT proname FROM pg_proc UNION \
+SELECT attname FROM pg_attribute UNION \
+SELECT name FROM pg_settings \
+) v ORDER BY 1";
+
+        for (var tab in Clients){
+            var tabClient = Clients[tab];
+            var client = new PqClient(tabClient.connstr, tabClient.password);
+            client.sendQuery(query,
+            function(result){
+                if (result.datasets.length > 0 && result.datasets[0].resultStatus == 'PGRES_FATAL_ERROR'){
+                    console.log(result.datasets[0].resultErrorMessage);
+                } else {
+                    result.datasets[0].data.forEach(function(item, idx){
+                        var word = item[0];
+                        if (words.indexOf(word) == -1){
+                            words.push(word);
+                        }
+                    });
+                }
+            },
+            function(err){console.log(err);/*ignore errors in background process*/})
+        }
+        callback(words);
     },
     
 };

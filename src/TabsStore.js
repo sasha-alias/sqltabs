@@ -77,6 +77,7 @@ var _TabsStore = function(){
 
     this.connectionHistory = (Config.getConnHistory() || []);
     this.projects = (Config.getProjects() || []);
+    this.completion_words = [];
 
     this.getAll = function(){return this.tabs;};
 
@@ -328,6 +329,13 @@ var _TabsStore = function(){
         Config.saveProjects(this.projects);
     }
 
+    this.getCompletionWords = function(){
+        return this.completion_words;
+    }
+
+    this.updateCompletionWords = function(words){
+        this.completion_words = words; 
+    }
         
     // restore recent connection string on startup
     if (typeof(Config.getConnHistory()) != 'undefined' && Config.getConnHistory().length > 0){

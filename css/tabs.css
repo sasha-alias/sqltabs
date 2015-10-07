@@ -116,6 +116,11 @@ body{
     height: 100%;
 }
 
+.edit-area{
+    height: 100%;
+    width: 100%;
+}
+
 .tab-editor {
     height: 50vh;
     width: 100%;
@@ -373,3 +378,20 @@ body{
 .project-file:hover{
     cursor: pointer;
 }
+
+.completion-list{
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    border: 1px solid;
+    border-radius: 2px;
+    max-height: 200px;
+    overflow: scroll;
+    z-index: 1;
+}
+
+.completion-list > ul {
+    padding: 5px;
+    list-style-type: none;
+}
+

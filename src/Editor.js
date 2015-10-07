@@ -17,10 +17,12 @@
 
 var React = require('react');
 var Ace = require('brace');
+var Range = ace.acequire('ace/range').Range;
 var TabsStore = require('./TabsStore');
 var Actions = require('./Actions');
 var History = require('./History');
 var fs = require('fs');
+var $ = require('jquery');
 
 require('brace/mode/pgsql');
 require('brace/theme/chrome');
@@ -36,6 +38,9 @@ var Editor = React.createClass({
         } else {
             var script = null;
         }
+
+        this.completion_words = TabsStore.getCompletionWords();
+
         return {
             theme: TabsStore.getEditorTheme(), 
             mode: TabsStore.getEditorMode(),
@@ -62,6 +67,13 @@ var Editor = React.createClass({
         TabsStore.bind('object-info-'+this.props.eventKey, this.objectInfoHandler);
         TabsStore.bind('paste-history-item-'+this.props.eventKey, this.pasteHistoryHandler);
         TabsStore.bind('focus-editor-'+this.props.eventKey, this.focusEditorHandler);
+        TabsStore.bind('show-project-'+this.props.eventKey, this.hideCompleter);
+        TabsStore.bind('hide-project-'+this.props.eventKey, this.hideCompleter);
+        TabsStore.bind('toggle-project-'+this.props.eventKey, this.hideCompleter);
+        TabsStore.bind('completion-update', this.completionUpdateHandler);
+
+        this.editor_input = $("#"+this.props.name).children(".ace_text-input").get()[0];
+        this.editor_input.addEventListener("keydown", this.keyHandler, true);
 
         this.editor.commands.addCommand({
             name: "find",
@@ -106,6 +118,7 @@ var Editor = React.createClass({
         if (this.state.script != null){ // load script
             this.editor.session.setValue(this.state.script, -1);
         }
+
         this.editor.focus();
     },
 
@@ -124,6 +137,12 @@ var Editor = React.createClass({
         TabsStore.unbind('object-info-'+this.props.eventKey, this.objectInfoHandler);
         TabsStore.unbind('paste-history-item-'+this.props.eventKey, this.pasteHistoryHandler);
         TabsStore.unbind('focus-editor-'+this.props.eventKey, this.focusEditorHandler);
+        TabsStore.unbind('show-project-'+this.props.eventKey, this.hideCompleter);
+        TabsStore.unbind('hide-project-'+this.props.eventKey, this.hideCompleter);
+        TabsStore.unbind('toggle-project-'+this.props.eventKey, this.hideCompleter);
+        TabsStore.unbind('completion-update', this.completionUpdateHandler);
+
+        this.editor_input.addEventListener("keydown", this.keyHandler);
     },
 
     execHandler: function(editor) {
@@ -312,11 +331,162 @@ var Editor = React.createClass({
         this.editor.resize();
     },
 
+    keyHandler: function(e){
+        var self = this;
+        if (e.keyCode == 9){ // tab
+            if (this.completion_mode){
+                e.preventDefault();
+                e.stopPropagation();
+                if (e.shiftKey){
+                    return this.completePrev();
+                } else {
+                    return this.completeNext();
+                }
+            }
+        }
+
+        if ([37,38,39,40,27].indexOf(e.keyCode) != -1){// hide autocompletion on arrows, esc
+            return this.hideCompleter();
+        }
+
+        if (e.keyCode != 16){  // ignore shift
+            var vim_mode = this.getVimMode();
+            if (vim_mode == null || vim_mode == 'insert'){ // don't show autocompletion in normal mode of vim
+                setTimeout(function(){
+                    self.adjustCompletion();
+                }, 1);
+            }
+        }
+    },
+
+    completionUpdateHandler: function(){
+        this.completion_words = TabsStore.getCompletionWords();
+    },
+
+    adjustCompletion: function(){
+        var completer = $(React.findDOMNode(this.refs.completer));
+        var cursor = $("#"+this.props.name).find(".ace_cursor");
+        var offset = {
+            top: cursor.offset().top + cursor.height(),
+            left: cursor.offset().left,
+        };
+        var position = this.editor.selection.getCursor();
+        var line = this.editor.session.getLine(position.row);
+        line = (line.slice(0, position.column)).toLowerCase();
+        var word = line.match(/\w+$/);
+        if (word != null){
+            word = word[0];
+            this.getHints(word);
+            if (this.hints.length > 0){
+                completer.show();
+                completer.offset(offset);
+                completer.html(this.renderHints());
+                this.completion_mode = true;
+                this.editor.commands.removeCommand('indent'); // disable tab
+                return;
+            } else {
+                this.hideCompleter(); 
+            }
+        } else {
+            this.hideCompleter();
+        }
+    },
+
+    hideCompleter: function(){
+        this.completion_mode = false;
+        this.hints = [];
+        var completer = $(React.findDOMNode(this.refs.completer));
+        completer.hide();
+        this.editor.commands.addCommand({ // enable tab back
+            name: "indent",
+            bindKey: {win: "Tab", mac: "Tab"},
+            exec: function(editor) { editor.indent(); },
+            multiSelectAction: "forEach",
+            scrollIntoView: "selectionPart"
+        });
+    },
+
+    getHints: function(word){
+        hints = [];
+        for (var i=0; i< this.completion_words.length; i++){
+            if (this.completion_words[i].toLowerCase().startsWith(word)){
+                hints.push(this.completion_words[i])
+            }
+        }
+        this.hints = hints;
+        this.current_hint = -1;
+        return hints;
+    },
+
+    complete: function(){
+        var hint = this.hints[this.current_hint];
+        var position = this.editor.getCursorPosition();
+        var line = this.editor.session.getLine(position.row);
+        line = line.slice(0, position.column);
+        var word = line.match(/\w+$/)[0];
+        var range = new Range(position.row, position.column - word.length, position.row, position.column);
+        this.editor.getSession().replace(range, hint);
+
+        var completer = $(React.findDOMNode(this.refs.completer));
+        completer.html(this.renderHints());
+
+    },
+
+    completeNext: function(){
+        if (this.current_hint < this.hints.length-1){
+            this.current_hint = this.current_hint + 1;
+        } else if (this.current_hint == this.hints.length-1){
+            this.current_hint = 0;
+        }
+
+        this.complete();
+        scrollToDown("#completion-list-"+this.props.eventKey, "#completion-hint-active-"+this.props.eventKey);
+
+    },
+
+    completePrev: function(){
+        if (this.current_hint > 0){
+            this.current_hint = this.current_hint-1;
+        } else if (this.current_hint == 0){
+            this.current_hint = this.hints.length-1;
+        }
+        this.complete();
+        scrollToUp("#completion-list-"+this.props.eventKey, "#completion-hint-active-"+this.props.eventKey);
+    },
+
+    renderHints: function(){
+        var list = "";
+        for (var i=0; i<this.hints.length; i++){
+            if (i == this.current_hint){
+                list += '<li class="completion-hint-active" id="completion-hint-active-'+this.props.eventKey+'">'+this.hints[i]+'</li>';
+            } else {
+                list += '<li class="completion-hint">'+this.hints[i]+'</li>';
+            }
+        }
+        return "<ul>"+list+"</ul>";
+    },
+
+    getVimMode: function(){
+        var normal_mode = $("#editor-"+this.props.eventKey)[0].className.split(" ").indexOf("normal-mode");
+        var insert_mode = $("#editor-"+this.props.eventKey)[0].className.split(" ").indexOf("insert-mode");
+        if (normal_mode != -1){
+            return 'normal';
+        }
+        if (insert_mode != -1){
+            return 'insert';
+        }
+        return null;
+    },
+
     render: function(){
+
         return (
-            <div id={this.props.name} mode={this.state.mode}/>
+            <div className="edit-area">
+                <div ref="container" id={this.props.name} mode={this.state.mode}/>
+                <div ref="completer" className="completion-list" id={"completion-list-"+this.props.eventKey}/>
+            </div>
         );
     },
 });
 
-module.exports= Editor;
+module.exports = Editor;

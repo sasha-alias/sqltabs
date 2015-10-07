@@ -308,6 +308,21 @@ DBDispatcher.register(function(payload){
     return true; // Needed for Flux promise resolution
 });
 
+// background job for fetching auto completion words from databases
+var wordsUpdateInProgress = false; 
+
+var updateCompletionWords = function(){
+    if (!wordsUpdateInProgress){
+        wordsUpdateInProgress = true;
+        Executor.getCompletionWords(function(words){
+            TabsStore.updateCompletionWords(words);
+            TabsStore.trigger("completion-update"); 
+            wordsUpdateInProgress = false
+        });
+    }
+}
+updateCompletionWords();
+setInterval(updateCompletionWords, 10000);
 
 module.exports = {
 AppDispatcher: AppDispatcher,

@@ -63,3 +63,12 @@
 .project-button-remove:hover{
     color: #000000;
 }
+
+.completion-list{
+    background-color: rgba(250, 250, 250, 0.8);
+    border-color: rgb(50, 50, 50);
+}
+
+.completion-hint-active{
+    background-color: #DDDDDD;
+}

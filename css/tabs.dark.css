@@ -133,3 +133,13 @@ table {
 .toolbar-button:hover{
     color: #ffffff;
 }
+
+.completion-list{
+    border-color: #ffffff;
+    background-color: rgba(30, 30, 30, 0.8);
+}
+
+.completion-hint-active{
+    background-color: #5e5e5e;
+    color: #ffffff;
+}
