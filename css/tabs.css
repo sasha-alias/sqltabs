@@ -383,7 +383,8 @@ body{
     position: absolute;
     top: 20px;
     left: 20px;
-    border: 1px solid;
+    border-width: 1px;
+    border-style: solid;
     border-radius: 2px;
     max-height: 200px;
     overflow: scroll;
@@ -391,7 +392,12 @@ body{
 }
 
 .completion-list > ul {
-    padding: 5px;
+    padding: 0px;
     list-style-type: none;
+}
+
+.completion-list > ul > li {
+    padding-left: 5px;
+    padding-right: 5px;
 }
 

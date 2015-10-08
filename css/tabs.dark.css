@@ -135,8 +135,8 @@ table {
 }
 
 .completion-list{
-    border-color: #ffffff;
-    background-color: rgba(30, 30, 30, 0.8);
+    border-color: #5A5A5A;
+    background-color: rgba(58, 58, 58, 0.8);
 }
 
 .completion-hint-active{
