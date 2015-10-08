@@ -63,8 +63,13 @@ var CheckVersion = function(version){
     var last_version = JSON.parse(version).version.split('.');
     var pkg = require('../package.json');
     var current_version = pkg.version.split('.');
-    if (last_version > current_version){
-        Actions.newVersionAvailable(last_version);
+    for (var i=0; i<3; i++){
+        if (parseInt(last_version[i]) > parseInt(current_version[i])){
+            return Actions.newVersionAvailable(last_version);
+        }
+        if (parseInt(last_version[i]) < parseInt(current_version[i])){
+            return;
+        }
     }
 }
 
