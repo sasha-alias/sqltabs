@@ -380,6 +380,7 @@ body{
 }
 
 .completion-list{
+    display: none;
     position: absolute;
     top: 20px;
     left: 20px;
@@ -387,7 +388,7 @@ body{
     border-style: solid;
     border-radius: 2px;
     max-height: 200px;
-    overflow: scroll;
+    overflow: hidden;
     z-index: 1;
 }
 
