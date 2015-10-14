@@ -129,6 +129,12 @@ var ObjectInfo = React.createClass({
             return <li key={id}><a href="#" onClick={function(){self.getInfo(full_object_name)}}>{item}</a></li>
         });
 
+        var sequences = info.object.sequences.map(function(item, idx){
+            var id = "sequence_"+self.props.eventKey+"_"+idx;
+            var full_object_name = info.object_name+'.'+item; // schema.sequence
+            return <li key={id}><a href="#" onClick={function(){self.getInfo(full_object_name)}}>{item}</a></li>
+        });
+
         var gotop = <a href="#" onClick={function(){scrollTo(
                     '#output-console-'+self.props.eventKey, "#output-console-"+self.props.eventKey
                     )}}><span className="glyphicon glyphicon-circle-arrow-up"/></a>;
@@ -148,7 +154,12 @@ var ObjectInfo = React.createClass({
                   <li role="presentation"><a href="#" onClick={function(){
                       scrollTo('#output-console-'+self.props.eventKey, '#views-'+self.props.eventKey);
                   }}> Views ({views.length}) </a></li>
+
+                  <li role="presentation"><a href="#" onClick={function(){
+                      scrollTo('#output-console-'+self.props.eventKey, '#sequences-'+self.props.eventKey);
+                  }}> Sequences ({sequences.length}) </a></li>
                 </ul>
+
                 <hr/>
             <div id={"tables-"+this.props.eventKey}> {gotop} Tables:
                 <ul>
@@ -165,12 +176,22 @@ var ObjectInfo = React.createClass({
                     {views}
                 </ul>
             </div>
+            <div id={"sequences-"+this.props.eventKey}> {gotop} Sequences:
+                <ul>
+                    {sequences}
+                </ul>
+            </div>
         </div>
         );
     },
 
     render_db_info: function(info){
         var self = this;
+
+        var gotop = <a href="#" onClick={function(){scrollTo(
+                    '#output-console-'+self.props.eventKey, "#output-console-"+self.props.eventKey
+                    )}}><span className="glyphicon glyphicon-circle-arrow-up"/></a>;
+
         var schemas = info.object.schemas.map(function(item, idx){
             var id = "schema_"+self.props.eventKey+"_"+idx;
             return <li key={id}><a href="#" onClick={function(){self.getInfo(item+'.');}}>{item}</a></li>
@@ -180,25 +201,69 @@ var ObjectInfo = React.createClass({
             return <li key={id}>{item}</li>
         });
         var databases = info.object.databases.map(function(item, idx){
-            var id = "role_"+self.props.eventKey+"_"+idx;
+            var id = "database_"+self.props.eventKey+"_"+idx;
             return <li key={id}>{item}</li>
         });
+        var tablespaces = info.object.tablespaces.map(function(item, idx){
+            var id = "tablespace_"+self.props.eventKey+"_"+idx;
+            return <li key={id}>{item}</li>
+        });
+        var event_triggers = info.object.event_triggers.map(function(item, idx){
+            var id = "event_trigger_"+self.props.eventKey+"_"+idx;
+            return <li key={id}>{item}</li>
+        });
+
         return (<div className="object-info-div">Database <span className="object-info-name">{info.object_name}</span> <br/>
             {info.object.version}
+
+
+            <ul className="schema-nav nav nav-pills">
+              <li role="presentation"><a href="#" onClick={function(){
+                  scrollTo('#output-console-'+self.props.eventKey, '#schemas-'+self.props.eventKey);
+              }}> Schemas ({schemas.length}) </a></li>
+
+              <li role="presentation"><a href="#" onClick={function(){
+                  scrollTo('#output-console-'+self.props.eventKey, '#roles-'+self.props.eventKey);
+              }}> Roles ({roles.length}) </a></li>
+
+              <li role="presentation"><a href="#" onClick={function(){
+                  scrollTo('#output-console-'+self.props.eventKey, '#databases-'+self.props.eventKey);
+              }}> Databases ({databases.length}) </a></li>
+
+              <li role="presentation"><a href="#" onClick={function(){
+                  scrollTo('#output-console-'+self.props.eventKey, '#tablespaces-'+self.props.eventKey);
+              }}> Tablespaces ({tablespaces.length}) </a></li>
+              <li role="presentation"><a href="#" onClick={function(){
+                  scrollTo('#output-console-'+self.props.eventKey, '#event-triggers-'+self.props.eventKey);
+              }}> Event Triggers ({event_triggers.length}) </a></li>
+            </ul>
+
             <hr/>
-            <div>Schemas:
+            <div id={"schemas-"+this.props.eventKey}> {gotop} Schemas:
                 <ul>
                     {schemas}
                 </ul>
             </div>
-            <div>Roles:
+            <div id={"roles-"+this.props.eventKey}> {gotop} Roles:
                 <ul>
                     {roles}
                 </ul>
             </div>
-            <div>Databases:
+            <div id={"databases-"+this.props.eventKey}> {gotop} Databases:
                 <ul>
                     {databases}
+                </ul>
+            </div>
+
+            <div id={"tablespaces-"+this.props.eventKey}> {gotop} Tablespaces:
+                <ul>
+                    {tablespaces}
+                </ul>
+            </div>
+            
+            <div id={"event-triggers-"+this.props.eventKey}> {gotop} Event Triggers:
+                <ul>
+                    {event_triggers}
                 </ul>
             </div>
         </div>);
@@ -350,6 +415,10 @@ var ObjectInfo = React.createClass({
             var triggers = null;
         }
 
+        var records = <p> Records: <span className="ace_constant">{info.object.records}</span></p>;
+        var size = <p> Size: <span className="ace_constant">{info.object.size}</span> </p>;
+        var total_size = <p> Total Size: <span className="ace_constant">{info.object.total_size}</span></p>;
+
         // view script
         if (info.object.relkind == 'v'){
             this.scripts = [info.object.script];
@@ -361,11 +430,33 @@ var ObjectInfo = React.createClass({
             </div>
 
             edit = <a href="#" onClick={function(){Actions.newTab(self.scripts.join(';\n---\n\n'));}}><span className="glyphicon glyphicon-edit" title="edit"/></a>;
+            records = null;
+            size = null;
+            total_size = null;
             
         } else {
             var view_script = null;
         }
 
+        // sequence params
+        if (info.object.relkind == 'S'){
+            // rewrite columns on sequens params
+
+            var columns = <tbody>
+                <tr><td> Last Value:    </td><td> {info.object.params.last_value}   </td></tr>
+                <tr><td> Start Value:   </td><td> {info.object.params.start_value}  </td></tr>
+                <tr><td> Increment By:  </td><td> {info.object.params.increment_by} </td></tr>
+                <tr><td> Max Value:     </td><td> {info.object.params.max_value}    </td></tr>
+                <tr><td> Min Value:     </td><td> {info.object.params.min_value}    </td></tr>
+                <tr><td> Cache Value:   </td><td> {info.object.params.cache_value}  </td></tr>
+                <tr><td> Cycled:        </td><td> {info.object.params.is_cycled}    </td></tr>
+                <tr><td> Called:        </td><td> {info.object.params.is_called}    </td></tr>
+                </tbody>;
+
+            records = null;
+            size = null;
+            total_size = null;
+        }
 
         return (
         <div className="object-info-div"> 
@@ -385,9 +476,9 @@ var ObjectInfo = React.createClass({
             {indexes}
             {check_constraints}
             {triggers}
-            <p> Records: <span className="ace_constant">{info.object.records}</span></p>
-            <p> Size: <span className="ace_constant">{info.object.size}</span> </p>
-            <p> Total Size: <span className="ace_constant">{info.object.total_size}</span></p>
+            {records}
+            {size}
+            {total_size}
             {view_script}
         </div>
         );

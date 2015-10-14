@@ -1,8 +1,9 @@
 var async = require('async');
 var PqClient = require('./PqClient');
-var words = require('./keywords.js');
+var Words = require('./keywords.js');
 
-var Clients={};
+var Clients = {};
+var AutocompletionHashes = {};
 
 var Executor = {
 
@@ -186,66 +187,92 @@ and n.oid = c.relnamespace;";
 
                 /// fill the relation object with details
     
-                var get_columns = function(cb){
+                var get_columns = function(done){
                     self._getRelationColumns(id, connstr, password, object,
                     function(columns){
                         relation.columns = columns;
-                        cb();
+                        done();
                     },
                     err_callback);
                 };
 
-                var get_pk = function(cb){
+                var get_pk = function(done){
                     self._getRelationPK(id, connstr, password, object,
                     function(pk){
                         relation.pk = pk;
-                        cb();
+                        done();
                     },
                     err_callback);
                 };
 
-                var get_check_constraints = function(cb){
+                var get_check_constraints = function(done){
                     self._getCheckConstraints(id, connstr, password, object,
                     function(constraints){
                         relation.check_constraints = constraints;
-                        cb();
+                        done();
                     },
                     err_callback);
                 };
 
-                var get_indexes = function(cb){
+                var get_indexes = function(done){
                     self._getRelationIndexes(id, connstr, password, object,
                     function(indexes){
                         relation.indexes = indexes;
-                        cb();
+                        done();
                     },
                     err_callback);
                 };
 
-                var get_triggers = function(cb){
+                var get_triggers = function(done){
                     self._getTriggers(id, connstr, password, object,
                     function(triggers){
                         relation.triggers = triggers;
-                        cb();
+                        done();
                     },
                     err_callback);
                 };
 
-                var get_view_def = function(cb){
+                var get_view_def = function(done){
                     if (relation.relkind == 'v'){
                         var query = "select * from pg_get_viewdef('"+object+"')";
                         self._getData(id, connstr, password, query,
                         function(script){
                             relation.script = 'CREATE OR REPLACE VIEW '+object+' AS \n'+script;
-                            cb();
+                            done();
                         },
                         err_callback);
                     } else {
-                        cb();
+                        done();
                     }
                 }
 
-                async.series([get_columns, get_pk, get_check_constraints, get_indexes, get_triggers, get_view_def],
+                var get_sequence_info = function(done){
+                    if (relation.relkind == 'S'){
+                        var query = "select last_value, start_value, increment_by, max_value, min_value, cache_value, log_cnt, is_cycled, is_called from "+object;
+                        self._getData(id, connstr, password, query,
+                        function(data){
+                            if (data.length > 0){
+                                relation.params = {
+                                    last_value: data[0][0],
+                                    start_value: data[0][1],
+                                    increment_by: data[0][2],
+                                    max_value: data[0][3],
+                                    min_value: data[0][4],
+                                    cache_value: data[0][5],
+                                    log_cnt: data[0][6],
+                                    is_cycled: data[0][7],
+                                    is_called: data[0][8],
+                                };
+                            }
+                            done();
+                        },
+                        err_callback);
+                    } else {
+                        done();
+                    }
+                }
+
+                async.series([get_columns, get_pk, get_check_constraints, get_indexes, get_triggers, get_view_def, get_sequence_info],
                 function(){
                     callback(relation);
                 }
@@ -300,9 +327,9 @@ and p.proname = '"+proc_name+"'";
             var func = {};
             var error = null;
 
-            var calls_for_oids = search_path.map(function(item){return function(cb){
+            var calls_for_oids = search_path.map(function(item){return function(done){
                 if (oids.length > 0){ // skip if already found
-                    cb();
+                    done();
                     return;
                 }
                 var client = self.getClient(id, connstr, password);
@@ -356,7 +383,7 @@ and p.proname = '"+proc_name+"'";
                         });
                     }
                     ///
-                    cb();
+                    done();
                 },
                 function(err){
                     err_callback(id, err);
@@ -682,9 +709,11 @@ where t.oid = '+trigger_oid;
         var schemas = [];
         var databases = [];
         var roles = [];
+        var tablespaces = [];
+        var event_triggers = [];
 
         // get current dbname
-        var get_current_database = function(cb){
+        var get_current_database = function(done){
             var query = "SELECT current_database(), version()";
 
             self._getData(id, connstr, password, query,
@@ -693,13 +722,13 @@ where t.oid = '+trigger_oid;
                     current_database = data[0][0];
                     version = data[0][1];
                 }
-                cb();
+                done();
             },
             err_callback);
         };
 
         // get schemas
-        var get_schemas = function(cb){
+        var get_schemas = function(done){
             var query = " \
 SELECT nspname AS schema \
 FROM pg_namespace \
@@ -710,13 +739,13 @@ ORDER BY 1 \
                 if (data.length > 0){
                     schemas = data.map(function(item){return item[0];});
                 }
-                cb();
+                done();
             },
             err_callback);
         }
 
         // get roles
-        var get_roles = function(cb){
+        var get_roles = function(done){
             var query = " \
 SELECT rolname AS role \
 FROM pg_roles \
@@ -727,13 +756,13 @@ ORDER BY 1 \
                 if (data.length > 0){
                     roles = data.map(function(item){return item[0];});
                 }
-                cb();
+                done();
             },
             err_callback);
         }
 
         // get databases
-        var get_databases = function(cb){
+        var get_databases = function(done){
             var query = " \
 SELECT datname AS db \
 FROM pg_database \
@@ -744,18 +773,54 @@ ORDER BY 1 \
                 if (data.length > 0){
                     databases = data.map(function(item){return item[0];});
                 }
-                cb();
+                done();
             },
             err_callback);
         }
 
-        async.series([get_current_database, get_schemas, get_roles, get_databases], function(){
+        // get tablespaces
+        var get_tablespaces = function(done){
+            var query = " \
+SELECT spcname \
+FROM pg_tablespace \
+ORDER BY 1 \
+";
+            self._getData(id, connstr, password, query,
+            function(data){
+                if (data.length > 0){
+                    tablespaces = data.map(function(item){return item[0];});
+                }
+                done();
+            },
+            err_callback);
+        }
+
+        // get event triggers
+        var get_event_triggers = function(done){
+            var query = " \
+SELECT evtname \
+FROM pg_event_trigger \
+ORDER BY 1 \
+";
+            self._getData(id, connstr, password, query,
+            function(data){
+                if (data.length > 0){
+                    event_triggers = data.map(function(item){return item[0];});
+                }
+                done();
+            },
+            err_callback);
+        }
+
+        async.series([get_current_database, get_schemas, get_roles, get_databases, get_tablespaces, get_event_triggers], function(){
             var database = {
                 dbname: current_database,
                 version: version,
                 schemas: schemas,
                 roles: roles,
                 databases: databases,
+                tablespaces: tablespaces,
+                event_triggers: event_triggers,
             };
             return callback(database);
         });
@@ -767,9 +832,10 @@ ORDER BY 1 \
         var tables = [];
         var functions = [];
         var views = [];
+        var sequences = [];
 
         // get current dbname
-        var get_current_database = function(cb){
+        var get_current_database = function(done){
             var query = "SELECT current_database()";
 
             self._getData(id, connstr, password, query,
@@ -777,13 +843,13 @@ ORDER BY 1 \
                 if (data.length > 0){
                     current_database = data[0][0];
                 }
-                cb();
+                done();
             },
             err_callback);
         };
 
         // get tables
-        var get_tables = function(cb){
+        var get_tables = function(done){
             var query = " \
 select c.relname from \
 pg_class c, \
@@ -798,13 +864,13 @@ order by 1 \
                 if (data.length > 0){
                     tables = data.map(function(item){return item[0];});
                 }
-                cb();
+                done();
             },
             err_callback);
         }
 
         // get functions
-        var get_functions = function(cb){
+        var get_functions = function(done){
             var query = " \
 select distinct p.proname from \
 pg_proc p, \
@@ -819,14 +885,14 @@ order by 1  \
                 if (data.length > 0){
                     functions = data.map(function(item){return item[0];});
                 }
-                cb();
+                done();
             },
             err_callback);
             
         }
 
         // get views
-        var get_views = function(cb){
+        var get_views = function(done){
             var query = " \
 select viewname from \
 pg_views \
@@ -838,33 +904,58 @@ order by 1";
                 if (data.length > 0){
                     views = data.map(function(item){return item[0];});
                 }
-                cb();
+                done();
             },
             err_callback);
         }
 
-        async.series([get_current_database, get_tables, get_functions, get_views], function(){
+        // get sequences
+        var get_sequences = function(done){
+            var query = " \
+select c.relname from \
+pg_class c, \
+pg_namespace n \
+where n.nspname = '"+schema_name+"' \
+and c.relnamespace = n.oid \
+and c.relkind = 'S' \
+order by 1 \
+";
+            self._getData(id, connstr, password, query,
+            function(data){
+                if (data.length > 0){
+                    sequences = data.map(function(item){return item[0];});
+                }
+                done();
+            },
+            err_callback);
+        }
+
+        async.series([get_current_database, get_tables, get_functions, get_views, get_sequences], function(){
             var schema = {
                 schema_name: schema_name,
                 tables: tables,
                 functions: functions,
                 views: views,
+                sequences: sequences,
                 current_database: current_database,
             };
             callback(schema);
         });
 
-  
     },
 
     getCompletionWords: function(callback){
-        var query = "SELECT DISTINCT word FROM ( \
-SELECT nspname AS word FROM pg_namespace UNION \
-SELECT relname FROM pg_class UNION \
-SELECT proname FROM pg_proc UNION \
-SELECT attname FROM pg_attribute UNION \
-SELECT name FROM pg_settings \
-) v ORDER BY 1";
+        var query = " \
+SELECT word, hashtext(string_agg(word, '') over()) FROM ( \
+    SELECT DISTINCT word FROM ( \
+        SELECT nspname AS word FROM pg_namespace UNION \
+        SELECT relname FROM pg_class UNION \
+        SELECT proname FROM pg_proc UNION \
+        SELECT attname FROM pg_attribute UNION \
+        SELECT name FROM pg_settings \
+    ) v  ORDER BY 1 \
+) w \
+ORDER BY 1";
 
         for (var tab in Clients){
             var tabClient = Clients[tab];
@@ -874,17 +965,25 @@ SELECT name FROM pg_settings \
                 if (result.datasets.length > 0 && result.datasets[0].resultStatus == 'PGRES_FATAL_ERROR'){
                     console.log(result.datasets[0].resultErrorMessage);
                 } else {
-                    result.datasets[0].data.forEach(function(item, idx){
-                        var word = item[0];
-                        if (words.indexOf(word) == -1){
-                            words.push(word);
-                        }
-                    });
+                    if (tab in AutocompletionHashes &&
+                        result.datasets[0].data.length > 0 &&
+                        AutocompletionHashes[tab] == result.datasets[0].data[0][1]
+                    ) { // hash hasn't changed since last update
+                        return callback(Words);
+                    } else if (result.datasets[0].data.length > 0){ // remeber the hash and update words
+                        AutocompletionHashes[tab] = result.datasets[0].data[0][1];
+                        result.datasets[0].data.forEach(function(item, idx){
+                            var word = item[0];
+                            if (Words.indexOf(word) == -1){
+                                Words.push(word);
+                            }
+                        });
+                    }
                 }
             },
             function(err){console.log(err);/*ignore errors in background process*/})
         }
-        callback(words);
+        callback(Words);
     },
     
 };

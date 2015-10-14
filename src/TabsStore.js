@@ -188,6 +188,10 @@ var _TabsStore = function(){
     this.setConnection = function(id, connstr){
         this.tabs[id].connstr = connstr;
 
+        if (connstr == null || connstr == ""){ // don't track empty connstr
+            return;
+        }
+
         hist_idx = this.connectionHistory.indexOf(connstr);
         if (hist_idx == -1){ // add to history
             if (this.connectionHistory.length === 20){// limit history size

@@ -59,7 +59,9 @@ var Conf = {
     },
 
     getConnHistory: function(){
-        return config.conn_history;
+        var ret = config.conn_history.filter(function(item){return item != null && item != "";});
+        console.log(ret);
+        return ret;
     },
 
     getFontSize: function(){
