@@ -103,32 +103,39 @@ var Client = function(connstr, password){
 
     // query is ready to return data, so read data from server
     this.readyHandler = function(){
-        while (!self.finished){
-            self._read();
-        }
+        self._read();
+    };
 
+    this.dataReady = function(){
         if (!self.error){
             self.finished = true;
             self.pq.removeListener('readable', self.readyHandler);
             self.pq.stopReader();
             self.callback(self.Response);
         }
-    };
+    }
+
     // extract data from server
     this._read = function(){
         
         self.pq.consumeInput();
 
-        if (self.pq.isBusy()){
+        if (self.pq.isBusy()){ // give it a moment, so not to block while fetching data
+            setTimeout(function(){
+                if (!self.finished){
+                    self._read();
+                }
+            }, 100);
             return;
         } 
 
         res = self.pq.getResult();
 
         if (!res){ // no more result sets
-            this.finished = true;
-            this.pq.finish();
+            self.finished = true;
+            self.pq.finish();
             self.Response.finish();
+            self.dataReady();
             return;
         }
 
@@ -163,6 +170,10 @@ var Client = function(connstr, password){
             resultStatus: self.pq.resultStatus(),
             resultErrorMessage: self.pq.resultErrorMessage(),
         });
+
+        if (!self.finished){
+            self._read();
+        }
     }
 
     this.pq.on('notice', this.noticeHandler);
