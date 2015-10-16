@@ -12,9 +12,9 @@ In order to run SQL Tabs from source code follow the next steps:
 
         npm install electron-prebuilt@0.25.2 -g
 
-3. Install jsx - react javascript extension the application is written with:
+3. Install React javascript extension the application is written with:
 
-        npm install -g jsx
+        npm install -g react-tools
 
 4. Get the code, install dependencies and build the application:
 
