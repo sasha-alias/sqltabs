@@ -945,8 +945,9 @@ order by 1 \
     },
 
     getCompletionWords: function(callback){
-        var query = " \
-SELECT word, hashtext(string_agg(word, '') over()) FROM ( \
+
+        var query1 = "/*sqltabs*/ \
+SELECT hashtext(string_agg(word, '')) FROM ( \
     SELECT DISTINCT word FROM ( \
         SELECT nspname AS word FROM pg_namespace UNION \
         SELECT relname FROM pg_class UNION \
@@ -957,33 +958,89 @@ SELECT word, hashtext(string_agg(word, '') over()) FROM ( \
 ) w \
 ORDER BY 1";
 
+        var query2 = "/*sqltabs*/ \
+SELECT DISTINCT word FROM ( \
+    SELECT nspname AS word FROM pg_namespace UNION \
+    SELECT relname FROM pg_class UNION \
+    SELECT proname FROM pg_proc UNION \
+    SELECT attname FROM pg_attribute UNION \
+    SELECT name FROM pg_settings \
+) v  ORDER BY 1";
+
+        var needUpdate = {};
+        var calls = [];
+
         for (var tab in Clients){
-            var tabClient = Clients[tab];
-            var client = new PqClient(tabClient.connstr, tabClient.password);
-            client.sendQuery(query,
-            function(result){
-                if (result.datasets.length > 0 && result.datasets[0].resultStatus == 'PGRES_FATAL_ERROR'){
-                    console.log(result.datasets[0].resultErrorMessage);
-                } else {
-                    if (tab in AutocompletionHashes &&
-                        result.datasets[0].data.length > 0 &&
-                        AutocompletionHashes[tab] == result.datasets[0].data[0][1]
-                    ) { // hash hasn't changed since last update
-                        return callback(Words);
-                    } else if (result.datasets[0].data.length > 0){ // remeber the hash and update words
-                        AutocompletionHashes[tab] = result.datasets[0].data[0][1];
-                        result.datasets[0].data.forEach(function(item, idx){
-                            var word = item[0];
-                            if (Words.indexOf(word) == -1){
-                                Words.push(word);
-                            }
-                        });
+
+            needUpdate[tab] = false;
+
+            var hash = null;
+
+            var get_words_hash = function(tab){return function(done){
+                var tabClient = Clients[tab];
+                var client = new PqClient(tabClient.connstr, tabClient.password);
+                client.sendQuery(query1, // get hash of words
+                function(result){
+                    if (result.datasets.length > 0 && result.datasets[0].resultStatus == 'PGRES_FATAL_ERROR'){ // error
+                        // error ignore
+                    } else {
+                        if (tab in AutocompletionHashes &&
+                            result.datasets[0].data.length > 0 &&
+                            AutocompletionHashes[tab] == result.datasets[0].data[0][0]
+                        ) { 
+                            // hash hasn't changed since last update 
+                        } else {
+                            AutocompletionHashes[tab] = result.datasets[0].data[0][0];
+                            needUpdate[tab] = true;
+                        }
                     }
+                    client.disconnect();
+                    done();
+                },
+                function(err){
+                    client.disconnect();
+                    done();
+                });
+            }}(tab);
+            
+            var get_words = function(tab){return function(done){
+                if (needUpdate[tab]){
+                    var tabClient = Clients[tab];
+                    var client = new PqClient(tabClient.connstr, tabClient.password);
+
+                    client.sendQuery(query2, // get words themselves
+                    function(result){
+                        if (result.datasets.length > 0 && result.datasets[0].resultStatus == 'PGRES_FATAL_ERROR'){ // error
+                            // error ignore
+                        } else {
+                            result.datasets[0].data.forEach(function(item, idx){
+                                var word = item[0];
+                                if (Words.indexOf(word) == -1){
+                                    Words.push(word);
+                                }
+                            });
+                        }
+                        client.disconnect();
+                        done();
+                    },
+                    function(err){
+                        client.disconnect();
+                        done();
+                    });
+                    
+                } else {
+                    done();
                 }
-            },
-            function(err){console.log(err);/*ignore errors in background process*/})
+            }}(tab);
+
+            calls.push(get_words_hash);
+            calls.push(get_words);
         }
-        callback(Words);
+
+        async.series(calls, function(){
+            callback(Words);
+        });
+
     },
     
 };

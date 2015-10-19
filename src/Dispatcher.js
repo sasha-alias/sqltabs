@@ -317,7 +317,7 @@ var updateCompletionWords = function(){
         Executor.getCompletionWords(function(words){
             TabsStore.updateCompletionWords(words);
             TabsStore.trigger("completion-update"); 
-            wordsUpdateInProgress = false
+            wordsUpdateInProgress = false;
         });
     }
 }

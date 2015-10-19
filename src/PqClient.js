@@ -67,6 +67,10 @@ var Client = function(connstr, password){
         self.err_callback(err);
     };
 
+    this.disconnect = function(){
+        self.pq.finish();
+    };
+
     // send query for execution
     this.sendQuery = function(query, callback, err_callback){
         self.Response = new Response(query);
@@ -133,7 +137,7 @@ var Client = function(connstr, password){
 
         if (!res){ // no more result sets
             self.finished = true;
-            self.pq.finish();
+            //self.pq.finish(); ?? I have no idea why it was here, so commenting out for a while
             self.Response.finish();
             self.dataReady();
             return;
