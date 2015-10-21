@@ -18,10 +18,17 @@
 var request = require('request');
 
 Cloud = {
-    share: function(data, callback, err_callback){
+
+    share: function(target_server, data, callback, err_callback){
+        if (target_server.indexOf('http://') == -1 && target_server.indexOf('https://') == -1){
+            target_server = 'http://'+target_server;
+        }
+
+        var uri = target_server+'/api/1.0/docs';
+
         request({
             method: 'POST',
-            uri: 'http://www.sqltabs.com/api/1.0/docs',
+            uri: uri,
             json: true,
             headers: {
                 "content-type": "application/json",
@@ -30,7 +37,7 @@ Cloud = {
             },
             function(err, res, body){
                 if (err){
-                    err_callback(err);
+                    err_callback(err.message);
                     return;
                 }
 

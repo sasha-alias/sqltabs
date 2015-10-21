@@ -72,3 +72,9 @@
 .completion-hint-active{
     background-color: #DDDDDD;
 }
+
+/* sqldoc csv render*/
+.csv-separator{
+    color: rgb(84, 149, 213);
+    font-weight: bold;
+}

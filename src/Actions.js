@@ -46,14 +46,14 @@ var ObjectInfoCallback = function(key, object){
 }
 
 var ShareErrorCallback = function(err){
-    AppDispatcher.dispatch({
+    SignalsDispatcher.dispatch({
         eventName: 'doc-shared-error',
         error: err,
     });
 }
 
 var ShareCallback = function(docid){
-    AppDispatcher.dispatch({
+    SignalsDispatcher.dispatch({
         eventName: 'doc-shared',
         docid: docid,
     });
@@ -282,9 +282,16 @@ var Actions = {
         });
     },
 
-    share: function(){
+    shareDialog: function(){
+        AppDispatcher.dispatch({
+            eventName: 'share-dialog',
+        });
+    },
+
+    share: function(target_server){
         AppDispatcher.dispatch({
             eventName: 'share',
+            targetServer: target_server,
             callback: ShareCallback,
             err_callback: ShareErrorCallback,
         });

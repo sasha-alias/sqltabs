@@ -51,7 +51,16 @@ SignalsDispatcher.register(function(payload){
         case 'focus-editor':
             TabsStore.trigger('focus-editor-'+TabsStore.selectedTab);
             break;
-
+        case 'doc-shared':
+            TabsStore.setCloudDoc(payload.docid);
+            TabsStore.setCloudError(null);
+            TabsStore.trigger('cloud-message');
+            break;
+        case 'doc-shared-error':
+            TabsStore.setCloudDoc(null);
+            TabsStore.setCloudError(payload.error);
+            TabsStore.trigger('cloud-message');
+            break;
     };
     return true;
 });
@@ -240,22 +249,15 @@ AppDispatcher.register( function(payload) {
             TabsStore.trigger('change');
             break;
 
+        case 'share-dialog':
+            TabsStore.trigger('cloud-dialog');
+            break;
+
         case 'share':
             var result = TabsStore.getResult(TabsStore.selectedTab);
-            Cloud.share(result, payload.callback, payload.err_callback);
             TabsStore.trigger('cloud-sent');
-            break;
-
-        case 'doc-shared':
-            TabsStore.setCloudDoc(payload.docid);
-            TabsStore.setCloudError(null);
-            TabsStore.trigger('cloud-message');
-            break;
-
-        case 'doc-shared-error':
-            TabsStore.setCloudDoc(null);
-            TabsStore.setCloudError(payload.error);
-            TabsStore.trigger('cloud-message');
+            Config.saveSharingServer(payload.targetServer);
+            Cloud.share(payload.targetServer, result, payload.callback, payload.err_callback);
             break;
 
         case 'upgrade-check':

@@ -305,6 +305,15 @@ body{
     word-break: break-all;
 }
 
+.target-server-input{
+  width: 100%;
+  border-radius: 3px;
+  border-style: solid;
+  border-width: 1px;
+  padding: 3px;
+  padding-left: 8px;
+}
+
 .schema-nav{
     padding-top: 10px;
 }
@@ -401,4 +410,22 @@ body{
     padding-left: 5px;
     padding-right: 5px;
 }
+
+/* sqldoc csv render*/
+.csv-div {
+    margin-left: 10px;
+    white-space: nowrap;
+}
+.csv-fields-div {
+    margin-left: 10px;
+    white-space: nowrap;
+}
+.csv-field {
+    font-weight: bold;
+}
+.csv-separator{
+    margin-left: 3px;
+    margin-right: 3px;
+}
+
 

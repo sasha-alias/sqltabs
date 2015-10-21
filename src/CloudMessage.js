@@ -21,22 +21,41 @@ var Modal = require('react-bootstrap').Modal;
 var Button = require('react-bootstrap').Button;
 var OverlayMixin = require('react-bootstrap').OverlayMixin;
 var TabsStore = require('./TabsStore');
+var Actions = require('./Actions');
 var Shell = require('shell');
 
 var CloudMessage = React.createClass({
 
     getInitialState: function(){
+        this.target_server = TabsStore.sharingServer;
         return {hidden: true}
     },
 
     componentDidMount: function(){
+        TabsStore.bind('cloud-dialog', this.dialogHandler);
         TabsStore.bind('cloud-sent', this.sentHandler); 
         TabsStore.bind('cloud-message', this.cloudMessageHandler); 
     },
 
     componentWillUnmount: function(){
+        TabsStore.unbind('cloud-dialog', this.dialogHandler);
         TabsStore.unbind('cloud-sent', this.sentHandler); 
         TabsStore.unbind('cloud-message', this.cloudMessageHandler); 
+    },
+
+    dialogHandler: function(){
+        this.setState({
+            hidden: false, 
+            status: 'dialog',
+        });
+    },
+
+    targetChangeHandler: function(e){
+        this.target_server = e.target.value;
+    },
+
+    share: function(){
+        Actions.share(this.target_server);
     },
 
     sentHandler: function(){
@@ -58,9 +77,13 @@ var CloudMessage = React.createClass({
     },
 
     open: function(){
-
         var docid = TabsStore.getCloudDoc();
-        Shell.openExternal('http://www.sqltabs.com/api/1.0/docs/'+docid);
+        if (this.target_server.indexOf("http://") == -1 && this.target_server.indexOf('https://') == -1){
+            var target_server = "http://"+this.target_server;
+        } else {
+            var target_server = this.target_server;
+        }
+        Shell.openExternal(target_server+'/api/1.0/docs/'+docid);
         this.hide();
     },
 
@@ -74,6 +97,10 @@ var CloudMessage = React.createClass({
             if (this.state.status == 'sending'){ // sending in progress
 
                 return this.renderProgress();
+
+            } else if (this.state.status == 'dialog'){ // share dialog
+
+                return this.renderDialog();
 
             } else { // message from cloud
 
@@ -90,6 +117,42 @@ var CloudMessage = React.createClass({
                 }
             }
         }
+    },
+
+    renderDialog: function(){
+        return(
+            <div className='static-modal'>
+
+              <Modal 
+                bsStyle='primary'
+                backdrop={false}
+                animation={false}
+                container={document.body}
+                onRequestHide={this.hide}
+                onRequestEnter={this.enter}
+                >
+
+                <div className='modal-body'>
+                
+                    <table className="about-table"><tr>
+                    <td><img className="about-logo" src="logo.png"/></td>
+                    <td> 
+                        <div>
+                            Share on <input ref="target_server" onChange={this.targetChangeHandler} className="target-server-input" type="text" placeholder="www.sqltabs.com" defaultValue={this.target_server}></input>
+                        </div>
+                    </td>
+                    </tr></table>
+
+                </div>
+
+                <div className='modal-footer'>
+                   <Button onClick={this.share}>OK</Button>
+                   <Button onClick={this.hide}>Cancel</Button>
+                </div>
+
+              </Modal>
+            </div>
+        );
     },
 
     renderProgress: function(){
@@ -148,7 +211,7 @@ var CloudMessage = React.createClass({
                 <table className="about-table"><tr>
                 <td><img className="about-logo" src="logo.png"/></td>
                 <td> <p> Your document is available on the URL: </p>
-                     <p> <a href="#" onClick={this.open}>www.sqltabs.com/api/1.0/docs/{docid}</a></p>
+                     <p> <a href="#" onClick={this.open}>{this.target_server}/api/1.0/docs/{docid}</a></p>
                 </td>
                 </tr></table>
 

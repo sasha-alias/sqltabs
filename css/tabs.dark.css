@@ -143,3 +143,9 @@ table {
     background-color: #5e5e5e;
     color: #ffffff;
 }
+
+
+/* sqldoc csv render*/
+.csv-separator{
+    color: #DD8D8E;
+}

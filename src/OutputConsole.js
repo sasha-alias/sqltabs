@@ -102,7 +102,7 @@ var OutputConsole = React.createClass({
     },
 
     share: function(){
-        Actions.share();
+        Actions.shareDialog();
     },
 
     objectInfoReceived: function(){

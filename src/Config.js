@@ -80,6 +80,15 @@ var Conf = {
         this.saveSync();
     },
 
+    getSharingServer: function(){
+        return config.sharing_server;
+    },
+
+    saveSharingServer: function(server){
+        config.sharing_server = server;
+        this.saveSync();
+    },
+
     saveSync: function(){
         fs.unwatchFile(config_path);
         db.saveSync();
