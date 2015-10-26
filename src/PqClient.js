@@ -53,6 +53,7 @@ var Client = function(connstr, password){
     this.silentCancel = function(){
         self.callback = function(){};
         self.cancel();
+        self.disconnect();
     };
 
     this.isBusy = function(){
@@ -73,6 +74,7 @@ var Client = function(connstr, password){
 
     // send query for execution
     this.sendQuery = function(query, callback, err_callback){
+
         self.Response = new Response(query);
         self.finished = false;
         self.error = false;
@@ -80,22 +82,25 @@ var Client = function(connstr, password){
         self.callback = callback;
         self.err_callback = err_callback;
 
-        self.pq.connect(self._connstr, function(err) {
-            if (err){
-                console.log('Connection error: '+err);
-                return self.raiseError(err);
-            }
-
+        var send = function(){
             self.pq.addListener('readable', self.readyHandler);
             var sent = self.pq.sendQuery(query);
-
             if (!sent){
-                console.log('Query sending error: '+self.pq.errorMessage());
                 return self.raiseError(self.pq.errorMessage());
             }
-
             self.pq.startReader();
-        });
+        }
+
+        if (self.pq.socket() == -1){
+            self.pq.connect(self._connstr, function(err) {
+                if (err){
+                    return self.raiseError(err);
+                }
+                send();
+            });
+        } else {
+            send();
+        }
     };
 
     this.noticeHandler = function(message){
@@ -121,7 +126,11 @@ var Client = function(connstr, password){
 
     // extract data from server
     this._read = function(){
-        
+
+        if (self.pq.socket() == -1){
+            self.raiseError("Connection was terminated. Try to restart query.");
+        }
+
         self.pq.consumeInput();
 
         if (self.pq.isBusy()){ // give it a moment, so not to block while fetching data
@@ -205,13 +214,19 @@ var normalizeConnstr = function(connstr, password){
         if (connstr.lastIndexOf('postgres://', 0) !== 0) {
             connstr = 'postgres://'+connstr;
             parsed = url.parse(connstr);
-            connstr = util.format('%s//%s%s%s%s',
+            if (parsed.query == null){
+                var params = "application_name=sqltabs";
+            } else {
+                var params = parsed.query;
+            }
+            connstr = util.format('%s//%s%s%s%s?%s',
                 parsed.protocol,
                 parsed.auth,
                 (password == null) ? '' : ':'+password,
                 (parsed.host == null) ? '' : '@'+parsed.host,
-                (parsed.path == null) ? '' : parsed.path
-            )
+                (parsed.path == null) ? '' : parsed.pathname,
+                params
+            );
         }
 
         return connstr;

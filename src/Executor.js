@@ -62,21 +62,29 @@ var Executor = {
         var self = this;
         var current_block = 0;
         var results = [];
+        var client = this.getClient(id, connstr, password);
 
-        var deferred_callback = function(id, result){
-            results.push(result[0]); 
-            if (current_block == blocks.length-1){
-                callback(id, results);
-            } else {
-                current_block++;
-                self.runQuery(id, connstr, password, blocks[current_block], deferred_callback, function(err){err_callback(id, err);});
-            }
-        };
+        var calls = [];
+        for (var i=0; i<blocks.length; i++){
+            var call = function(block){return function(done){
+                client.sendQuery(block, 
+                function(result){
+                    results.push(result);
+                    done();
+                },
+                function(err){
+                    err_callback(err);
+                    done();
+                });
+                
+            }}(blocks[i]);
+            calls.push(call);
+        }
 
-        this.runQuery(id, connstr, password, blocks[current_block],
-            deferred_callback,
-            function(err){err_callback(id, err)}
-        );
+        async.series(calls, function(){
+            callback(id, results);
+        });
+
     },
 
     testConnection: function(id, connstr, password, callback, err_callback1, err_callback2){
