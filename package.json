@@ -25,7 +25,7 @@
     "react": ">=0.12.2",
     "react-bootstrap": ">=0.16.1",
     "request": "^2.60.0",
-    "sqldoc": "git+https://github.com/sasha-alias/sqldoc.git"
+    "sqldoc": "^0.2.1"
   },
   "devDependencies": {
     "electron-rebuild": "^0.1.4"
