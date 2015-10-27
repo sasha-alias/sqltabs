@@ -59,7 +59,11 @@ var Conf = {
     },
 
     getConnHistory: function(){
-        return config.conn_history.filter(function(item){return item != null && item != "";});
+        if (typeof(config.conn_history) != 'undefined'){
+            return config.conn_history.filter(function(item){return item != null && item != "";});
+        } else {
+            return [];
+        }
     },
 
     getFontSize: function(){
