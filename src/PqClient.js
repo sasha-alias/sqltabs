@@ -29,6 +29,7 @@ var Client = function(connstr, password){
     this._connstr = normalizeConnstr(connstr, password);
 
     this.setPassword = function(password){
+        this.disconnect();
         this.password = password;
         this._connstr = normalizeConnstr(this.connstr, password);
     };

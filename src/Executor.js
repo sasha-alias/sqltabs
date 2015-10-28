@@ -96,7 +96,7 @@ var Executor = {
                 callback(id, [result]);
             }, 
             function(err){
-                if (err.message.indexOf("no password supplied")>-1){
+                if (typeof(err.message) != 'undefined' && err.message.indexOf("no password supplied")>-1){
                     err_callback1(id, err);
                 } else {
                     err_callback2(id, err);
