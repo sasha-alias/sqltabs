@@ -142,7 +142,7 @@ var Editor = React.createClass({
         TabsStore.unbind('toggle-project-'+this.props.eventKey, this.hideCompleter);
         TabsStore.unbind('completion-update', this.completionUpdateHandler);
 
-        this.editor_input.addEventListener("keydown", this.keyHandler);
+        this.editor_input.removeEventListener("keydown", this.keyHandler);
     },
 
     execHandler: function(editor) {
@@ -345,7 +345,15 @@ var Editor = React.createClass({
             }
         }
 
-        if ([37,38,39,40,27].indexOf(e.keyCode) != -1){// hide autocompletion on arrows, esc
+        if (e.keyCode == 40){ // down
+            return this.completeNext();
+        }
+
+        if (e.keyCode == 38){ // up
+            return this.completePrev();
+        }
+
+        if ([37,39,27].indexOf(e.keyCode) != -1){// hide autocompletion on arrows, esc
             return this.hideCompleter();
         }
 
@@ -383,6 +391,8 @@ var Editor = React.createClass({
                 completer.html(this.renderHints());
                 this.completion_mode = true;
                 this.editor.commands.removeCommand('indent'); // disable tab
+                this.editor.commands.removeCommand('golineup'); // disable up
+                this.editor.commands.removeCommand('golinedown'); // disable down
                 return;
             } else {
                 this.hideCompleter(); 
@@ -404,6 +414,25 @@ var Editor = React.createClass({
             multiSelectAction: "forEach",
             scrollIntoView: "selectionPart"
         });
+
+        this.editor.commands.addCommand({ // enable up back
+            name: "golineup",
+            bindKey: {win: "Up", mac: "Up|Ctrl-P"},
+            exec: function(editor, args) { editor.navigateUp(args.times); },
+            multiSelectAction: "forEach",
+            scrollIntoView: "cursor",
+            readOnly: true
+        });
+
+        this.editor.commands.addCommand({ // enable down back
+            name: "golinedown",
+            bindKey: {win: "Down", mac: "Down|Ctrl-N"},
+            exec: function(editor, args) { editor.navigateDown(args.times); },
+            multiSelectAction: "forEach",
+            scrollIntoView: "cursor",
+            readOnly: true
+        });
+
     },
 
     getHints: function(word){
@@ -423,9 +452,12 @@ var Editor = React.createClass({
         var position = this.editor.getCursorPosition();
         var line = this.editor.session.getLine(position.row);
         line = line.slice(0, position.column);
-        var word = line.match(/\w+$/)[0];
-        var range = new Range(position.row, position.column - word.length, position.row, position.column);
-        this.editor.getSession().replace(range, hint);
+        line = line.match(/\w+$/);
+        if (line != null){
+            var word = line[0];
+            var range = new Range(position.row, position.column - word.length, position.row, position.column);
+            this.editor.getSession().replace(range, hint);
+        }
 
         var completer = $(React.findDOMNode(this.refs.completer));
         completer.html(this.renderHints());
