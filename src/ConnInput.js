@@ -81,6 +81,7 @@ var ConnInput = React.createClass({
     },
 
     pickHandler: function(e){
+        console.log(e.target);
         var idx = e.target.getAttribute("data-idx");
         this.setState({
             active: false,
@@ -160,7 +161,7 @@ var ConnInput = React.createClass({
                 onMouseOver={self.itemMouseOverHandler} 
                 onClick={self.pickHandler} 
                 className={"conn_history_item"+hilighted} 
-                key={'connhist'+i}><span className="conn_item_alias">{alias}</span> {conn_str}</li>;
+                key={'connhist'+i}><span data-idx={i} className="conn_item_alias">{alias}</span><span data-idx={i}>{conn_str}</span></li>;
         });
 
         if (this.state.active && TabsStore.connectionHistory.length > 0){
