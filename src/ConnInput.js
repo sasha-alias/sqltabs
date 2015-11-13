@@ -81,7 +81,6 @@ var ConnInput = React.createClass({
     },
 
     pickHandler: function(e){
-        console.log(e.target);
         var idx = e.target.getAttribute("data-idx");
         this.setState({
             active: false,
