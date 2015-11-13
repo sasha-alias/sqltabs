@@ -9,7 +9,7 @@ var Executor = {
 
     getClient: function(id, connstr, password){
 
-        if (id in Clients && Clients[id].connstr == connstr){
+        if (id in Clients && Clients[id].connstr == connstr && Clients[id].connected){
             var client = Clients[id];
             if (client.isBusy()){ // when previous query is running
                 client.silentCancel(); // just drop it

@@ -29,13 +29,17 @@ var Client = function(connstr, password){
     this._connstr = normalizeConnstr(connstr, password);
 
     this.setPassword = function(password){
-        this.disconnect();
+        if (password != this.password){
+            this.disconnect();
+        }
         this.password = password;
         this._connstr = normalizeConnstr(this.connstr, password);
     };
 
     // libpq instance
     this.pq = new PQ();
+
+    this.connected = false;
 
     this.callback = null;
 
@@ -70,6 +74,7 @@ var Client = function(connstr, password){
     };
 
     this.disconnect = function(){
+        self.connected = false;
         self.pq.finish();
     };
 
@@ -92,11 +97,12 @@ var Client = function(connstr, password){
             self.pq.startReader();
         }
 
-        if (self.pq.socket() == -1){
+        if (!self.connected){
             self.pq.connect(self._connstr, function(err) {
                 if (err){
                     return self.raiseError(err);
                 }
+                self.connected = true;
                 send();
             });
         } else {
@@ -129,6 +135,7 @@ var Client = function(connstr, password){
     this._read = function(){
 
         if (self.pq.socket() == -1){
+            self.connected = false;
             self.raiseError("Connection was terminated. Try to restart query.");
         }
 
@@ -147,7 +154,6 @@ var Client = function(connstr, password){
 
         if (!res){ // no more result sets
             self.finished = true;
-            //self.pq.finish(); ?? I have no idea why it was here, so commenting out for a while
             self.Response.finish();
             self.dataReady();
             return;
