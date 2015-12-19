@@ -28,7 +28,9 @@
     "sqldoc": "^0.2.1"
   },
   "devDependencies": {
-    "electron-rebuild": "^0.1.4"
+    "electron-packager": "^5.1.1",
+    "electron-rebuild": "^0.1.4",
+    "uglifyjs": "^2.4.10"
   },
   "scripts": {
     "postinstall": "jsx src/ build/"
