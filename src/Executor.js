@@ -1021,12 +1021,14 @@ SELECT DISTINCT word FROM ( \
                         if (result.datasets.length > 0 && result.datasets[0].resultStatus == 'PGRES_FATAL_ERROR'){ // error
                             // error ignore
                         } else {
-                            result.datasets[0].data.forEach(function(item, idx){
+                            data = result.datasets[0].data;
+                            async.eachSeries(data, function(item, callback){
                                 var word = item[0];
                                 if (Words.indexOf(word) == -1){
                                     Words.push(word);
                                 }
-                            });
+                                callback();
+                            })
                         }
                         client.disconnect();
                         done();
