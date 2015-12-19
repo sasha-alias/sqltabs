@@ -24,6 +24,10 @@
     color: rgb(0, 0, 205);
 }
 
+.ace_content{
+    background-color: rgb(255, 255, 255);
+}
+
 .omitted-message{
     color: rgb(147, 15, 128);
 }
@@ -77,4 +81,10 @@
 .csv-separator{
     color: rgb(84, 149, 213);
     font-weight: bold;
+}
+
+
+/* sqldoc floating header*/
+.floating-cols-header {
+    background: rgba(255, 255, 255, 0.9);
 }

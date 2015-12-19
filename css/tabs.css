@@ -114,6 +114,8 @@ body{
     cursor: ew-resize;
     width: 3px;
     height: 100%;
+    position: relative;
+    z-index: 1;
 }
 
 .edit-area{
@@ -147,6 +149,10 @@ body{
     font-size: inherit !important;
 }
 
+.ace_content{
+    z-index: 1;
+}
+
 .connection-error{
     font-family: monospace;
     white-space: pre-line;
@@ -155,6 +161,21 @@ body{
 .query-error{
     font-family: monospace;
     white-space: pre;
+}
+
+.floating-cols-header{
+    position: fixed;
+    display: none;
+    margin-top: -5px;
+}
+
+.floating-header-table{
+}
+
+.floating-field {
+    display: inline-block;
+    padding: 8px;
+    font-weight: bold;
 }
 
 .table-resultset {

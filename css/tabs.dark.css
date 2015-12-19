@@ -54,6 +54,10 @@
     color: #BC9458;
 }
 
+.ace_content{
+    background-color: #323232;
+}
+
 .ace_keyword{
     color: #CC7833;
 }
@@ -148,4 +152,9 @@ table {
 /* sqldoc csv render*/
 .csv-separator{
     color: #DD8D8E;
+}
+
+/* sqldoc floating header*/
+.floating-cols-header {
+    background: rgba(40, 40, 40, 0.8);
 }
