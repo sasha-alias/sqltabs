@@ -24,11 +24,11 @@
     "react": "^0.13.0",
     "react-bootstrap": "^0.23.0",
     "request": "^2.60.0",
-    "sqldoc": "^0.3.0"
+    "sqldoc": "^0.3.0",
+    "c3": "^0.4.0"
   },
   "devDependencies": {
     "electron-packager": "^5.1.1",
-    "electron-rebuild": "^0.1.4",
     "uglifyjs": "^2.4.10"
   },
   "scripts": {
