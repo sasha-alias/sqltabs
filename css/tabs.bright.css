@@ -40,6 +40,10 @@
     background-color: #dcdcdc;
 }
 
+.project-div{
+    background-color: rgb(255, 255, 255);
+}
+
 .project-toolbar a{
     color: #666666;
 }

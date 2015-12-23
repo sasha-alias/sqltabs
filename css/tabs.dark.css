@@ -110,6 +110,10 @@ table {
     background-image: none;
 }
 
+.project-div{
+    background-color: #323232;
+}
+
 .project-folder:hover{
     background-color: #5BC0DE;
     color: #ffffff;
