@@ -31,14 +31,11 @@ In order to run SQL Tabs from source code follow the next steps:
 
         git clone https://github.com/sasha-alias/sqltabs
         cd sqltabs
-        npm install d3
-        npm install c3
-        rm -r node_modules/c3/node_modules
         export npm_config_disturl=https://atom.io/download/atom-shell
         export npm_config_target=0.27.3
         export npm_config_arch=x64
         export npm_config_runtime=electron
-        npm install --target=0.27.3
+        npm install
 
 5. Run the application:
 

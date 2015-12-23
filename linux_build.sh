@@ -13,8 +13,8 @@ cp -r node_modules .build/
 
 cd .build
 electron-packager ./ "sqltabs" --platform=linux --arch=x64 --version=0.27.3 --icon logo.png --asar --prune
-rm sqltabs-linux/LICENSE
-rm sqltabs-linux/version
-cp ../logo.png sqltabs-linux/logo.png
+rm sqltabs-linux-x64/LICENSE
+rm sqltabs-linux-x64/version
+cp ../logo.png sqltabs-linux-x64/logo.png
 cd ..
 
