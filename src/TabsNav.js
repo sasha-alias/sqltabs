@@ -75,8 +75,11 @@ var TabsNav = React.createClass({
         var items = this.state.order;
         var tabs = this.state.tabs;
         var itemHtml = items.map( function(item) {
-                return <NavItem key={item} eventKey={item}> 
+                var title = <span className="tab-title">
                     {tabs[item].getTitle()}
+                </span>
+                return <NavItem key={item} eventKey={item}> 
+                    {title}
                     <CloseButton eventKey={item}/>
                 </NavItem>;
             });

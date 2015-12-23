@@ -23,6 +23,11 @@ body{
     margin-left: 3px;
 }
 
+.tab-title{
+    display: inline-block;
+    min-width: 60px;
+}
+
 .tab-close-button{
     margin-left: 10px;
 }
