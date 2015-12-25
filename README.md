@@ -4,7 +4,9 @@ Rich SQL console for Postgresql. Home [www.sqltabs.com](http://www.sqltabs.com)
 
 ## Building
 
+
 In order to run SQL Tabs from source code follow the next steps:
+(In case of any issues please report them [here](https://github.com/sasha-alias/sqltabs/issues/39))
 
 1. Install [npm](https://www.npmjs.com) - a javascript package manager
 
