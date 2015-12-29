@@ -218,8 +218,8 @@ var normalizeConnstr = function(connstr, password){
         if (meta_start != -1){
             connstr = connstr.substr(0, meta_start).trim();
         }
-        if (connstr.lastIndexOf('postgresql://', 0) !== 0) {
-            connstr = 'postgresql://'+connstr;
+        if (connstr.lastIndexOf('postgresql://', 0) !== 0 && connstr.lastIndexOf('postgres://', 0) !== 0) {
+            connstr = 'postgres://'+connstr;
             parsed = url.parse(connstr);
             if (parsed.query == null){
                 var params = "application_name=sqltabs";
