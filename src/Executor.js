@@ -105,6 +105,24 @@ var Executor = {
         );
     },
 
+    _quoteObject: function(object){
+        if (object.indexOf('.') > 0){
+            var list = object.split('.');
+            var quoted = list.map(function(item){return '"'+item+'"';});
+            return quoted.join('.');
+        } else {
+            return '"'+object+'"';
+        }
+    },
+
+    _unquoteString: function(str){
+        if (str.indexOf('"') == 0 && str.lastIndexOf('"') == str.length - 1){
+            return str.slice(1, str.length-1)
+        } else {
+            return str;
+        }
+    },
+
     _getCurrentUser: function(id, connstr, password, callback, err_callback){
         
         var client = this.getClient(id, connstr, password);
@@ -295,30 +313,6 @@ and n.oid = c.relnamespace;";
         });
     },
 
-    _getProcOids: function(id, connstr, password, object, callback, err_callback){
-
-        var client = this.getClient(id, connstr, password);
-
-        var schema_name = object.split('.')[0];
-        var proc_name = object.split('.')[1];
-
-        var query = "SELECT p.oid from \
-    pg_proc p, \
-    pg_namespace n \
-where p.pronamespace = n.oid \
-and n.nspname = '"+schema_name+"' \
-and p.proname = '"+proc_name+"'";
-
-        client.sendQuery(query, 
-        function(result){
-            callback();
-            //callback(result.datasets[0].data);
-        },
-        function(err){
-            err_callback(id, err);
-        });
-    },
-
     _findProc: function(id, connstr, password, object, callback, err_callback){
         var self = this;
         this._getSearchPath(id, connstr, password, 
@@ -342,8 +336,8 @@ and p.proname = '"+proc_name+"'";
                 }
                 var client = self.getClient(id, connstr, password);
 
-                var schema_name = item;
-                var proc_name = object;
+                var schema_name = self._unquoteString(item);
+                var proc_name = self._unquoteString(object);
 
                 func.schema_name = schema_name;
                 func.function_name = proc_name;
@@ -678,6 +672,7 @@ where t.oid = '+trigger_oid;
         }
 
         // try to find relation
+        object = self._quoteObject(object);
         self._findRelation(id, connstr, password, object,
         function(relation){
             var ret = {object_type: "relation", object: relation, object_name: object};
