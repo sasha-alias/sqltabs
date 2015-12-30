@@ -46,13 +46,13 @@ var Container = React.createClass({
     render: function(){
         if (this.props.type == "horizontal"){
             return (
-            <div className="tab-split-container" style={{width: '100%', height: this.props.h}}>
+            <div className="tab-split-container" style={{width: '100%'}}>
                 {this.props.children}
             </div>
             );
         } else {
             return (
-            <div className="tab-split-container" style={{width: this.props.h, height: '100%'}}>
+            <div className="tab-split-container">
                 {this.props.children}
             </div>
             );
@@ -70,36 +70,124 @@ var TabSplit = React.createClass({
             var type = this.props.type;
         }
 
-        if (typeof(this.props.h1) == 'undefined'){
-            var h1 = "50%";
-            var h2 = "calc(50% - 5px)";
-        } else {
-            var h1 = this.props.h1;
-            var h2 = "calc(100% - 5px - "+this.props.h1+")";
-        }
-
-        if (this.props.project){
-            h1 = 0;
-            h2 = "calc(100% - 5px)";
-        }
-
         return {
             drag: false, 
-            h1: h1,
-            h2: h2,
             type: type,
             project_visible: false,
         };
     },
 
+    setInitialSize: function(){
+        var main_container = $(this.getDOMNode());
+        var first_container = $(this.refs.first_container.getDOMNode());
+        var second_container = $(this.refs.second_container.getDOMNode());
+
+        main_container.height($(document).height() - main_container.offset().top);
+
+        if (typeof(this.props.type) == 'undefined' || this.props.type == 'horizontal'){
+        // horizontally split editor area
+            var h1 = $(document).height()/3;
+            first_container.height(h1);
+            first_container.width('100%');
+            var h2 = $(document).height() - second_container.offset().top;
+            second_container.height(h2);
+            second_container.width('100%');
+        } else {
+        // vertically split project area
+            first_container.width('0px');
+            first_container.height(main_container.height());
+            second_container.width('100%');
+            second_container.height(main_container.height());
+        }
+    },
+
+    resizeContainers: function(){
+        var main_container = $(this.getDOMNode());
+        var first_container = $(this.refs.first_container.getDOMNode());
+        var second_container = $(this.refs.second_container.getDOMNode());
+        var splitter = $(this.refs.splitter.getDOMNode());
+
+        main_container.height($(document).height() - main_container.offset().top);
+
+        if (this.state.resize_type == 'show_project') {
+            first_container.width('20%');
+            second_container.width(main_container.width() - first_container.width() - 5);
+            splitter.height(main_container.height());
+        }
+
+        if (this.state.resize_type == 'hide_project') {
+            first_container.width('0px');
+            second_container.width(main_container.width());
+        }
+
+        if (this.state.resize_type == 'switch_view') {
+            if (this.state.type == 'horizontal'){
+                var h1 = $(document).height()/3;
+                first_container.width('100%');
+                first_container.height(h1);
+                var h2 = $(document).height() - first_container.offset().top - first_container.height() - 8;
+                second_container.width('100%');
+                second_container.height(h2);
+            } else { // vertical
+                first_container.width(main_container.width()/2);
+                first_container.height($(document).height() - main_container.offset().top);
+                second_container.width(main_container.width()/2 - 5);
+                second_container.height($(document).height() - main_container.offset().top);
+            }
+        }
+    },
+
+    horizontalResize: function(e){
+        var main_container = $(this.getDOMNode());
+        var first_container = $(this.refs.first_container.getDOMNode());
+        var second_container = $(this.refs.second_container.getDOMNode());
+        
+        var h1 = e.pageY - first_container.offset().top;
+        var h2 = main_container.height() - h1;
+        if (h1 > 15 && h2 > 15) {
+            first_container.height(h1);
+            second_container.height($(document).height() - first_container.offset().top - h1 - 8);
+            TabActions.resize(this.props.eventKey);
+        }
+    },
+
+    verticalResize: function(e){
+        var main_container = $(this.getDOMNode());
+        var first_container = $(this.refs.first_container.getDOMNode());
+        var second_container = $(this.refs.second_container.getDOMNode());
+        
+        var w1 = e.pageX - first_container.offset().left;
+        var w2 = main_container.width() - w1;
+        if (w1 > 15 && w2 > 15) {
+            if (this.state.project_visible && w1 > main_container.width()/2){
+                return; // project window max width 50%
+            }
+            first_container.width(w1);
+            second_container.width($(document).width() - first_container.offset().left - w1 - 5);
+            TabActions.resize(this.props.eventKey);
+        }
+    },
+
     componentDidMount: function(){
+        var self = this;
+
         if (this.props.project){
             TabsStore.bind('show-project-'+this.props.eventKey, this.showProjectHandler);
             TabsStore.bind('hide-project-'+this.props.eventKey, this.hideProjectHandler);
             TabsStore.bind('toggle-project-'+this.props.eventKey, this.toggleProjectHandler);
         } else {
             TabsStore.bind('switch-view-'+this.props.eventKey, this.switchViewHandler);
+            TabsStore.bind('editor-resize', this.resizeHandler);
         }
+
+        self.setInitialSize();
+    },
+
+    componentDidUpdate: function(){
+        if (this.make_resize){
+            this.make_resize = false;
+            this.resizeContainers();
+        } 
     },
 
     componentWillUnmount: function(){
@@ -112,37 +200,56 @@ var TabSplit = React.createClass({
         }
     },
 
+    resizeHandler: function(){
+        // handle risize of outer container for vertical view
+        if (this.state.type == 'vertical' && !this.state.project_visible){
+            var first_container = $(this.refs.first_container.getDOMNode());
+            var second_container = $(this.refs.second_container.getDOMNode());
+            var second_overflow = (first_container.offset().left + first_container.width() + second_container.width() + 5) - $(document).width();
+            if ( second_overflow > 0) {
+                // reduce second container width
+                var w2 = second_container.width() - second_overflow;
+                second_container.width(w2);
+            } else if (second_overflow < 0) {
+                // expand second container width
+                var w2 = second_container.width() + second_overflow*-1;
+                second_container.width(w2);
+            }
+        }
+    },
+
     switchViewHandler: function(){
+        this.make_resize = true;
         if (this.state.type == 'horizontal'){
             this.setState({
-                h1: '50%',
-                h2: 'calc(50% - 5px)',
-                type: 'vertical'
+                type: 'vertical',
+                resize_type: 'switch_view',
             });
         } else {
             this.setState({
-                h1: '50%',
-                h2: 'calc(50% - 5px)',
-                type: 'horizontal'
+                type: 'horizontal',
+                resize_type: 'switch_view',
             });
         }
         TabActions.resize(this.props.eventKey);
     },
 
     showProjectHandler: function(){
+        this.make_resize = true;
         this.setState({
-            h1: '20%',
-            h2: 'calc(80% - 5px)',
             project_visible: true,
+            resize_type: 'show_project',
         });
+        TabActions.resize(this.props.eventKey);
     },
 
     hideProjectHandler: function(){
-        this.setState({
-            h1: 0,
-            h2: "calc(100% - 5px)",
+        this.make_resize = true;
+        this.setState({ 
             project_visible: false,
+            resize_type: 'hide_project',
         });
+        TabActions.resize(this.props.eventKey);
     },
 
     toggleProjectHandler: function(){
@@ -154,61 +261,49 @@ var TabSplit = React.createClass({
     },
 
     mouseDownHandler: function(e){
-        this.setState({
-          drag: true,
-        });
-
         e.stopPropagation();
         e.preventDefault();
+        this.setState({drag: true});
     },
 
     mouseMoveHandler: function(e){
 
+        if (!this.state.drag){
+            return;
+        }
+        var first_container = $(this.refs.first_container.getDOMNode())
+        var second_container = $(this.refs.second_container.getDOMNode())
+
         if (this.state.type == 'horizontal'){
-            var pos = $(this.getDOMNode()).offset();
-            var h = $(this.getDOMNode()).height();
+            this.horizontalResize(e);
 
-            if (this.state.drag){
-
-                var h1 = e.pageY - pos.top;
-                var h2 = h - h1 - 5;
-                if (h1 > 15 && h2 > 15) {
-                    this.setState({
-                        h1: h1,
-                        h2: h2,
-                        });
-                    TabActions.resize(this.props.eventKey);
-                }
-            }
         } else { // vertical
-            var pos = $(this.getDOMNode()).offset();
-            var h = $(this.getDOMNode()).width();
+            this.verticalResize(e);
+            //var pos = $(this.getDOMNode()).offset();
+            //var h = $(this.getDOMNode()).width();
 
-            if (this.state.drag){
-
-                var h1 = e.pageX - pos.left;
-                var h2 = h - h1 - 5;
-                if (h1 > 15 && h2 > 15) {
-                    this.setState({
-                        h1: h1,
-                        h2: h2,
-                        });
-                    TabActions.resize(this.props.eventKey);
-                }
-            }
+            //var h1 = e.pageX - pos.left;
+            //var h2 = h - h1 - 5;
+            //if (h1 > 15 && h2 > 15) {
+            //    this.setState({
+            //        h1: h1,
+            //        h2: h2,
+            //        });
+            //    TabActions.resize(this.props.eventKey);
+            //}
         }
     },
 
     mouseUpHandler: function(e){
-        this.setState({drag: false});
         e.stopPropagation();
         e.preventDefault();
+        this.setState({drag: false});
     },
 
     mouseLeaveHandler: function(e){
-        this.setState({drag: false});
         e.stopPropagation();
         e.preventDefault();
+        this.setState({drag: false});
     },
 
     render: function(){
@@ -225,13 +320,13 @@ var TabSplit = React.createClass({
           onMouseUp={this.mouseUpHandler}
           onMouseLeave={this.mouseLeaveHandler}
         >
-          <Container type={this.state.type} h={this.state.h1}> 
+          <Container ref="first_container" type={this.state.type} h={this.state.h1}> 
             {this.props.children[0]}
           </Container>
-          <Splitter type={splitter_type}
+          <Splitter ref="splitter" type={splitter_type}
               mouseDownHandler={this.mouseDownHandler}
           />
-          <Container type={this.state.type} h={this.state.h2}>
+          <Container ref="second_container" type={this.state.type} h={this.state.h2}>
             {this.props.children[1]}
           </Container>
         </div>

@@ -42,7 +42,7 @@ body{
 
 .tab-container {
     display: inline-block;
-    height: calc(100% - 25px);
+    height: 100%;
     width: 100%;
 }
 
@@ -54,7 +54,7 @@ body{
 
 .tab-content-without-toolbar {
     display: inline-block;
-    height: calc(100% - 40px);
+    height: 100%;
     width: 100%;
 }
 
