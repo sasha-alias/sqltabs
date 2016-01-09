@@ -90,6 +90,13 @@ var ConnInput = React.createClass({
         TabActions.setConnection(this.props.eventKey, TabsStore.connectionHistory[idx]);
     },
 
+    removeHandler: function(e){
+        var idx = e.target.getAttribute("data-idx");
+        e.stopPropagation();
+        e.preventDefault();
+        TabActions.removeConnectionItem(this.props.eventKey, TabsStore.connectionHistory[idx]);
+    },
+
     dontLoseFocus: function(){
         React.findDOMNode(this).removeEventListener("focusout", this.unfocusHandler);
     },
@@ -155,12 +162,26 @@ var ConnInput = React.createClass({
                 var conn_str = item;
                 var alias = null;
             }
-            var hilighted = (i==self.state.hilight)? ' conn_history_item_active' : '';
+            if (i == self.state.hilight) {
+                var highlighted = ' conn_history_item_active'
+                var remove_item = <span 
+                    data-idx={i} 
+                    key={"remove_connstr_"+i} 
+                    onClick={self.removeHandler}
+                    className="conn_item_remove glyphicon glyphicon-minus-sign"></span>
+            } else {
+                var highlighted = '';
+                var remove_item = '';
+            }
             return <li data-idx={i} 
                 onMouseOver={self.itemMouseOverHandler} 
                 onClick={self.pickHandler} 
-                className={"conn_history_item"+hilighted} 
-                key={'connhist'+i}><span data-idx={i} className="conn_item_alias">{alias}</span><span data-idx={i}>{conn_str}</span></li>;
+                className={"conn_history_item"+highlighted} 
+                key={'connhist'+i}>
+                    <span data-idx={i} className="conn_item_alias">{alias}</span>
+                    <span data-idx={i}>{conn_str}</span>
+                    {remove_item}
+                </li>;
         });
 
         if (this.state.active && TabsStore.connectionHistory.length > 0){

@@ -234,6 +234,13 @@ body{
     font-weight: bold;
 }
 
+.conn_item_remove{
+    float: right;
+    margin-left: 5px;
+    margin-right: 5px;
+    cursor: no-drop;
+}
+
 .c3-legend-item{
     font-size: inherit;
 }

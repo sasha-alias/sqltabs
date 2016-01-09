@@ -205,6 +205,14 @@ var _TabsStore = function(){
         }
     };
 
+    this.removeConnectionItem = function(connstr){
+        var idx = this.connectionHistory.indexOf(connstr)
+        if (idx > -1){
+            this.connectionHistory.splice(idx, 1);
+
+        }
+    };
+
     this.setPassword = function(id, password){
         this.tabs[id].password = password;
         connstr = this.getConnstr(id);

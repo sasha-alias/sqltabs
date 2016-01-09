@@ -116,6 +116,12 @@ AppDispatcher.register( function(payload) {
             Config.saveMode(payload.key);
             TabsStore.trigger('change-mode');
             break;
+
+        case 'remove-connection-item':
+            TabsStore.removeConnectionItem(payload.value);
+            Config.saveConnHistory(TabsStore.connectionHistory);
+            TabsStore.trigger('change');
+            break;
         
         case 'set-connection':
             TabsStore.setConnection(payload.key, payload.value);

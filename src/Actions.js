@@ -133,6 +133,14 @@ var Actions = {
         });
     },
 
+    removeConnectionItem: function(key, value){
+        AppDispatcher.dispatch({
+            eventName: 'remove-connection-item',
+            key: key,
+            value: value,
+        });
+    },
+
     resize: function(key){
         SignalsDispatcher.dispatch({
             eventName: 'editor-resize',
