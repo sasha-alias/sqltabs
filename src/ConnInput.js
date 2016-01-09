@@ -173,13 +173,20 @@ var ConnInput = React.createClass({
                 var highlighted = '';
                 var remove_item = '';
             }
+
+            if (alias){
+                var alias = <span data-idx={i} className="conn_item_alias">{alias}</span>
+            } else {
+                var alias = '';
+            }
+
             return <li data-idx={i} 
                 onMouseOver={self.itemMouseOverHandler} 
                 onClick={self.pickHandler} 
                 className={"conn_history_item"+highlighted} 
                 key={'connhist'+i}>
-                    <span data-idx={i} className="conn_item_alias">{alias}</span>
-                    <span data-idx={i}>{conn_str}</span>
+                    {alias}
+                    <span data-idx={i} className="conn_item_str">{conn_str}</span>
                     {remove_item}
                 </li>;
         });

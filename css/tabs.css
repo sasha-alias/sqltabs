@@ -227,11 +227,16 @@ body{
 
 .conn_history_item{
     cursor: pointer;    
-    padding-left: 10px;
+    padding-left: 5px;
 }
 
 .conn_item_alias{
     font-weight: bold;
+    padding-left: 5px;
+}
+
+.conn_item_str{
+    padding-left: 5px;
 }
 
 .conn_item_remove{
