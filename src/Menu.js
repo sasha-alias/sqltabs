@@ -94,7 +94,7 @@ if (process.platform == 'darwin'){
             type: 'separator'
           },
           {
-            label: 'Quite',
+            label: 'Quit',
             accelerator: 'Command+Q',
             click: function(){app.quit()},
           },
