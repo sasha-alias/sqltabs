@@ -60,7 +60,9 @@ var saveFile = function(){
 
 var saveFileAs = function(){
     dialog.showSaveDialog(function(filename){
-        console.log(filename);
+        if (typeof(filename) != 'undefined'){
+            Actions.saveFile(filename);
+        }
     })
 }
 
