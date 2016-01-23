@@ -357,7 +357,7 @@ var Editor = React.createClass({
             return this.hideCompleter();
         }
 
-        if (e.keyCode != 16){  // ignore shift
+        if ([16,17,18,91].indexOf(e.keyCode) < 0){  // ignore shift, ctr, alt, command
             var vim_mode = this.getVimMode();
             if (vim_mode == null || vim_mode == 'insert'){ // don't show autocompletion in normal mode of vim
                 setTimeout(function(){
