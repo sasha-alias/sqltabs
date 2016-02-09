@@ -25,6 +25,8 @@ require('brace/theme/chrome');
 require('brace/theme/idle_fingers');
 require('brace/keybinding/vim');
 
+var Cassandra = require('./connectors/cassandra/Renderer.js');
+
 var ObjectInfo = React.createClass({
 
     getInitialState: function(){
@@ -501,7 +503,12 @@ var ObjectInfo = React.createClass({
 
         } else if (info.object_type == 'trigger'){
             return this.render_trigger_info(info);
-
+        } else if (info.object_type == 'cassandra_cluster'){
+            return Cassandra.renderCluster(this.props.eventKey, info, this.getInfo);
+        } else if (info.object_type == 'cassandra_keyspace'){
+            return Cassandra.renderKeyspace(this.props.eventKey, info, this.getInfo);
+        } else if (info.object_type == 'cassandra_table'){
+            return Cassandra.renderTable(this.props.eventKey, info, this.getInfo);
         } else {
             return (
                 <div className="alert alert-danger">Not supported object type: {info.object_type}</div>

@@ -166,9 +166,9 @@ AppDispatcher.register( function(payload) {
         case 'run-all-blocks':
             connstr = TabsStore.getConnstr(payload.key);
             password = TabsStore.getPassword(payload.key);
+            TabsStore.trigger('query-started-'+payload.key);
             Executor.runBlocks(payload.key, connstr, password, payload.blocks, payload.callback, payload.err_callback);
             History.push(payload.blocks.join('\r'));
-            TabsStore.trigger('query-started-'+payload.key);
             break;
 
         case 'query-cancelled':
@@ -225,11 +225,11 @@ AppDispatcher.register( function(payload) {
         case 'get-object-info':
             connstr = TabsStore.getConnstr(TabsStore.selectedTab);
             password = TabsStore.getPassword(TabsStore.selectedTab);
+            TabsStore.trigger('query-started-'+TabsStore.selectedTab);
             Executor.getObjectInfo(TabsStore.selectedTab, connstr, password, payload.object,
                 payload.callback,
                 payload.err_callback
             );
-            TabsStore.trigger('query-started-'+TabsStore.selectedTab);
             break;
 
         case 'toggle-history':

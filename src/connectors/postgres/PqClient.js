@@ -51,6 +51,8 @@ var Client = function(connstr, password){
 
     this.Response = null;
 
+    this.copy_data = [];
+
     this.cancel = function(){
         return self.pq.cancel();
     };
@@ -80,6 +82,7 @@ var Client = function(connstr, password){
 
     // send query for execution
     this.sendQuery = function(query, callback, err_callback){
+        self.pq.setNonBlocking(true);
 
         self.Response = new Response(query);
         self.finished = false;
@@ -141,6 +144,23 @@ var Client = function(connstr, password){
 
         self.pq.consumeInput();
 
+        if (self.pq.resultStatus() == 'PGRES_COPY_OUT'){
+            var copy_data = self.pq.getCopyData();
+            if (copy_data == -1) { // COPY completed
+                var copy_dataset = this.convert_copy_buffer(self.copy_data);
+                self.copy_data = []; // reset buffer
+            } else {
+                self.copy_data.push(copy_data.toString('utf8'));
+                setTimeout(function(){
+                    if (!self.finished){
+                        self._read();
+                    }
+                }, 5);
+                return;
+            }
+            //self.raiseError("COPY command is not supported yet");
+        }
+
         if (self.pq.isBusy()){ // give it a moment, so not to block while fetching data
             setTimeout(function(){
                 if (!self.finished){
@@ -150,7 +170,7 @@ var Client = function(connstr, password){
             return;
         } 
 
-        res = self.pq.getResult();
+        var res = self.pq.getResult();
 
         if (!res){ // no more result sets
             self.finished = true;
@@ -197,6 +217,11 @@ var Client = function(connstr, password){
     }
 
     this.pq.on('notice', this.noticeHandler);
+
+    this.convert_copy_buffer = function(buffer){
+        // converts buffer stream gotten from COPY into resultset
+        return null;
+    }
 
 }
 
