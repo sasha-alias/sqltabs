@@ -18,6 +18,7 @@
 var PQ = require('libpq');
 var util = require('util');
 var url = require('url');
+var copyTo = require('pg-copy-streams').to;
 
 
 var Client = function(connstr, password){
@@ -147,10 +148,19 @@ var Client = function(connstr, password){
         if (self.pq.resultStatus() == 'PGRES_COPY_OUT'){
             var copy_data = self.pq.getCopyData();
             if (copy_data == -1) { // COPY completed
-                var copy_dataset = this.convert_copy_buffer(self.copy_data);
+                var copy_dataset = self.copy_data;
                 self.copy_data = []; // reset buffer
+
+                self.Response.datasets.push({
+                    nrecords: copy_dataset.length, 
+                    fields: ['copy'], 
+                    data: copy_dataset, 
+                    cmdStatus: self.pq.cmdStatus(),
+                    resultStatus: self.pq.resultStatus(),
+                    resultErrorMessage: self.pq.resultErrorMessage(),
+                });
             } else {
-                self.copy_data.push(copy_data.toString('utf8'));
+                self.copy_data.push([copy_data.toString('utf8')]);
                 setTimeout(function(){
                     if (!self.finished){
                         self._read();
@@ -158,7 +168,6 @@ var Client = function(connstr, password){
                 }, 5);
                 return;
             }
-            //self.raiseError("COPY command is not supported yet");
         }
 
         if (self.pq.isBusy()){ // give it a moment, so not to block while fetching data
@@ -202,14 +211,16 @@ var Client = function(connstr, password){
             records.push(rec);
         }
 
-        self.Response.datasets.push({
-            nrecords: nrows, 
-            fields: fields, 
-            data: records, 
-            cmdStatus: self.pq.cmdStatus(),
-            resultStatus: self.pq.resultStatus(),
-            resultErrorMessage: self.pq.resultErrorMessage(),
-        });
+        if (self.pq.resultStatus() != 'PGRES_COPY_OUT'){
+            self.Response.datasets.push({
+                nrecords: nrows, 
+                fields: fields, 
+                data: records, 
+                cmdStatus: self.pq.cmdStatus(),
+                resultStatus: self.pq.resultStatus(),
+                resultErrorMessage: self.pq.resultErrorMessage(),
+            });
+        }
 
         if (!self.finished){
             self._read();
@@ -217,11 +228,6 @@ var Client = function(connstr, password){
     }
 
     this.pq.on('notice', this.noticeHandler);
-
-    this.convert_copy_buffer = function(buffer){
-        // converts buffer stream gotten from COPY into resultset
-        return null;
-    }
 
 }
 
