@@ -18,8 +18,6 @@
 var PQ = require('libpq');
 var util = require('util');
 var url = require('url');
-var copyTo = require('pg-copy-streams').to;
-
 
 var Client = function(connstr, password){
     var self = this;

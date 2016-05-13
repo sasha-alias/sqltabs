@@ -1,16 +1,16 @@
 /*
   Copyright (C) 2015  Aliaksandr Aliashkevich
-  
+
       This program is free software: you can redistribute it and/or modify
       it under the terms of the GNU General Public License as published by
       the Free Software Foundation, either version 3 of the License, or
       (at your option) any later version.
-  
+
       This program is distributed in the hope that it will be useful,
       but WITHOUT ANY WARRANTY; without even the implied warranty of
       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
       GNU General Public License for more details.
-  
+
       You should have received a copy of the GNU General Public License
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -122,15 +122,15 @@ AppDispatcher.register( function(payload) {
             Config.saveConnHistory(TabsStore.connectionHistory);
             TabsStore.trigger('change');
             break;
-        
+
         case 'set-connection':
             TabsStore.setConnection(payload.key, payload.value);
             TabsStore.setPassword(payload.key, null);
             Config.saveConnHistory(TabsStore.connectionHistory);
             TabsStore.trigger('change');
             Executor.testConnection(
-                payload.key, 
-                payload.value, 
+                payload.key,
+                payload.value,
                 TabsStore.tabs[TabsStore.selectedTab].password,
                 payload.callback,
                 function(){
@@ -146,7 +146,7 @@ AppDispatcher.register( function(payload) {
         case 'set-password':
             TabsStore.setPassword(TabsStore.selectedTab, payload.password);
             Executor.testConnection(
-                TabsStore.selectedTab, 
+                TabsStore.selectedTab,
                 TabsStore.getConnstr(TabsStore.selectedTab),
                 TabsStore.getPassword(TabsStore.selectedTab),
                 payload.callback,
@@ -235,7 +235,7 @@ AppDispatcher.register( function(payload) {
         case 'toggle-history':
             TabsStore.trigger('toggle-history');
             break;
-        
+
         case 'paste-history-item':
             TabsStore.setHistoryItem(payload.idx);
             TabsStore.trigger('paste-history-item-'+TabsStore.selectedTab);
@@ -293,7 +293,7 @@ AppDispatcher.register( function(payload) {
 
     }
     return true; // Needed for Flux promise resolution
-}); 
+});
 
 DBDispatcher.register(function(payload){
     switch(payload.eventName){
@@ -317,16 +317,19 @@ DBDispatcher.register(function(payload){
 });
 
 // background job for fetching auto completion words from databases
-var wordsUpdateInProgress = false; 
+var wordsUpdateInProgress = false;
 
 var updateCompletionWords = function(){
     if (!wordsUpdateInProgress){
         wordsUpdateInProgress = true;
-        Executor.getCompletionWords(function(words){
-            TabsStore.updateCompletionWords(words);
-            TabsStore.trigger("completion-update"); 
-            wordsUpdateInProgress = false;
-        });
+        for (tab in TabsStore.tabs){
+            var connstr = TabsStore.getConnstr(tab);
+            Executor.getCompletionWords(connstr, function(words){
+                TabsStore.updateCompletionWords(words);
+                TabsStore.trigger("completion-update");
+                wordsUpdateInProgress = false;
+            });
+        }
     }
 }
 updateCompletionWords();

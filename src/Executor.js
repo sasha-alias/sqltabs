@@ -42,11 +42,14 @@ var Executor = {
         db.testConnection(id, connstr, password, callback, err_callback1, err_callback2);
     },
 
-    getCompletionWords: function(callback){
-        var db = this.getDatabase(connstr);
-        db.getCompletionWords(callback)
+    getCompletionWords: function(connstr, callback){
+        if (connstr){
+            var db = this.getDatabase(connstr);
+            db.getCompletionWords(callback)
+        } else {
+            callback([]);
+        }
     },
-    
 };
 
 module.exports = Executor;
