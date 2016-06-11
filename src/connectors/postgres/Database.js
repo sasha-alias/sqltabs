@@ -2,32 +2,41 @@ var async = require('async');
 var PqClient = require('./PqClient');
 var Words = require('./keywords.js');
 
-var Clients = {};
+var Clients = {}; // clients used for executing user queries
+var InfoClients = {}; // clients used for getting info about objects
 var AutocompletionHashes = {};
 
 var Database = {
 
-    getClient: function(id, connstr, password){
+    _getClient: function(id, connstr, password, cache){
 
-        if (id in Clients && Clients[id].connstr == connstr && Clients[id].connected){
-            var client = Clients[id];
+        if (id in cache && cache[id].connstr == connstr && cache[id].connected){
+            var client = cache[id];
             if (client.isBusy()){ // when previous query is running
                 client.silentCancel(); // just drop it
                 var client = new PqClient(connstr, password); // and get new client, so async errors won't come in
-                Clients[id] = client;
+                cache[id] = client;
             }
             client.setPassword(password);
         } else {
             var client = new PqClient(connstr, password);
-            Clients[id] = client;
+            cache[id] = client;
         }
         return client;
     },
 
+    getClient: function(id, connstr, password){
+        return this._getClient(id, connstr, password, Clients);
+    },
+
+    getInfoClient: function(id, connstr, password){
+        return this._getClient(id, connstr, password, InfoClients);
+    },
+
     runQuery: function(id, connstr, password, query, callback, err_callback){
         var client = this.getClient(id, connstr, password);
-        client.sendQuery(query, 
-            function(result){callback(id, [result])}, 
+        client.sendQuery(query,
+            function(result){callback(id, [result])},
             function(err){err_callback(id, err)}
         );
 
@@ -48,7 +57,7 @@ var Database = {
         var calls = [];
         for (var i=0; i<blocks.length; i++){
             var call = function(block){return function(done){
-                client.sendQuery(block, 
+                client.sendQuery(block,
                 function(result){
                     results.push(result);
                     done();
@@ -57,7 +66,7 @@ var Database = {
                     err_callback(err);
                     done();
                 });
-                
+
             }}(blocks[i]);
             calls.push(call);
         }
@@ -72,10 +81,10 @@ var Database = {
 
         var client = this.getClient(id, connstr, password);
 
-        client.sendQuery("select 0 as connected where 1=0", 
+        client.sendQuery("select 0 as connected where 1=0",
             function(result){
                 callback(id, [result]);
-            }, 
+            },
             function(err){
                 if (typeof(err.message) != 'undefined' && err.message.indexOf("no password supplied")>-1){
                     err_callback1(id, err);
@@ -94,12 +103,12 @@ var Database = {
         // if no object selected then get info about database
         if (typeof(object) == 'undefined' || object == '' || object == null){
             var ret = {object_type: 'database', object: null, object_name: null};
-            this._get_db_info(id, connstr, password, 
+            this._get_db_info(id, connstr, password,
             function(db_info){
                 ret.object = db_info;
                 ret.object_name = db_info.dbname;
                 callback(id, ret);
-            }, 
+            },
             function(err){
                 err_callback(id, err);
             })
@@ -114,7 +123,7 @@ var Database = {
             function(schema_info){
                 ret.object = schema_info;
                 callback(id, ret);
-            }, 
+            },
             function(err){
                 err_callback(id, err);
             })
@@ -127,7 +136,7 @@ var Database = {
             var ret = {object_type: 'trigger', object: null, object_name: null}
             var oid = object.split(':')[1];
 
-            this._getTrigger(id, connstr, password, oid, 
+            this._getTrigger(id, connstr, password, oid,
             function(trigger){
                 ret.object = trigger;
                 ret.object_name = trigger.trigger_name;
@@ -149,7 +158,7 @@ var Database = {
 
             } else {
                 // relation not found, try functions
-                self._findProc(id, connstr, password, object, 
+                self._findProc(id, connstr, password, object,
                 function(func){
                     if (func && func.scripts.length > 0){
                         var funcs = {object_type: "function", object: func, object_name: null};
@@ -157,7 +166,7 @@ var Database = {
                     } else {
                         return callback(id, ret);
                     }
-                }, 
+                },
                 function(id, err){
                     return err_callback(id, err);
                 });
@@ -174,15 +183,15 @@ var Database = {
     // for internal use only: runs query and checks for error (not for rendering)
     // returns only data of first dataset
     _getData: function(id, connstr, password, query, callback, err_callback){
-        var client = this.getClient(id, connstr, password);
-        client.sendQuery(query, 
+        var client = this.getInfoClient(id, connstr, password);
+        client.sendQuery(query,
             function(result){
                 if (result.datasets.length > 0 && result.datasets[0].resultStatus == 'PGRES_FATAL_ERROR'){
                     err_callback(result.datasets[0].resultErrorMessage);
                 } else {
                     callback(result.datasets[0].data);
                 }
-            }, 
+            },
             function(err){
                 err_callback(err);
             }
@@ -209,13 +218,13 @@ var Database = {
     },
 
     _getCurrentUser: function(id, connstr, password, callback, err_callback){
-        
-        var client = this.getClient(id, connstr, password);
+
+        var client = this.getInfoClient(id, connstr, password);
         query = "SELECT current_user;";
         client.sendQuery(query,
         function(result){
             var user = result.datasets[0].data[0][0];
-            callback(user); 
+            callback(user);
         },
         function(err){
             err_callback(id, err);
@@ -235,7 +244,7 @@ var Database = {
                     spath.unshift('pg_catalog');
                     callback(spath);
                 }
-            }, 
+            },
             function(err){
                 err_callback(id, err)
             });
@@ -251,7 +260,7 @@ var Database = {
 
     _getSearchPath: function(id, connstr, password, callback, err_callback){
         var self = this;
-        var client = this.getClient(id, connstr, password);
+        var client = this.getInfoClient(id, connstr, password);
         query = "SHOW search_path";
         client.sendQuery(query,
         function(result){
@@ -283,7 +292,7 @@ pg_namespace n \
 where c.oid = '"+object+"'::regclass \
 and n.oid = c.relnamespace;";
 
-        this._getData(id, connstr, password, query, 
+        this._getData(id, connstr, password, query,
         function(data){
             if (data.length > 0){
                 var row = data[0];
@@ -297,7 +306,7 @@ and n.oid = c.relnamespace;";
                 };
 
                 /// fill the relation object with details
-    
+
                 var get_columns = function(done){
                     self._getRelationColumns(id, connstr, password, object,
                     function(columns){
@@ -392,15 +401,15 @@ and n.oid = c.relnamespace;";
             } else {
                 callback(null);
             }
-        }, 
-        function(err){ 
+        },
+        function(err){
             callback(null); // ignore error, behave like relation not found
         });
     },
 
     _findProc: function(id, connstr, password, object, callback, err_callback){
         var self = this;
-        this._getSearchPath(id, connstr, password, 
+        this._getSearchPath(id, connstr, password,
         function(search_path){
 
             // rewrite search path if schema defined
@@ -419,7 +428,7 @@ and n.oid = c.relnamespace;";
                     done();
                     return;
                 }
-                var client = self.getClient(id, connstr, password);
+                var client = self.getInfoClient(id, connstr, password);
 
                 var schema_name = self._unquoteString(item);
                 var proc_name = self._unquoteString(object);
@@ -435,7 +444,7 @@ where p.pronamespace = n.oid \
 and n.nspname = '"+schema_name+"' \
 and p.proname = '"+proc_name+"'";
 
-                client.sendQuery(query, 
+                client.sendQuery(query,
                 function(result){
                     oids = result.datasets[0].data;
                     // get scripts for func oids
@@ -443,9 +452,9 @@ and p.proname = '"+proc_name+"'";
                         var calls_for_scripts = oids.map(function(item){return function(cb_inner){
                             var oid = item[0];
 
-                            var client = self.getClient(id, connstr, password);
+                            var client = self.getInfoClient(id, connstr, password);
                             var query = "SELECT pg_get_functiondef("+oid+")";
-                            client.sendQuery(query, 
+                            client.sendQuery(query,
                             function(result){
                                 if (result.datasets[0].resultStatus == 'PGRES_FATAL_ERROR'){
                                     error = true;
@@ -462,11 +471,11 @@ and p.proname = '"+proc_name+"'";
                             });
 
                         }});
-                        
+
                         async.series(calls_for_scripts, function(){
                             if (error == null) {
                                 callback(func);
-                            } 
+                            }
                         });
                     }
                     ///
@@ -483,7 +492,7 @@ and p.proname = '"+proc_name+"'";
                     callback(null);
                 }
             });
-        }, 
+        },
         function(err){
             err_callback(id, err);
         })
@@ -491,18 +500,18 @@ and p.proname = '"+proc_name+"'";
 
     _getRelationDescription: function(id, connstr, password, object, callback, err_callback){
 
-        var client = this.getClient(id, connstr, password);
+        var client = this.getInfoClient(id, connstr, password);
 
         query = "SELECT description \
 FROM pg_description \
 WHERE objoid = '"+object+"'::regclass \
 AND objsubid = 0";
 
-        client.sendQuery(query, 
+        client.sendQuery(query,
         function(result){
             description = result.datasets[0].data[0][0];
             callback(description);
-        }, 
+        },
         function(err){
             err_callback(id, err);
         });
@@ -528,7 +537,7 @@ WHERE a.attrelid = \''+object+'\'::regclass \
     AND a.attnum > 0 \
 ORDER BY a.attnum';
 
-        this._getData(id, connstr, password, query, 
+        this._getData(id, connstr, password, query,
         function(data){
             columns = [];
             for (var i=0; i<data.length; i++){
@@ -545,7 +554,7 @@ ORDER BY a.attnum';
                 columns.push(column);
             }
             callback(columns);
-        }, 
+        },
         err_callback);
     },
 
@@ -661,7 +670,7 @@ c.oid = '"+object+"'::regclass \
 and t.tgrelid = c.oid \
 order by 1 \
 ";
-            this._getData(id, connstr, password, query, 
+            this._getData(id, connstr, password, query,
             function(data){
                 if (data.length > 0){
                     var triggers = data.map(function(item){
@@ -691,7 +700,7 @@ where t.oid = '+trigger_oid;
             if (data.length > 0){
                 trigger_name = data[0][0];
                 table = data[0][1];
-                script = data[0][2]; 
+                script = data[0][2];
             }
 
             var trigger = {
@@ -893,7 +902,7 @@ order by 1  \
                 done();
             },
             err_callback);
-            
+
         }
 
         // get views
@@ -992,8 +1001,8 @@ SELECT DISTINCT word FROM ( \
                         if (tab in AutocompletionHashes &&
                             result.datasets[0].data.length > 0 &&
                             AutocompletionHashes[tab] == result.datasets[0].data[0][0]
-                        ) { 
-                            // hash hasn't changed since last update 
+                        ) {
+                            // hash hasn't changed since last update
                         } else {
                             AutocompletionHashes[tab] = result.datasets[0].data[0][0];
                             needUpdate[tab] = true;
@@ -1007,7 +1016,7 @@ SELECT DISTINCT word FROM ( \
                     done();
                 });
             }}(tab);
-            
+
             var get_words = function(tab){return function(done){
                 if (needUpdate[tab]){
                     var tabClient = Clients[tab];
@@ -1034,7 +1043,7 @@ SELECT DISTINCT word FROM ( \
                         client.disconnect();
                         done();
                     });
-                    
+
                 } else {
                     done();
                 }
