@@ -339,6 +339,12 @@ body{
     padding-left: 10px;
 }
 
+.query-block{
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 5px;
+}
+
 .cloud-error{
     word-break: break-all;
 }

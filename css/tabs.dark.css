@@ -162,3 +162,9 @@ table {
 .floating-cols-header {
     background: rgba(40, 40, 40, 0.8);
 }
+
+/* echo query block */
+.query-block > pre{
+    background: rgba(40, 40, 40, 0.8);
+    color: #ffffff;
+}

@@ -1,16 +1,16 @@
 /*
   Copyright (C) 2015  Aliaksandr Aliashkevich
-  
+
       This program is free software: you can redistribute it and/or modify
       it under the terms of the GNU General Public License as published by
       the Free Software Foundation, either version 3 of the License, or
       (at your option) any later version.
-  
+
       This program is distributed in the hope that it will be useful,
       but WITHOUT ANY WARRANTY; without even the implied warranty of
       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
       GNU General Public License for more details.
-  
+
       You should have received a copy of the GNU General Public License
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -41,7 +41,7 @@ var OutputConsole = React.createClass({
         // otherwise it will recalculate state on every action in app, which is slow on large datasets
         return this.state.updatable;
     },
-    
+
     componentDidMount: function(){
         TabsStore.bind('query-started-'+this.props.eventKey, this.queryStarted);
         TabsStore.bind('query-finished-'+this.props.eventKey, this.queryFinished);
@@ -72,16 +72,16 @@ var OutputConsole = React.createClass({
         }
         this.setState({updatable: true}, function(){    // first make component updatable
             this.setState({                             // second change state so it's get rerendered
-                message: "# Executing ...", 
+                message: "# Executing ...",
                 result: null,
                 error: null,
                 info: null,
                 executing: 0,
             }, function(){
                 this.timer = setInterval(this.tick, 100);
-            }); 
+            });
         }
-        );  
+        );
     },
 
     queryFinished: function(){
@@ -89,7 +89,7 @@ var OutputConsole = React.createClass({
 
         this.setState({
             message: null,
-            result: TabsStore.getResult(this.props.eventKey), 
+            result: TabsStore.getResult(this.props.eventKey),
             error: null,
             info: null,
             updatable: false,
@@ -115,7 +115,7 @@ var OutputConsole = React.createClass({
                 info: TabsStore.getObjectInfo(),
                 updatable: false,
             });
-        });   
+        });
     },
 
     getRenderer: function(query){
@@ -166,9 +166,10 @@ var OutputConsole = React.createClass({
             var output = 'script';
         }
         var sqldoc = React.createElement(SqlDoc, {
-            data: this.state.result, 
-            buttonBar: true, 
-            eventKey: this.props.eventKey, 
+            data: this.state.result,
+            buttonBar: true,
+            showQuery: TabsStore.showQuery,
+            eventKey: this.props.eventKey,
             output: output,
             onShare: this.share,
             });

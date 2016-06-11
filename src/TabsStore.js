@@ -1,16 +1,16 @@
 /*
   Copyright (C) 2015  Aliaksandr Aliashkevich
-  
+
       This program is free software: you can redistribute it and/or modify
       it under the terms of the GNU General Public License as published by
       the Free Software Foundation, either version 3 of the License, or
       (at your option) any later version.
-  
+
       This program is distributed in the hope that it will be useful,
       but WITHOUT ANY WARRANTY; without even the implied warranty of
       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
       GNU General Public License for more details.
-  
+
       You should have received a copy of the GNU General Public License
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -66,7 +66,7 @@ var Tab = function(id, connstr){
 };
 
 var _TabsStore = function(){
-    
+
     this.theme = (Config.getTheme() || 'dark');
     this.mode = (Config.getMode() || 'classic');
     this.tabs = {};
@@ -74,6 +74,7 @@ var _TabsStore = function(){
     this.order = [];
     this.selectedTab = 0;
     this.renderer = 'plain'; // plain or auto
+    this.showQuery = false;
     this.sharingServer = (Config.getSharingServer() || 'www.sqltabs.com');
 
     this.connectionHistory = (Config.getConnHistory() || []);
@@ -347,20 +348,24 @@ var _TabsStore = function(){
     }
 
     this.updateCompletionWords = function(words){
-        this.completion_words = words; 
+        this.completion_words = words;
     }
-        
+
+    this.setEcho = function(boolean_echo){
+        this.showQuery = boolean_echo;
+    }
+
     // restore recent connection string on startup
     if (typeof(Config.getConnHistory()) != 'undefined' && Config.getConnHistory().length > 0){
         connstr = Config.getConnHistory()[0];
         this.newTab(connstr);
     } else {
-        this.newTab(); 
+        this.newTab();
     }
-    
+
 };
 
-MicroEvent.mixin(_TabsStore);  
+MicroEvent.mixin(_TabsStore);
 
 TabsStore = new _TabsStore();
 

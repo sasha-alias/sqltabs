@@ -1,16 +1,16 @@
 /*
   Copyright (C) 2015  Aliaksandr Aliashkevich
-  
+
       This program is free software: you can redistribute it and/or modify
       it under the terms of the GNU General Public License as published by
       the Free Software Foundation, either version 3 of the License, or
       (at your option) any later version.
-  
+
       This program is distributed in the hope that it will be useful,
       but WITHOUT ANY WARRANTY; without even the implied warranty of
       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
       GNU General Public License for more details.
-  
+
       You should have received a copy of the GNU General Public License
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -29,7 +29,7 @@ if (typeof(DEVMODE) == 'undefined'){
 }
 
 var openFile = function(){
-    dialog.showOpenDialog({ properties: ['openFile']}, 
+    dialog.showOpenDialog({ properties: ['openFile']},
     function(filenames){
         if (typeof(filenames) != 'undefined' && filenames.length == 1){
             var filename = filenames[0];
@@ -219,6 +219,11 @@ if (process.platform == 'darwin'){
                 {label: "X-Large", click: function(){setFontSize("x-large");}},
                 {label: "XX-Large", click: function(){setFontSize("xx-large");}},
             ]},
+            {label: "Output",
+            submenu: [
+                {label: "Echo on", click: function(){TabsStore.setEcho(true);}},
+                {label: "Echo off", click: function(){TabsStore.setEcho(false);}},
+            ]},
         ]},
         {label: "Window", submenu:[
             {label: "Next Tab",
@@ -229,15 +234,15 @@ if (process.platform == 'darwin'){
              accelerator: "Command+[",
              click: function(){Actions.previosTab();},
             },
-            {label: "Switch Tab View", 
+            {label: "Switch Tab View",
              accelerator: "Command+\\",
              click: function(){Actions.switchView();}
             },
-            {label: "Show Project", 
+            {label: "Show Project",
              accelerator: "Command+P",
              click: function(){Actions.showProject();}
             },
-            {label: "Hide Project", 
+            {label: "Hide Project",
              accelerator: "Command+Shift+P",
              click: function(){Actions.hideProject();}
             },
@@ -350,6 +355,11 @@ if (process.platform == 'darwin'){
                 {label: "X-Large", click: function(){setFontSize("x-large");}},
                 {label: "XX-Large", click: function(){setFontSize("xx-large");}},
             ]},
+            {label: "Output",
+            submenu: [
+                {label: "Echo on", click: function(){TabsStore.setEcho(true);}},
+                {label: "Echo off", click: function(){TabsStore.setEcho(false);}},
+            ]},
         ]},
 
 
@@ -362,22 +372,22 @@ if (process.platform == 'darwin'){
              accelerator: "Ctrl+Shift+Tab",
              click: function(){Actions.previosTab();},
             },
-            {label: "Switch Tab View", 
+            {label: "Switch Tab View",
              accelerator: "Alt+\\",
              click: function(){Actions.switchView();}
             },
-            {label: "Show Project", 
+            {label: "Show Project",
              accelerator: "Alt+P",
              click: function(){Actions.showProject();}
             },
-            {label: "Hide Project", 
+            {label: "Hide Project",
              accelerator: "Alt+Shift+P",
              click: function(){Actions.hideProject();}
             },
 ,
         ]
         },
-	
+
         {label: "Help", submenu:[
             {label: "About",
              click: function(){Actions.about()},
