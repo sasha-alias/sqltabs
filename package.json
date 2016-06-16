@@ -16,7 +16,7 @@
     "brace": "0.7.0",
     "c3": "^0.4.0",
     "cassandra-driver": "^3.0.1",
-    "cassandra-map": "^0.1.7",
+    "cassandra-map": "~0.1.7",
     "d3": "^3.5.0",
     "flux": "2.0.1",
     "jquery": "2.1.3",
