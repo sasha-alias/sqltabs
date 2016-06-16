@@ -6,9 +6,18 @@ var Clients = {};
 
 var parse_connstr = function(connstr){
     var parsed = url.parse(connstr);
+
+    if (parsed.pathname){
+        var keyspace = parsed.pathname.substring(1);
+    } else {
+        var keyspace = '';
+    }
+
+    var hosts = parsed.host;
+
     return {
-        contactPoints: [parsed.host],
-        keyspace: parsed.pathname.substring(1),
+        contactPoints: hosts,
+        keyspace: keyspace,
     }
 }
 
@@ -37,7 +46,7 @@ var Response = function(query){
     this.duration = null;
     self = this;
     this.finish = function(){
-        self.duration = Math.round((performance.now() - self.start_time)*1000)/1000; 
+        self.duration = Math.round((performance.now() - self.start_time)*1000)/1000;
     };
     this.processResult = function(result){
 
@@ -72,7 +81,7 @@ var Response = function(query){
                 if (['TEXT', 'VARCHAR', 'ASCII'].indexOf(fields[i].type) > -1){
                     rec.push(value);
                 } else if (fields[i].type == 'TIMESTAMP') {
-                    rec.push(formatDate(value)); 
+                    rec.push(formatDate(value));
                 }else {
                     rec.push(JSON.stringify(value));
                 }
@@ -96,36 +105,34 @@ var Database = {
         if (id in Clients){
             return Clients[id];
         } else {
-            var client  = new cassandra.Client(parse_connstr(connstr));
+            connstr = parse_connstr(connstr);
+            console.log(connstr);
+            var client  = new cassandra.Client(connstr);
             Clients[id] = client;
             return Clients[id];
         }
     },
 
     runQuery: function(id, connstr, password, query, callback, err_callback){
-        
         var client = this.getClient(id, connstr);
         var response = new Response(query);
-        console.log('executing');
-        client.execute(query, 
+        client.execute(query,
         function(err, result){
             if (err){
-                console.log('error');
                 err_callback(id, err);
             } else {
-                console.log('done');
                 response.finish();
                 response.processResult(result);
                 callback(id, [response]);
             }
         });
 
-    }, 
+    },
 
     _getData: function(id, connstr, password, query, callback, err_callback){
-        
+
         var client = this.getClient(id, connstr);
-        client.execute(query, 
+        client.execute(query,
         function(err, result){
             if (err){
                 err_callback(id, err);
@@ -134,7 +141,7 @@ var Database = {
             }
         });
 
-    }, 
+    },
 
     testConnection: function(id, connstr, password, callback, err_callback1, err_callback2){
         this.runQuery(id, connstr, null, "SELECT now() FROM system.local;",
@@ -150,7 +157,7 @@ var Database = {
         // if no object selected then get info about database
         if (typeof(object) == 'undefined' || object == '' || object == null){
             this._getDatabaseInfo(id, connstr, password, callback, err_callback);
-        } 
+        }
         else if (object.slice(-1) == '.'){
             var keyspace = object.slice(0, object.length-1);
             this._getKeyspaceInfo(id, connstr, password, keyspace, callback, err_callback);
@@ -172,7 +179,7 @@ var Database = {
         var calls = [];
         for (var i=0; i<blocks.length; i++){
             var call = function(block){return function(done){
-                self.runQuery(id, connstr, password, block, 
+                self.runQuery(id, connstr, password, block,
                 function(id, result){
                     results.push(result);
                     done();
@@ -181,7 +188,6 @@ var Database = {
                     err_callback(id, err);
                     done();
                 });
-                
             }}(blocks[i]);
             calls.push(call);
         }
@@ -205,7 +211,7 @@ var Database = {
         }
 
         getConnection = function(done){
-            self.testConnection(id, connstr, password, 
+            self.testConnection(id, connstr, password,
             function(){
                 var client = self.getClient(id, connstr);
                 peers = client.hosts;
@@ -241,46 +247,101 @@ var Database = {
     },
 
     _getKeyspaceInfo: function(id, connstr, password, keyspace, callback, err_callback){
-        this._getData(id, connstr, password, "SELECT columnfamily_name AS table_name FROM system.schema_columnfamilies WHERE keyspace_name='"+keyspace+"'",
-        function(data){
-            
-            var tables = []
-            data.forEach(function(item){ 
-                tables.push(item.table_name);
-            });
-            tables = tables.sort();
-            var info = {
-                object_type: 'cassandra_keyspace',
-                object_name: keyspace,
-                object: {
-                    schema_name: keyspace,
-                    tables: tables,
-                },
-            };
+
+        var self = this;
+
+        var info = {
+            object_type: 'cassandra_keyspace',
+            object_name: keyspace,
+            object: {
+                schema_name: keyspace,
+                tables: [],
+                replication: {},
+                cluster_name: '',
+            },
+        };
+
+        var getClusterName = function(done){
+            self._getData(id, connstr, password, "SELECT cluster_name FROM system.local",
+            function(data){
+                info.object.cluster_name = data[0].cluster_name;
+                done();
+            },
+            err_callback);
+        }
+
+
+        var getTables = function(done){
+            self._getData(id, connstr, password, "SELECT columnfamily_name AS table_name FROM system.schema_columnfamilies WHERE keyspace_name='"+keyspace+"'",
+            function(data){
+                var tables = []
+                data.forEach(function(item){
+                    tables.push(item.table_name);
+                });
+                tables = tables.sort();
+                info.object.tables = tables;
+                done();
+            },
+            err_callback)
+        };
+
+        var getStrategy = function(done){
+            self._getData(id, connstr, password, "SELECT strategy_class, strategy_options FROM system.schema_keyspaces WHERE keyspace_name = '"+keyspace+"'",
+            function(data){
+                if (data.length > 0){
+                    info.object.replication = JSON.parse(data[0].strategy_options);
+                    var strategy_class = data[0].strategy_class.split('.');
+                    strategy_class = strategy_class[strategy_class.length - 1];
+                    info.object.replication.class = strategy_class;
+                }
+                done();
+            },
+            err_callback)
+        };
+
+        async.series([getClusterName, getTables, getStrategy], function(){
             callback(id, info);
-        },
-        err_callback);
+        });
     },
 
     _getTableInfo: function(id, connstr, password, table, callback, err_callback){
         var self = this;
-        this.testConnection(id, connstr, password, 
+        this.testConnection(id, connstr, password,
         function(){
             var client = self.getClient(id, connstr);
             var keyspace = table.split('.')[0];
             var table_name = table.split('.')[1];
-            client.metadata.getTable(keyspace, table_name, 
+            client.metadata.getTable(keyspace, table_name,
             function(err, table_info){
                 if (err) {
                     err_callback(id, err);
                 } else {
-                    console.log(table_info);
                     info = {
                         object_type: 'cassandra_table',
                         object_name: table,
                         object: table_info,
                     }
-                    callback(id, info);
+                    info.object.keyspace = keyspace;
+                    // inject datatype names
+                    table_info.columns.forEach(function(item, i){
+                        var type = info.object.columns[i].type;
+                        var typename = cassandra.types.getDataTypeNameByCode(type);
+                        info.object.columns[i].typename = typename;
+                    });
+                    //
+
+                    var getClusterName = function(done){
+                        self._getData(id, connstr, password, "SELECT cluster_name FROM system.local",
+                        function(data){
+                            info.object.cluster_name = data[0].cluster_name;
+                            done();
+                        },
+                        err_callback);
+                    }
+
+                    async.series([getClusterName], function(){
+                        callback(id, info);
+                    });
                 }
             });
         },
