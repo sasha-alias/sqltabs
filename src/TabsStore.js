@@ -17,6 +17,7 @@
 
 var MicroEvent = require('microevent');
 var Config = require('./Config');
+var fs = require('fs');
 
 var Sequence = function(start){
     this.curval = start;
@@ -354,6 +355,53 @@ var _TabsStore = function(){
     this.setEcho = function(boolean_echo){
         this.showQuery = boolean_echo;
     }
+
+    this.exportResult = function(filename, format){
+        if (format == 'json'){
+            fs.writeFile(filename, JSON.stringify(this.tabs[this.selectedTab].result), function(err) {
+                if(err) {
+                    return console.log(err);
+                }
+            });
+            return;
+        }
+        if (format == 'csv'){
+            file = fs.openSync(filename, 'w');
+            for (var i = 0; i < this.tabs[this.selectedTab].result.length; i++){
+                var block = this.tabs[this.selectedTab].result[i]
+                for (var j = 0; j < block.datasets.length; j++){
+                    var dataset = block.datasets[j];
+                    // write field names
+                    field_names = [];
+                    dataset.fields.forEach(function(field){
+                        field_names.push('"' + field.name + '"');
+                    });
+                    fs.writeSync(file, field_names.join()+'\n');
+                    // write records
+                    dataset.data.forEach(function(record){
+                        values = []
+                        record.forEach(function(col){
+                            var escaped = col.replace(/"/g, '""');
+                            values.push('"' + escaped + '"');
+                        });
+                        fs.writeSync(file, values.join()+'\n');
+                    });
+                }
+            }
+            return;
+        }
+
+    }
+
+    //this.exportResultCsv = function(filename){
+    //    csv = ''
+    //    JSON.stringify(this.tabs[this.selectedTab].result
+    //    fs.writeFile(filename, , function(err) {
+    //        if(err) {
+    //            return console.log(err);
+    //        }
+    //    });
+    //}
 
     // restore recent connection string on startup
     if (typeof(Config.getConnHistory()) != 'undefined' && Config.getConnHistory().length > 0){

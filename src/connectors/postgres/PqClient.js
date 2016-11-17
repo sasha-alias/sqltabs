@@ -1,16 +1,16 @@
 /*
   Copyright (C) 2015  Aliaksandr Aliashkevich
-  
+
       This program is free software: you can redistribute it and/or modify
       it under the terms of the GNU General Public License as published by
       the Free Software Foundation, either version 3 of the License, or
       (at your option) any later version.
-  
+
       This program is distributed in the hope that it will be useful,
       but WITHOUT ANY WARRANTY; without even the implied warranty of
       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
       GNU General Public License for more details.
-  
+
       You should have received a copy of the GNU General Public License
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -114,7 +114,7 @@ var Client = function(connstr, password){
 
     this.noticeHandler = function(message){
         self.Response.datasets.push({
-            resultStatus: 'PGRES_NONFATAL_ERROR', 
+            resultStatus: 'PGRES_NONFATAL_ERROR',
             resultErrorMessage: message,
         });
     };
@@ -150,9 +150,9 @@ var Client = function(connstr, password){
                 self.copy_data = []; // reset buffer
 
                 self.Response.datasets.push({
-                    nrecords: copy_dataset.length, 
-                    fields: ['copy'], 
-                    data: copy_dataset, 
+                    nrecords: copy_dataset.length,
+                    fields: ['copy'],
+                    data: copy_dataset,
                     cmdStatus: self.pq.cmdStatus(),
                     resultStatus: self.pq.resultStatus(),
                     resultErrorMessage: self.pq.resultErrorMessage(),
@@ -175,7 +175,7 @@ var Client = function(connstr, password){
                 }
             }, 100);
             return;
-        } 
+        }
 
         var res = self.pq.getResult();
 
@@ -211,9 +211,9 @@ var Client = function(connstr, password){
 
         if (self.pq.resultStatus() != 'PGRES_COPY_OUT'){
             self.Response.datasets.push({
-                nrecords: nrows, 
-                fields: fields, 
-                data: records, 
+                nrecords: nrows,
+                fields: fields,
+                data: records,
                 cmdStatus: self.pq.cmdStatus(),
                 resultStatus: self.pq.resultStatus(),
                 resultErrorMessage: self.pq.resultErrorMessage(),
@@ -236,7 +236,7 @@ var Response = function(query){
     this.duration = null;
     self = this;
     this.finish = function(){
-        self.duration = Math.round((performance.now() - self.start_time)*1000)/1000; 
+        self.duration = Math.round((performance.now() - self.start_time)*1000)/1000;
     };
 }
 
@@ -265,6 +265,7 @@ var normalizeConnstr = function(connstr, password){
             );
         }
 
+        connstr = decodeURIComponent(connstr).trim();
         return connstr;
     }
 };

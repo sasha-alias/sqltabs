@@ -11,7 +11,7 @@ if (process.platform == 'linux'){
             if(err) {
                 return console.log(err);
             }
-        }); 
+        });
     });
     fs.open(process.env.HOME+"/.local/share/icons/sqltabs.png", "wx", function(err){
         if(err){
@@ -32,7 +32,7 @@ app.on('window-all-closed', function() {
 
 app.on('ready', function() {
   mainWindow = new BrowserWindow({
-    width: 800, 
+    width: 800,
     height: 600,
     title: 'SQL Tabs',
   });

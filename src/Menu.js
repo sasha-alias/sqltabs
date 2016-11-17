@@ -66,6 +66,16 @@ var saveFileAs = function(){
     })
 }
 
+var exportResult = function(format){
+    dialog.showSaveDialog(function(filename){
+        if (typeof(filename) != 'undefined'){
+            Actions.exportResult(filename, format);
+        }
+    })
+}
+
+
+
 var setFontSize = function(size){
     Actions.setFontSize(size);
 }
@@ -118,6 +128,13 @@ if (process.platform == 'darwin'){
             },
             {label: "Close File",
              click: function(){Actions.closeFile()},
+            },
+            {type: 'separator'},
+            {label: "Export to JSON",
+             click: function(){exportResult('json')}
+            },
+            {label: "Export to CSV",
+             click: function(){exportResult('csv')}
             },
             {type: 'separator'},
             {label: "New Tab",
@@ -279,6 +296,13 @@ if (process.platform == 'darwin'){
             },
             {label: "Close File",
              click: function(){Actions.closeFile()},
+            },
+            {type: 'separator'},
+            {label: "Export to JSON",
+             click: function(){exportResult('json')}
+            },
+            {label: "Export to CSV",
+             click: function(){exportResult('csv')}
             },
             {type: 'separator'},
             {label: "New Tab",

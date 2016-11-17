@@ -5,18 +5,18 @@ var url = require('url');
 var Clients = {};
 
 var parse_connstr = function(connstr){
+    console.log(connstr);
+
     var parsed = url.parse(connstr);
 
-    if (parsed.pathname){
+    if (parsed.pathname != 'undefined' && parsed.pathname != null){
         var keyspace = parsed.pathname.substring(1);
     } else {
         var keyspace = '';
     }
 
-    var hosts = parsed.host;
-
     return {
-        contactPoints: hosts,
+        contactPoints: [parsed.host],
         keyspace: keyspace,
     }
 }
@@ -101,12 +101,13 @@ var Response = function(query){
 
 var Database = {
 
+    DEFAULT_PORT: 9042,
+
     getClient: function(id, connstr){
         if (id in Clients){
             return Clients[id];
         } else {
             connstr = parse_connstr(connstr);
-            console.log(connstr);
             var client  = new cassandra.Client(connstr);
             Clients[id] = client;
             return Clients[id];
@@ -204,7 +205,7 @@ var Database = {
         var cluster_name = null;
         var release_version = null;
         var keyspaces = null;
-        var peers = null;
+        var peers = [];
 
         var _err_callback = function(id, err){
                 err_callback(id, JSON.stringify(err, null, 2));
@@ -214,12 +215,27 @@ var Database = {
             self.testConnection(id, connstr, password,
             function(){
                 var client = self.getClient(id, connstr);
-                peers = client.hosts;
                 keyspaces = client.metadata.keyspaces;
                 done();
             },
-            _err_callback
-            );
+            function(err){
+                _err_callback(id, err);
+                done();
+            });
+        }
+
+        var getPeers = function(done){
+            self._getData(id, connstr, password, "SELECT peer, data_center, rack, release_version FROM system.peers",
+            function(data){
+                data.forEach(function(item){
+                    peers.push(item);
+                });
+                done()
+            },
+            function(err){
+                _err_callback(id, err);
+                done();
+            });
         }
 
         var getClusterName = function(done){
@@ -229,10 +245,13 @@ var Database = {
                 release_version = data[0].release_version;
                 done();
             },
-            _err_callback);
+            function(err){
+                _err_callback(id, err);
+                done();
+            });
         }
 
-        async.series([getConnection, getClusterName], function(){
+        async.series([getPeers, getConnection, getClusterName], function(){
             var info = {
                 object_type: 'cassandra_cluster',
                 object: {

@@ -173,7 +173,8 @@ AppDispatcher.register( function(payload) {
 
         case 'query-cancelled':
             tab = TabsStore.selectedTab;
-            Executor.cancelQuery(tab);
+            connstr = TabsStore.getConnstr(tab);
+            Executor.cancelQuery(tab, connstr);
             TabsStore.trigger('query-cancelled-'+tab);
             break;
 
@@ -289,6 +290,10 @@ AppDispatcher.register( function(payload) {
 
         case 'toggle-project':
             TabsStore.trigger('toggle-project-'+TabsStore.selectedTab);
+            break;
+
+        case 'export-result':
+            TabsStore.exportResult(payload.filename, payload.format);
             break;
 
     }

@@ -1,16 +1,16 @@
 /*
   Copyright (C) 2015  Aliaksandr Aliashkevich
-  
+
       This program is free software: you can redistribute it and/or modify
       it under the terms of the GNU General Public License as published by
       the Free Software Foundation, either version 3 of the License, or
       (at your option) any later version.
-  
+
       This program is distributed in the hope that it will be useful,
       but WITHOUT ANY WARRANTY; without even the implied warranty of
       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
       GNU General Public License for more details.
-  
+
       You should have received a copy of the GNU General Public License
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -33,19 +33,19 @@ var CloudMessage = React.createClass({
 
     componentDidMount: function(){
         TabsStore.bind('cloud-dialog', this.dialogHandler);
-        TabsStore.bind('cloud-sent', this.sentHandler); 
-        TabsStore.bind('cloud-message', this.cloudMessageHandler); 
+        TabsStore.bind('cloud-sent', this.sentHandler);
+        TabsStore.bind('cloud-message', this.cloudMessageHandler);
     },
 
     componentWillUnmount: function(){
         TabsStore.unbind('cloud-dialog', this.dialogHandler);
-        TabsStore.unbind('cloud-sent', this.sentHandler); 
-        TabsStore.unbind('cloud-message', this.cloudMessageHandler); 
+        TabsStore.unbind('cloud-sent', this.sentHandler);
+        TabsStore.unbind('cloud-message', this.cloudMessageHandler);
     },
 
     dialogHandler: function(){
         this.setState({
-            hidden: false, 
+            hidden: false,
             status: 'dialog',
         });
     },
@@ -83,7 +83,7 @@ var CloudMessage = React.createClass({
         } else {
             var target_server = this.target_server;
         }
-        Shell.openExternal(target_server+'/api/1.0/docs/'+docid);
+        Shell.openExternal(target_server+'/share/'+docid);
         this.hide();
     },
 
@@ -123,7 +123,7 @@ var CloudMessage = React.createClass({
         return(
             <div className='static-modal'>
 
-              <Modal 
+              <Modal
                 bsStyle='primary'
                 backdrop={false}
                 animation={false}
@@ -133,10 +133,10 @@ var CloudMessage = React.createClass({
                 >
 
                 <div className='modal-body'>
-                
+
                     <table className="about-table"><tr>
                     <td><img className="about-logo" src="logo.png"/></td>
-                    <td> 
+                    <td>
                         <div>
                             Share on <input ref="target_server" onChange={this.targetChangeHandler} className="target-server-input" type="text" placeholder="www.sqltabs.com" defaultValue={this.target_server}></input>
                         </div>
@@ -157,10 +157,10 @@ var CloudMessage = React.createClass({
 
     renderProgress: function(){
 
-        return (  
+        return (
             <div className='static-modal'>
 
-              <Modal 
+              <Modal
                 bsStyle='primary'
                 backdrop={false}
                 animation={false}
@@ -170,10 +170,10 @@ var CloudMessage = React.createClass({
                 >
 
                 <div className='modal-body'>
-                
+
                     <table className="about-table"><tr>
                     <td><img className="about-logo" src="logo.png"/></td>
-                    <td> 
+                    <td>
                         <div className="progress">
                           <div className="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style={{width: "100%"}}>
                             <span className="sr-only">sharing ... </span>
@@ -198,7 +198,7 @@ var CloudMessage = React.createClass({
         return (
           <div className='static-modal'>
 
-            <Modal 
+            <Modal
               bsStyle='primary'
               backdrop={false}
               animation={false}
@@ -237,7 +237,7 @@ var CloudMessage = React.createClass({
         return (
           <div className='static-modal'>
 
-            <Modal 
+            <Modal
               bsStyle='primary'
               backdrop={false}
               animation={false}

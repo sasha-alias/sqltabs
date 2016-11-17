@@ -8,6 +8,8 @@ var AutocompletionHashes = {};
 
 var Database = {
 
+    DEFAULT_PORT: 5432,
+
     _getClient: function(id, connstr, password, cache){
 
         if (id in cache && cache[id].connstr == connstr && cache[id].connected){
