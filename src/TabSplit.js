@@ -1,16 +1,16 @@
 /*
   Copyright (C) 2015  Aliaksandr Aliashkevich
-  
+
       This program is free software: you can redistribute it and/or modify
       it under the terms of the GNU General Public License as published by
       the Free Software Foundation, either version 3 of the License, or
       (at your option) any later version.
-  
+
       This program is distributed in the hope that it will be useful,
       but WITHOUT ANY WARRANTY; without even the implied warranty of
       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
       GNU General Public License for more details.
-  
+
       You should have received a copy of the GNU General Public License
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -71,7 +71,7 @@ var TabSplit = React.createClass({
         }
 
         return {
-            drag: false, 
+            drag: false,
             type: type,
             project_visible: false,
         };
@@ -141,7 +141,7 @@ var TabSplit = React.createClass({
         var main_container = $(this.getDOMNode());
         var first_container = $(this.refs.first_container.getDOMNode());
         var second_container = $(this.refs.second_container.getDOMNode());
-        
+
         var h1 = e.pageY - first_container.offset().top;
         var h2 = main_container.height() - h1;
         if (h1 > 15 && h2 > 15) {
@@ -155,7 +155,7 @@ var TabSplit = React.createClass({
         var main_container = $(this.getDOMNode());
         var first_container = $(this.refs.first_container.getDOMNode());
         var second_container = $(this.refs.second_container.getDOMNode());
-        
+
         var w1 = e.pageX - first_container.offset().left;
         var w2 = main_container.width() - w1;
         if (w1 > 15 && w2 > 15) {
@@ -181,13 +181,15 @@ var TabSplit = React.createClass({
         }
 
         self.setInitialSize();
+
+        window.addEventListener("resize", self.resizeContainers);
     },
 
     componentDidUpdate: function(){
         if (this.make_resize){
             this.make_resize = false;
             this.resizeContainers();
-        } 
+        }
     },
 
     componentWillUnmount: function(){
@@ -198,6 +200,7 @@ var TabSplit = React.createClass({
         } else {
             TabsStore.unbind('switch-view-'+this.props.eventKey, this.switchViewHandler);
         }
+        window.removeEventListener("resize", self.resizeContainers);
     },
 
     resizeHandler: function(){
@@ -245,7 +248,7 @@ var TabSplit = React.createClass({
 
     hideProjectHandler: function(){
         this.make_resize = true;
-        this.setState({ 
+        this.setState({
             project_visible: false,
             resize_type: 'hide_project',
         });
@@ -309,7 +312,7 @@ var TabSplit = React.createClass({
     render: function(){
 
         if (this.props.project && !this.state.project_visible){
-            var splitter_type = "invisible"; 
+            var splitter_type = "invisible";
         } else {
             var splitter_type = this.state.type;
         }
@@ -320,7 +323,7 @@ var TabSplit = React.createClass({
           onMouseUp={this.mouseUpHandler}
           onMouseLeave={this.mouseLeaveHandler}
         >
-          <Container ref="first_container" type={this.state.type} h={this.state.h1}> 
+          <Container ref="first_container" type={this.state.type} h={this.state.h1}>
             {this.props.children[0]}
           </Container>
           <Splitter ref="splitter" type={splitter_type}
