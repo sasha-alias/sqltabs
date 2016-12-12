@@ -3,7 +3,7 @@ var Modal = require('react-bootstrap').Modal;
 var Button = require('react-bootstrap').Button;
 var OverlayMixin = require('react-bootstrap').OverlayMixin;
 var TabsStore = require('./TabsStore');
-var Shell = require('shell');
+var Shell = require('electron').shell;
 
 var UpgradeMessage = React.createClass({
 
@@ -12,11 +12,11 @@ var UpgradeMessage = React.createClass({
     },
 
     componentDidMount: function(){
-        TabsStore.bind('new-version-available', this.newVersionHandler); 
+        TabsStore.bind('new-version-available', this.newVersionHandler);
     },
 
     componentWillUnmount: function(){
-        TabsStore.unbind('new-version-available', this.newVersionHandler); 
+        TabsStore.unbind('new-version-available', this.newVersionHandler);
     },
 
     newVersionHandler: function(){
@@ -38,7 +38,7 @@ var UpgradeMessage = React.createClass({
             return (
               <div className='static-modal'>
 
-                <Modal 
+                <Modal
                   bsStyle='primary'
                   backdrop={false}
                   animation={false}

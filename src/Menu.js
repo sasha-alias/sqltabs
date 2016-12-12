@@ -17,11 +17,11 @@
 
 var Actions = require ('./Actions');
 var TabsStore = require('./TabsStore');
-var remote = require('remote');
-var Menu = remote.require('menu');
-var BrowserWindow = remote.require('browser-window');
-var dialog = remote.require('dialog');
-var app = remote.require('app');
+var remote = require('electron').remote;
+var Menu = remote.Menu;
+var BrowserWindow = remote.BrowserWindow;
+var dialog = remote.dialog;
+var app = remote.app;
 var fs = require('fs');
 
 if (typeof(DEVMODE) == 'undefined'){

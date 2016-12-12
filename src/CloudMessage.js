@@ -22,7 +22,7 @@ var Button = require('react-bootstrap').Button;
 var OverlayMixin = require('react-bootstrap').OverlayMixin;
 var TabsStore = require('./TabsStore');
 var Actions = require('./Actions');
-var Shell = require('shell');
+var Shell = require('electron').shell;
 
 var CloudMessage = React.createClass({
 

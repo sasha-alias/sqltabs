@@ -21,8 +21,9 @@ if (process.platform == 'linux'){
     });
 }
 
-var app = require('app');
-var BrowserWindow = require('browser-window');
+var electron = require('electron');
+var app = electron.app;
+var BrowserWindow = electron.BrowserWindow;
 
 var mainWindow = null;
 
@@ -38,7 +39,7 @@ app.on('ready', function() {
   });
   mainWindow.maximize();
 
-  mainWindow.loadUrl('file://' + __dirname + '/index.html');
+  mainWindow.loadURL('file://' + __dirname + '/index.html');
 
   mainWindow.on('closed', function() {
     mainWindow = null;

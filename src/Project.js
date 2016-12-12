@@ -1,8 +1,8 @@
 var React = require('react');
 var Actions = require('./Actions');
 var TabsStore = require('./TabsStore');
-var remote = require('remote');
-var dialog = remote.require('dialog');
+var remote = require('electron').remote;
+var dialog = remote.dialog;
 var fs = require('fs');
 var path = require('path');
 var async = require('async');
@@ -23,7 +23,7 @@ var Project = React.createClass({
     componentDidMount: function(){
         TabsStore.bind('show-project-'+this.props.eventKey, this.showProjectHandler);
         TabsStore.bind('hide-project-'+this.props.eventKey, this.hideProjectHandler);
-        TabsStore.bind('font-size-changed', this.resize); 
+        TabsStore.bind('font-size-changed', this.resize);
         React.findDOMNode(this.refs.project_div).addEventListener("keydown", this.keyPressHandler);
 
     },
@@ -31,7 +31,7 @@ var Project = React.createClass({
     componentWillUnmount: function(){
         TabsStore.unbind('show-project-'+this.props.eventKey, this.showProjectHandler);
         TabsStore.unbind('hide-project-'+this.props.eventKey, this.hideProjectHandler);
-        TabsStore.unbind('font-size-changed', this.resize); 
+        TabsStore.unbind('font-size-changed', this.resize);
         React.findDOMNode(this.refs.project_div).removeEventListener("keydown", this.keyPressHandler);
     },
 
@@ -47,7 +47,7 @@ var Project = React.createClass({
 
     componentDidUpdate: function(){
 
-        this.resize(); 
+        this.resize();
     },
 
     resize: function(){
@@ -59,7 +59,7 @@ var Project = React.createClass({
     },
 
     update: function(){
-        this.setState({projects: TabsStore.getProjects()}); 
+        this.setState({projects: TabsStore.getProjects()});
     },
 
     keyPressHandler: function(e){
@@ -73,7 +73,7 @@ var Project = React.createClass({
             this.enterHandler(e);
         }
         if (e.keyCode == 39){ // right arrow
-            this.viewFile(); 
+            this.viewFile();
         }
         if (e.keyCode == 8){ // backspace
             this.goDirUp();
@@ -128,7 +128,7 @@ var Project = React.createClass({
         if (this.state.active.type == "project" && this.state.active.idx < this.state.projects.length-1){
             return this.setState({active: {type: "project", idx: this.state.active.idx+1}});
         }
-        
+
         // next file
         if (this.state.active.type == "file" && this.state.active.idx < this.state.files.length-1){
             return this.setState({active: {type: "file", idx: this.state.active.idx+1}},
@@ -176,7 +176,7 @@ var Project = React.createClass({
     addProjectHandler: function(){
         var self = this;
 
-        dialog.showOpenDialog({ properties: ['openDirectory']}, 
+        dialog.showOpenDialog({ properties: ['openDirectory']},
             function(dirs){
                 if (typeof(dirs) != 'undefined' && dirs.length == 1){
                     var dirname = dirs[0];
@@ -197,7 +197,7 @@ var Project = React.createClass({
         }
 
         return (
-        <div className="project-toolbar"> 
+        <div className="project-toolbar">
             <div ref="hidden" tabIndex="0"/>
                 <a href="#" onClick={this.addProjectHandler}> <span className="glyphicon glyphicon-plus-sign"/> </a>
             {path}
@@ -235,7 +235,7 @@ var Project = React.createClass({
     loadPath: function(p){
         var dirs = [{path: '..', dir: true}];
         var files = [];
-        
+
         var ls = fs.readdirSync(p);
         ls.forEach(function(file_name, idx){
             var file_path = path.join(p, file_name);
@@ -303,7 +303,7 @@ var Project = React.createClass({
 
             });
 
-            return <div id={"project-files-list-"+this.props.eventKey} className="project-files-list" ref="project_files_list"> 
+            return <div id={"project-files-list-"+this.props.eventKey} className="project-files-list" ref="project_files_list">
             {ret}
             </div>
         }
@@ -314,12 +314,12 @@ var Project = React.createClass({
 
         var projects = this.state.projects.map(function(item, idx){
             if (self.state.active.type == "project" && self.state.active.idx == idx){
-                return <div key={"project_"+self.props.eventKey+"_"+idx}> 
+                return <div key={"project_"+self.props.eventKey+"_"+idx}>
                     <div className="project-button project-button-active" onClick={function(){self.loadProjectHandler(idx)}}> {item.alias} </div>
                     <div className="project-button-remove" onClick={function(){self.removeProjectHandler(idx)}}> <span className="glyphicon glyphicon-minus-sign"/></div>
                 </div>;
             } else {
-                return <div key={"project_"+self.props.eventKey+"_"+idx}> 
+                return <div key={"project_"+self.props.eventKey+"_"+idx}>
                     <div className="project-button" onClick={function(){self.loadProjectHandler(idx)}}> {item.alias} </div>
                     <div className="project-button-remove" onClick={function(){self.removeProjectHandler(idx)}}> <span className="glyphicon glyphicon-minus-sign"/></div>
                 </div>;

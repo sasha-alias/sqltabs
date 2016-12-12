@@ -3,7 +3,8 @@ var $ = require('jquery');
 var c3 = require('c3');
 
 function openExternal(url){
-    require('shell').openExternal(url);
+    var shell = require('electron').shell;
+    shell.openExternal(url);
 }
 
 function scrollTo(div, to){
@@ -34,7 +35,7 @@ function scrollToUp(div, to){
     if (position > $(div).height()){ // if scrolled away down
         return $(div).scrollTop(position);
     }
-    if (position - $(to).height() < 0){ 
+    if (position - $(to).height() < 0){
         return $(div).scrollTop(scroll - $(to).height());
     }
 }
@@ -69,10 +70,10 @@ function mount_charts(){
         if (column_charts.indexOf(chart_type) != -1){
             // field name as a header
             var rows = dataset.data;
-            rows.unshift(fields); 
+            rows.unshift(fields);
 
             data = {
-                rows: rows, 
+                rows: rows,
                 type: chart_type,
             }
 

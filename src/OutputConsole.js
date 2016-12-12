@@ -19,7 +19,6 @@ var React = require('react');
 var Chart = require('./Chart');
 var ObjectInfo = require('./ObjectInfo');
 var Marked = require('marked');
-var Shell = require('shell');
 var Actions = require('./Actions');
 var SqlDoc = require('sqldoc');
 
