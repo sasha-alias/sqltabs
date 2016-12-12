@@ -381,8 +381,12 @@ var _TabsStore = function(){
                     dataset.data.forEach(function(record){
                         values = []
                         record.forEach(function(col){
-                            var escaped = col.replace(/"/g, '""');
-                            values.push('"' + escaped + '"');
+                            if (col != null){
+                                var escaped = col.replace(/"/g, '""');
+                                values.push('"' + escaped + '"');
+                            } else {
+                                values.push("NULL");
+                            }
                         });
                         fs.writeSync(file, values.join()+'\n');
                     });
@@ -392,16 +396,6 @@ var _TabsStore = function(){
         }
 
     }
-
-    //this.exportResultCsv = function(filename){
-    //    csv = ''
-    //    JSON.stringify(this.tabs[this.selectedTab].result
-    //    fs.writeFile(filename, , function(err) {
-    //        if(err) {
-    //            return console.log(err);
-    //        }
-    //    });
-    //}
 
     // restore recent connection string on startup
     if (typeof(Config.getConnHistory()) != 'undefined' && Config.getConnHistory().length > 0){
