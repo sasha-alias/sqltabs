@@ -5,11 +5,8 @@ var path = require('path');
 var tunnel = require('tunnel-ssh');
 var net = require('net');
 
-var Databases = {};
-var AutocompletionHashes = {};
 var Tunnels = {};
 var TunnelPorts = {};
-var TunnelCallbacks = {};
 var PortSequence = 15000;
 
 function resolveHome(filepath) {

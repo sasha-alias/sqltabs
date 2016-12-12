@@ -12,31 +12,17 @@ In order to run SQL Tabs from source code follow the next steps:
 
 2. Install [electron](http://electron.atom.io) - a runtime environment for application (version is important):
 
-        npm install electron-prebuilt@0.27.3 -g
+        npm install electron-prebuilt@1.4.7 -g
 
 3. Install React javascript extension the application is written with:
 
         npm install -g react-tools
 
-4. For building postgresql driver `pg_config` is needed, so depending on your platform install:
 
-    Ubuntu:
-        
-        apt-get install libpq-dev
-
-    OSX:
-
-        brew install postgresql
-    
-
-5. Get the code, install dependencies and build the application:
+4. Get the code, install dependencies and build the application:
 
         git clone https://github.com/sasha-alias/sqltabs
         cd sqltabs
-        export npm_config_disturl=https://atom.io/download/atom-shell
-        export npm_config_target=0.27.3
-        export npm_config_arch=x64
-        export npm_config_runtime=electron
         npm install
 
 5. Run the application:

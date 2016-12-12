@@ -15,17 +15,19 @@
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-var PQ = require('libpq');
+var pg = require('pg');
+var parseConnstr = require('pg-connection-string').parse;
 var util = require('util');
 var url = require('url');
+var now = require("performance-now")
 
 var Client = function(connstr, password){
     var self = this;
 
-    // connection string
     this.connstr = connstr;
     this.password = password;
-    this._connstr = normalizeConnstr(connstr, password);
+    this._connstr = normalizeConnstr(connstr);
+    this.client = new pg.Client(this._connstr);
 
     this.setPassword = function(password){
         if (password != this.password){
@@ -34,9 +36,6 @@ var Client = function(connstr, password){
         this.password = password;
         this._connstr = normalizeConnstr(this.connstr, password);
     };
-
-    // libpq instance
-    this.pq = new PQ();
 
     this.connected = false;
 
@@ -53,62 +52,85 @@ var Client = function(connstr, password){
     this.copy_data = [];
 
     this.cancel = function(){
-        return self.pq.cancel();
+
+        self.query_cancelled = true;
+
+        var xclient = new pg.Client(self._connstr);
+        xclient.connect(function(err){
+            if (err){
+                console.log("failed to connect to cancel query: "+err);
+            } else {
+                console.log(self.client.processID);
+                xclient.query("SELECT pg_cancel_backend($1)", [self.client.processID], function(err, res){
+                    if (err){
+                        console.log("failed to cancel query: "+err);
+                    }
+                    xclient.end();
+                });
+            }
+
+        });
+
+        //self.client.cancel(self.client, self.client.activeQuery.text);
     };
 
     this.silentCancel = function(){
-        self.callback = function(){};
-        self.cancel();
-        self.disconnect();
-    };
-
-    this.isBusy = function(){
-        return self.pq.isBusy();
+        self.client.end();
     };
 
     this.raiseError = function(err){
         self.error = true;
         self.finished = true;
-        //self.pq.removeListener('readable', self.readyHandler);
-        self.pq.stopReader();
         self.err_callback(err);
     };
 
     this.disconnect = function(){
         self.connected = false;
-        self.pq.finish();
+        self.client.end();
     };
 
-    // send query for execution
-    this.sendQuery = function(query, callback, err_callback){
-        self.pq.setNonBlocking(true);
+    // real sending query
+    this._executeQuery = function(query, callback, err_callback){
+        self.Response = new Response(query)
 
-        self.Response = new Response(query);
-        self.finished = false;
-        self.error = false;
-
-        self.callback = callback;
-        self.err_callback = err_callback;
-
-        var send = function(){
-            self.pq.addListener('readable', self.readyHandler);
-            var sent = self.pq.sendQuery(query);
-            if (!sent){
-                return self.raiseError(self.pq.errorMessage());
-            }
-            self.pq.startReader();
-        }
-
-        if (!self.connected){
-            self.pq.connect(self._connstr, function(err) {
-                if (err){
-                    return self.raiseError(err);
+        self.client.query({text: query, rowMode: 'array', multiResult: true}, function(err, res){
+            self.isBusy = false;
+            if (err) {
+                if (self.query_cancelled){
+                    self.query_cancelled = false;
+                    err_callback("query cancelled by user's request");
+                } else {
+                    err_callback(err);
                 }
-                self.connected = true;
-                send();
-            });
+            } else {
+                self.Response.finish()
+                res.forEach(function(r){
+                    ds = new Dataset(r);
+                    self.Response.datasets.push(ds);
+                });
+
+                callback(self.Response);
+            }
+        });
+    }
+
+    // send query interface, connects first if needed
+    this.sendQuery = function(query, callback, err_callback){
+        self.isBusy = true;
+
+        if (self.connected){
+            self._executeQuery(query, callback, err_callback);
         } else {
-            send();
+
+            self.client.connect(function(err){
+                if (err){
+                    self.isBusy = false;
+                    err_callback(err);
+                } else {
+                    self.connected = true;
+                    self._executeQuery(query, callback, err_callback)
+                }
+            });
         }
     };
 
@@ -119,128 +141,38 @@ var Client = function(connstr, password){
         });
     };
 
-    // query is ready to return data, so read data from server
-    this.readyHandler = function(){
-        self._read();
-    };
+    this.client.on('notice', this.noticeHandler);
 
-    this.dataReady = function(){
-        if (!self.error){
-            self.finished = true;
-            self.pq.removeListener('readable', self.readyHandler);
-            self.pq.stopReader();
-            self.callback(self.Response);
-        }
+}
+
+var Dataset = function(result){
+    // construct dataset object from returned resultset.
+    this.data = result.rows
+    this.fields = result.fields
+    this.nrecords = result.rows.length;
+    if (result.cmdStatus.indexOf('SELECT') > -1){
+        this.resultStatus = 'PGRES_TUPLES_OK';
+    } else {
+        this.resultStatus = 'PGRES_COMMAND_OK';
     }
-
-    // extract data from server
-    this._read = function(){
-
-        if (self.pq.socket() == -1){
-            self.connected = false;
-            self.raiseError("Connection was terminated. Try to restart query.");
-        }
-
-        self.pq.consumeInput();
-
-        if (self.pq.resultStatus() == 'PGRES_COPY_OUT'){
-            var copy_data = self.pq.getCopyData();
-            if (copy_data == -1) { // COPY completed
-                var copy_dataset = self.copy_data;
-                self.copy_data = []; // reset buffer
-
-                self.Response.datasets.push({
-                    nrecords: copy_dataset.length,
-                    fields: ['copy'],
-                    data: copy_dataset,
-                    cmdStatus: self.pq.cmdStatus(),
-                    resultStatus: self.pq.resultStatus(),
-                    resultErrorMessage: self.pq.resultErrorMessage(),
-                });
-            } else {
-                self.copy_data.push([copy_data.toString('utf8')]);
-                setTimeout(function(){
-                    if (!self.finished){
-                        self._read();
-                    }
-                }, 5);
-                return;
-            }
-        }
-
-        if (self.pq.isBusy()){ // give it a moment, so not to block while fetching data
-            setTimeout(function(){
-                if (!self.finished){
-                    self._read();
-                }
-            }, 100);
-            return;
-        }
-
-        var res = self.pq.getResult();
-
-        if (!res){ // no more result sets
-            self.finished = true;
-            self.Response.finish();
-            self.dataReady();
-            return;
-        }
-
-        var nrows = self.pq.ntuples();
-        var nfields = self.pq.nfields();
-        var fields = [];
-        for (i = 0; i<nfields; i++){
-            fields.push({
-                name: self.pq.fname(i),
-                type: decode_type(self.pq.ftype(i)),
-            });
-        }
-        var records = [];
-        for (r = 0; r < nrows; r++){
-            rec = [];
-            for (f = 0; f < nfields; f++){
-                if (self.pq.getisnull(r, f)){
-                    v = null;
-                } else {
-                    v = self.pq.getvalue(r, f);
-                }
-                rec.push(v);
-            }
-            records.push(rec);
-        }
-
-        if (self.pq.resultStatus() != 'PGRES_COPY_OUT'){
-            self.Response.datasets.push({
-                nrecords: nrows,
-                fields: fields,
-                data: records,
-                cmdStatus: self.pq.cmdStatus(),
-                resultStatus: self.pq.resultStatus(),
-                resultErrorMessage: self.pq.resultErrorMessage(),
-            });
-        }
-
-        if (!self.finished){
-            self._read();
-        }
-    }
-
-    this.pq.on('notice', this.noticeHandler);
-
+    this.fields.forEach(function(item){
+        item.type = decode_type(item.dataTypeID);
+    });
+    this.cmdStatus = result.cmdStatus;
 }
 
 var Response = function(query){
     this.query = query
     this.datasets = [];
-    this.start_time = performance.now(); //new Date().getTime();
+    this.start_time = now();
     this.duration = null;
     self = this;
     this.finish = function(){
-        self.duration = Math.round((performance.now() - self.start_time)*1000)/1000;
+        self.duration = Math.round((now() - self.start_time)*1000)/1000;
     };
 }
 
-// normalizes connect string: ensures protocol, and substitutes password
+// normalizes connect string: ensures protocol, and substitutes password, rewrite mistaken defaults etc
 var normalizeConnstr = function(connstr, password){
     if (connstr){
         var meta_start = connstr.indexOf('---'); // cut sqltabs extension of connect string
@@ -266,6 +198,11 @@ var normalizeConnstr = function(connstr, password){
         }
 
         connstr = decodeURIComponent(connstr).trim();
+
+        connstr = parseConnstr(connstr);
+        if (connstr.database == null){
+            connstr.database = connstr.user;
+        }
         return connstr;
     }
 };

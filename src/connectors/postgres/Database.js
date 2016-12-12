@@ -14,7 +14,7 @@ var Database = {
 
         if (id in cache && cache[id].connstr == connstr && cache[id].connected){
             var client = cache[id];
-            if (client.isBusy()){ // when previous query is running
+            if (client.isBusy){ // when previous query is running
                 client.silentCancel(); // just drop it
                 var client = new PqClient(connstr, password); // and get new client, so async errors won't come in
                 cache[id] = client;
