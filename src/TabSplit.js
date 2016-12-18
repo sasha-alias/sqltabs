@@ -180,9 +180,14 @@ var TabSplit = React.createClass({
             TabsStore.bind('editor-resize', this.resizeHandler);
         }
 
-        self.setInitialSize();
+        // timeout needed because of some race conditions during window initialization
+        // without timeout on linux areas created with wrong size
+        setTimeout(function(){
+            self.setInitialSize();
+        }, 10); 
 
-        window.addEventListener("resize", self.resizeContainers);
+        // resize areas after window size changed
+        window.addEventListener("resize", self.setInitialSize);
     },
 
     componentDidUpdate: function(){
