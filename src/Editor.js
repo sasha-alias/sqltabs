@@ -1,16 +1,16 @@
 /*
   Copyright (C) 2015  Aliaksandr Aliashkevich
-  
+
       This program is free software: you can redistribute it and/or modify
       it under the terms of the GNU General Public License as published by
       the Free Software Foundation, either version 3 of the License, or
       (at your option) any later version.
-  
+
       This program is distributed in the hope that it will be useful,
       but WITHOUT ANY WARRANTY; without even the implied warranty of
       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
       GNU General Public License for more details.
-  
+
       You should have received a copy of the GNU General Public License
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -42,7 +42,7 @@ var Editor = React.createClass({
         this.completion_words = TabsStore.getCompletionWords();
 
         return {
-            theme: TabsStore.getEditorTheme(), 
+            theme: TabsStore.getEditorTheme(),
             mode: TabsStore.getEditorMode(),
             script: script,
         };
@@ -111,7 +111,7 @@ var Editor = React.createClass({
             readOnly: true
         });
 
-        this.editor.getSelectedText = function() { 
+        this.editor.getSelectedText = function() {
             return this.session.getTextRange(this.getSelectionRange());
         }
 
@@ -201,10 +201,10 @@ var Editor = React.createClass({
             } else if (current_line_text.match(meta) != null){
                 start = current_line;
                 start_found = true;
-            } 
+            }
             current_line--;
         }
-        
+
         var end = null;
         var end_found = false;
         current_line = start;
@@ -217,9 +217,9 @@ var Editor = React.createClass({
                 end = current_line - 1;
                 end_found = true;
             }
-            current_line++; 
+            current_line++;
         }
-        
+
         return this.editor.session.getLines(start, end).join('\n');
     },
 
@@ -254,7 +254,7 @@ var Editor = React.createClass({
             if(err) {
                 return console.log(err);
             }
-        }); 
+        });
     },
 
     fileCloseHandler: function(){
@@ -286,7 +286,7 @@ var Editor = React.createClass({
             });
 
             if (typeof(ret) == 'undefined'){ // if nothing found
-                this.editor.gotoLine(init_position.row+1, init_position.column, false); 
+                this.editor.gotoLine(init_position.row+1, init_position.column, false);
             }
         }
     },
@@ -296,7 +296,7 @@ var Editor = React.createClass({
         var pos = this.editor.getCursorPosition();
         var line_text = this.editor.session.getLine(pos.row);
         var part1 = line_text.substring(0, pos.column);
-        part1 = part1.match("[A-z0-9.]*$"); 
+        part1 = part1.match("[A-z0-9.]*$");
         if (part1 != null){
             part1 = part1[0]
         } else {
@@ -304,7 +304,7 @@ var Editor = React.createClass({
         }
 
         var part2 = line_text.substring(pos.column);
-        part2 = part2.match("^[A-z0-9.]+"); 
+        part2 = part2.match("^[A-z0-9.]+");
         if (part2 != null){
             part2 = part2[0]
         } else {
@@ -395,7 +395,7 @@ var Editor = React.createClass({
                 this.editor.commands.removeCommand('golinedown'); // disable down
                 return;
             } else {
-                this.hideCompleter(); 
+                this.hideCompleter();
             }
         } else {
             this.hideCompleter();

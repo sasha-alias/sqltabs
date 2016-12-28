@@ -10,10 +10,9 @@ cp logo.png .build/
 cp package.json .build/
 cp -r build .build/
 cp -r css .build/
-cp -r driver .build/
 cp -r node_modules .build/
 
 cd .build
-electron-packager ./ "SQL Tabs" --platform=darwin --arch=x64 --version=0.27.3 --icon logo.icns --asar --prune
+electron-packager ./ "SQL Tabs" --platform=darwin --arch=x64 --version=1.4.7 --icon logo.icns --asar --prune
 cd ..
 
