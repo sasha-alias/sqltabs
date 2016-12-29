@@ -150,7 +150,6 @@ var Executor = {
     },
 
     cancelQuery: function(id, connstr){
-    // most probably the issue is that every time returned a new instance of connector, maybe not
         this.getDatabase(id, connstr, function(db){
             db.cancelQuery(id);
         });
@@ -169,13 +168,12 @@ var Executor = {
     },
 
 
-    testConnection: function(id, connstr, password, callback, err_callback1, err_callback2){
-        console.log('test con: '+id);
+    testConnection: function(id, connstr, password, callback, ask_password_callback, err_callback){
         this.getDatabase(id, connstr,
         function(db){
-            db.testConnection(id, db.connstr, password, callback, err_callback1, err_callback2);
+            db.testConnection(id, db.connstr, password, callback, ask_password_callback, err_callback);
         },
-        err_callback2);
+        err_callback);
     },
 
     getCompletionWords: function(connstr, callback){

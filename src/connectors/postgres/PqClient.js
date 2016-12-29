@@ -26,15 +26,16 @@ var Client = function(connstr, password){
 
     this.connstr = connstr;
     this.password = password;
-    this._connstr = normalizeConnstr(connstr);
+    this._connstr = normalizeConnstr(connstr, password);
     this.client = new pg.Client(this._connstr);
 
     this.setPassword = function(password){
-        if (password != this.password){
-            this.disconnect();
+        if (password != self.password){
+            self.connected = false;
+            self.disconnect();
         }
-        this.password = password;
-        this._connstr = normalizeConnstr(this.connstr, password);
+        self.password = password;
+        self._connstr = normalizeConnstr(this.connstr, password);
     };
 
     this.connected = false;
@@ -181,21 +182,21 @@ var normalizeConnstr = function(connstr, password){
         }
         if (connstr.lastIndexOf('postgresql://', 0) !== 0 && connstr.lastIndexOf('postgres://', 0) !== 0) {
             connstr = 'postgres://'+connstr;
-            parsed = url.parse(connstr);
-            if (parsed.query == null){
-                var params = "application_name=sqltabs";
-            } else {
-                var params = parsed.query;
-            }
-            connstr = util.format('%s//%s%s%s%s?%s',
-                parsed.protocol,
-                parsed.auth,
-                (password == null) ? '' : ':'+password,
-                (parsed.host == null) ? '' : '@'+parsed.host,
-                (parsed.path == null) ? '' : parsed.pathname,
-                params
-            );
         }
+        parsed = url.parse(connstr);
+        if (parsed.query == null){
+            var params = "application_name=sqltabs";
+        } else {
+            var params = parsed.query;
+        }
+        connstr = util.format('%s//%s%s%s%s?%s',
+            parsed.protocol,
+            parsed.auth,
+            (password == null) ? '' : ':'+password,
+            (parsed.host == null) ? '' : '@'+parsed.host,
+            (parsed.path == null) ? '' : parsed.pathname,
+            params
+        );
 
         connstr = decodeURIComponent(connstr).trim();
 

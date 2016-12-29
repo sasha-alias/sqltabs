@@ -79,7 +79,7 @@ var Database = {
 
     },
 
-    testConnection: function(id, connstr, password, callback, err_callback1, err_callback2){
+    testConnection: function(id, connstr, password, callback, ask_password_callback, err_callback){
 
         var client = this.getClient(id, connstr, password);
 
@@ -88,10 +88,10 @@ var Database = {
                 callback(id, [result]);
             },
             function(err){
-                if (typeof(err.message) != 'undefined' && err.message.indexOf("no password supplied")>-1){
-                    err_callback1(id, err);
+                if (typeof(err.message) != 'undefined' && err.message.indexOf("password authentication failed")>-1){
+                    ask_password_callback(id, err);
                 } else {
-                    err_callback2(id, err);
+                    err_callback(id, err);
                 }
             }
         );

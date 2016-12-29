@@ -154,6 +154,7 @@ AppDispatcher.register( function(payload) {
                 payload.err_callback
             );
             TabsStore.trigger('change');
+            break;
 
         case 'run-query':
             connstr = TabsStore.getConnstr(payload.key);
