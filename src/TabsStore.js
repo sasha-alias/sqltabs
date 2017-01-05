@@ -18,6 +18,7 @@
 var MicroEvent = require('microevent');
 var Config = require('./Config');
 var fs = require('fs');
+var EOL = require('os').EOL;
 
 var Sequence = function(start){
     this.curval = start;
@@ -376,7 +377,7 @@ var _TabsStore = function(){
                     dataset.fields.forEach(function(field){
                         field_names.push('"' + field.name + '"');
                     });
-                    fs.writeSync(file, field_names.join()+'\n');
+                    fs.writeSync(file, field_names.join()+EOL);
                     // write records
                     dataset.data.forEach(function(record){
                         values = []
@@ -388,7 +389,7 @@ var _TabsStore = function(){
                                 values.push("NULL");
                             }
                         });
-                        fs.writeSync(file, values.join()+'\n');
+                        fs.writeSync(file, values.join()+EOL);
                     });
                 }
             }

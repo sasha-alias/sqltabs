@@ -182,7 +182,7 @@ var TabSplit = React.createClass({
 
         // timeout needed because of some race conditions during window initialization
         // without timeout on linux areas created with wrong size
-        if (process.platform == 'darwin'){
+        if (process.platform == 'darwin' || process.platform == 'win32'){
             self.setInitialSize();
         } else {
             setTimeout(function(){

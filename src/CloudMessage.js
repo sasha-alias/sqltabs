@@ -83,7 +83,7 @@ var CloudMessage = React.createClass({
         } else {
             var target_server = this.target_server;
         }
-        Shell.openExternal(target_server+'/share/'+docid);
+        Shell.openExternal(target_server+'/api/1.0/docs/'+docid);
         this.hide();
     },
 
