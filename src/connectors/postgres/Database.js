@@ -88,7 +88,7 @@ var Database = {
                 callback(id, [result]);
             },
             function(err){
-                if (typeof(err.message) != 'undefined' && err.message.indexOf("password authentication failed")>-1){
+                if (typeof(err.code) != 'undefined' && ["28000", "28P01"].indexOf(err.code) > -1){
                     ask_password_callback(id, err);
                 } else {
                     err_callback(id, err);
