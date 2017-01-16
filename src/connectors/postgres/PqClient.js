@@ -153,6 +153,8 @@ var Dataset = function(result){
     this.nrecords = result.rows.length;
     if (result.cmdStatus.indexOf('SELECT') > -1){
         this.resultStatus = 'PGRES_TUPLES_OK';
+    } else if (result.cmdStatus.indexOf('EXPLAIN') > -1){
+        this.resultStatus = 'PGRES_TUPLES_OK';
     } else {
         this.resultStatus = 'PGRES_COMMAND_OK';
     }
