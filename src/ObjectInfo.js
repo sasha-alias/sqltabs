@@ -1,16 +1,16 @@
 /*
   Copyright (C) 2015  Aliaksandr Aliashkevich
-  
+
       This program is free software: you can redistribute it and/or modify
       it under the terms of the GNU General Public License as published by
       the Free Software Foundation, either version 3 of the License, or
       (at your option) any later version.
-  
+
       This program is distributed in the hope that it will be useful,
       but WITHOUT ANY WARRANTY; without even the implied warranty of
       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
       GNU General Public License for more details.
-  
+
       You should have received a copy of the GNU General Public License
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -26,6 +26,7 @@ require('brace/theme/idle_fingers');
 require('brace/keybinding/vim');
 
 var Cassandra = require('./connectors/cassandra/Renderer.js');
+var Mysql = require('./connectors/mysql/Renderer.js');
 
 var ObjectInfo = React.createClass({
 
@@ -262,7 +263,7 @@ var ObjectInfo = React.createClass({
                     {tablespaces}
                 </ul>
             </div>
-            
+
             <div id={"event-triggers-"+this.props.eventKey}> {gotop} Event Triggers:
                 <ul>
                     {event_triggers}
@@ -335,7 +336,7 @@ var ObjectInfo = React.createClass({
                 var description = "";
             }
 
-            var column = (<tr key={info.object_name+"_"+i}> 
+            var column = (<tr key={info.object_name+"_"+i}>
                 <td>{info.object.columns[i].name}</td>
                 <td>{type}</td>
                 <td>{not_null}</td>
@@ -351,7 +352,7 @@ var ObjectInfo = React.createClass({
         if (info.object.pk != null){
             var pk_cols = info.object.pk.columns.replace(/^\{/, '');
             var pk_cols = pk_cols.replace(/\}$/, '');
-            pk = <p><span className="ace_keyword">CONSTRAINT</span> {info.object.pk.pk_name} 
+            pk = <p><span className="ace_keyword">CONSTRAINT</span> {info.object.pk.pk_name}
             <span className="ace_keyword"> PRIMARY KEY</span> ({pk_cols})</p>;
         } else {
             pk = null;
@@ -362,7 +363,7 @@ var ObjectInfo = React.createClass({
             var check_constraints = [];
             for (var i=0; i < info.object.check_constraints.length; i++){
                 var check = <p key={"check_" + info.object.check_constraints[i].name}>
-                    <span className="ace_keyword">CONSTRAINT</span> {info.object.check_constraints[i].name} 
+                    <span className="ace_keyword">CONSTRAINT</span> {info.object.check_constraints[i].name}
                     <span className="ace_keyword"> CHECK </span> {info.object.check_constraints[i].src}
                 </p>;
                 check_constraints.push(check);
@@ -375,7 +376,7 @@ var ObjectInfo = React.createClass({
         if (info.object.indexes != null){
             var indexes=[];
             for (var i=0; i < info.object.indexes.length; i++){
-                
+
                 var idx = info.object.indexes[i];
                 var idx_cols = idx.columns.replace(/^\{/, '');
                 var idx_cols = idx_cols.replace(/\}$/, '');
@@ -410,7 +411,7 @@ var ObjectInfo = React.createClass({
             });
 
             triggers = <div>Triggers:<ul>
-                {triggers} 
+                {triggers}
             </ul></div>;
 
         } else {
@@ -435,7 +436,7 @@ var ObjectInfo = React.createClass({
             records = null;
             size = null;
             total_size = null;
-            
+
         } else {
             var view_script = null;
         }
@@ -461,7 +462,7 @@ var ObjectInfo = React.createClass({
         }
 
         return (
-        <div className="object-info-div"> 
+        <div className="object-info-div">
             <p>
             <div>{relkind}&nbsp;
             <span className="object-info-name">
@@ -488,31 +489,34 @@ var ObjectInfo = React.createClass({
 
     render: function(){
         var info = this.props.info;
-        if (info.object_type == 'function'){
 
-            return this.render_function_info(info);
+        console.log(info);
 
-        } else if (info.object_type == 'relation'){
-            return this.render_relation_info(info);
-
-        } else if (info.object_type == 'database'){
-            return this.render_db_info(info);
-
-        } else if (info.object_type == 'schema'){
-            return this.render_schema_info(info);
-
-        } else if (info.object_type == 'trigger'){
-            return this.render_trigger_info(info);
-        } else if (info.object_type == 'cassandra_cluster'){
-            return Cassandra.renderCluster(this.props.eventKey, info, this.getInfo);
-        } else if (info.object_type == 'cassandra_keyspace'){
-            return Cassandra.renderKeyspace(this.props.eventKey, info, this.getInfo);
-        } else if (info.object_type == 'cassandra_table'){
-            return Cassandra.renderTable(this.props.eventKey, info, this.getInfo);
+        if (info.connector == 'mysql'){
+            return Mysql.info(this.props.eventKey, info, this.getInfo);
         } else {
-            return (
-                <div className="alert alert-danger">Not supported object type: {info.object_type}</div>
-            );
+
+            if (info.object_type == 'function'){
+                return this.render_function_info(info);
+            } else if (info.object_type == 'relation'){
+                return this.render_relation_info(info);
+            } else if (info.object_type == 'database'){
+                return this.render_db_info(info);
+            } else if (info.object_type == 'schema'){
+                return this.render_schema_info(info);
+            } else if (info.object_type == 'trigger'){
+                return this.render_trigger_info(info);
+            } else if (info.object_type == 'cassandra_cluster'){
+                return Cassandra.renderCluster(this.props.eventKey, info, this.getInfo);
+            } else if (info.object_type == 'cassandra_keyspace'){
+                return Cassandra.renderKeyspace(this.props.eventKey, info, this.getInfo);
+            } else if (info.object_type == 'cassandra_table'){
+                return Cassandra.renderTable(this.props.eventKey, info, this.getInfo);
+            } else {
+                return (
+                    <div className="alert alert-danger">Not supported object type: {info.object_type}</div>
+                );
+            }
         }
     }
 });
