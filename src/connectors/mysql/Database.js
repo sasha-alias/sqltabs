@@ -479,12 +479,10 @@ WHERE SV0.Variable_Name = 'Hostname'";
                     err_callback);
                 };
 
-		// TODO
-		/*
-                var get_pk = function(done){
-                    self._getRelationPK(id, connstr, password, object,
-                    function(pk){
-                        relation.pk = pk;
+                var get_indexes = function(done){
+                    self._getRelationIndexes(id, connstr, password, object,
+                    function(indexes){
+                        relation.indexes = indexes;
                         done();
                     },
                     err_callback);
@@ -499,10 +497,10 @@ WHERE SV0.Variable_Name = 'Hostname'";
                     err_callback);
                 };
 
-                var get_indexes = function(done){
-                    self._getRelationIndexes(id, connstr, password, object,
-                    function(indexes){
-                        relation.indexes = indexes;
+                var get_pk = function(done){
+                    self._getRelationPK(id, connstr, password, object,
+                    function(pk){
+                        relation.pk = pk;
                         done();
                     },
                     err_callback);
@@ -516,6 +514,8 @@ WHERE SV0.Variable_Name = 'Hostname'";
                     },
                     err_callback);
                 };
+		// TODO
+		/*
 
                 var get_view_def = function(done){
                     if (relation.relkind == 'v'){
@@ -558,12 +558,8 @@ WHERE SV0.Variable_Name = 'Hostname'";
                 }
 
                 async.series([get_columns, get_pk, get_check_constraints, get_indexes, get_triggers, get_view_def, get_sequence_info],
-                function(){
-                    callback(relation);
-                }
-                );
 		*/
-                async.series([get_columns],
+                async.series([get_columns, get_pk, get_check_constraints, get_indexes, get_triggers],
                 function(){
                     callback(relation);
                 }
@@ -600,6 +596,84 @@ WHERE SV0.Variable_Name = 'Hostname'";
                 columns.push(column);
             }
             callback(columns);
+        },
+        err_callback);
+    },
+
+    _getRelationIndexes: function(id, connstr, password, object, callback, err_callback){
+	var query = "SELECT INDEX_NAME, INDEX_TYPE, NON_UNIQUE, GROUP_CONCAT(column_name ORDER BY seq_in_index) AS INDEX_COLUMNS FROM information_schema.statistics WHERE UPPER(CONCAT(table_schema,'.',table_name)) = UPPER('" + object  + "') GROUP BY 1, 2, 3;"
+        this._getData(id, connstr, password, query,
+        function(data){
+            indexes = [];
+            for (var i=0; i<data.length; i++){
+                var row = data[i];
+                var index = {
+                        name: row['INDEX_NAME'],
+                        non_unique: row['NON_UNIQUE'],
+                        method: row['INDEX_TYPE'],
+                        columns: row['INDEX_COLUMNS'],
+                        comment: row['INDEX_COMMENT'],
+                };
+                indexes.push(index);
+            }
+            callback(indexes);
+        },
+        err_callback);
+    },
+
+    _getCheckConstraints: function(id, connstr, password, object, callback, err_callback){
+	var query = "SELECT CONSTRAINT_NAME, GROUP_CONCAT(COALESCE(NULLIF(CONCAT_WS('.',REFERENCED_TABLE_SCHEMA,REFERENCED_TABLE_NAME,REFERENCED_COLUMN_NAME),''),COLUMN_NAME) ORDER BY ORDINAL_POSITION) AS CONSTRAINT_COLUMNS FROM information_schema.key_column_usage WHERE UPPER(CONCAT(table_schema,'.',table_name)) = UPPER('" + object  + "') AND CONSTRAINT_NAME != 'PRIMARY' AND POSITION_IN_UNIQUE_CONSTRAINT IS NOT NULL GROUP BY 1;";
+        this._getData(id, connstr, password, query,
+        function(data){
+            checks = [];
+            for (var i=0; i<data.length; i++){
+                var row = data[i];
+                var check = {
+                        name: row['CONSTRAINT_NAME'],
+                        columns: row['CONSTRAINT_COLUMNS'],
+                };
+                checks.push(check);
+            }
+            callback(checks);
+        },
+        err_callback);
+    },
+
+    _getRelationPK: function(id, connstr, password, object, callback, err_callback){
+	var query = "SELECT CONSTRAINT_NAME PK_NAME, GROUP_CONCAT(COALESCE(NULLIF(CONCAT_WS('.',REFERENCED_TABLE_SCHEMA,REFERENCED_TABLE_NAME,REFERENCED_COLUMN_NAME),''),COLUMN_NAME) ORDER BY ORDINAL_POSITION) AS PK_COLUMNS FROM information_schema.key_column_usage WHERE UPPER(CONCAT(table_schema,'.',table_name)) = UPPER('" + object  + "') AND CONSTRAINT_NAME = 'PRIMARY' AND POSITION_IN_UNIQUE_CONSTRAINT IS NULL GROUP BY 1;";
+        this._getData(id, connstr, password, query,
+        function(data){
+            pks = [];
+            for (var i=0; i<data.length; i++){
+                var row = data[i];
+                var pk = {
+                        name: row['PK_NAME'],
+                        columns: row['PK_COLUMNS'],
+                };
+                pks.push(pk);
+            }
+            callback(pks);
+        },
+        err_callback);
+    },
+
+    _getTriggers: function(id, connstr, password, object, callback, err_callback){
+	var query = "SELECT * FROM information_schema.triggers WHERE UPPER(CONCAT(EVENT_OBJECT_SCHEMA,'.',EVENT_OBJECT_TABLE)) = UPPER('" + object  + "');";
+        this._getData(id, connstr, password, query,
+        function(data){
+            triggers = [];
+            for (var i=0; i<data.length; i++){
+                var row = data[i];
+                var trigger = {
+                        name: row['TRIGGER_NAME'],
+                        timing: row['ACTION_TIMING'],
+                        manipulation: row['EVENT_MANIPULATION'],
+                        orientation: row['ACTION_ORIENTATION'],
+                        statement: row['ACTION_STATEMENT'],
+                };
+                triggers.push(trigger);
+            }
+            callback(triggers);
         },
         err_callback);
     },
