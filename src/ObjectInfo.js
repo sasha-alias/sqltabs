@@ -27,6 +27,7 @@ require('brace/keybinding/vim');
 
 var Cassandra = require('./connectors/cassandra/Renderer.js');
 var Mysql = require('./connectors/mysql/Renderer.js');
+var MSsql = require('./connectors/mssql/Renderer.js');
 
 var ObjectInfo = React.createClass({
 
@@ -490,10 +491,10 @@ var ObjectInfo = React.createClass({
     render: function(){
         var info = this.props.info;
 
-        console.log(info);
-
         if (info.connector == 'mysql'){
             return Mysql.info(this.props.eventKey, info, this.getInfo);
+        } else if (info.connector == 'mssql'){
+            return MSsql.info(this.props.eventKey, info, this.getInfo);
         } else {
 
             if (info.object_type == 'function'){

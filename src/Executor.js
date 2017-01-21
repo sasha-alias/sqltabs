@@ -1,6 +1,7 @@
 var postgres = require('./connectors/postgres/Database.js');
 var cassandra = require('./connectors/cassandra/Database.js');
 var mysql = require('./connectors/mysql/Database.js');
+var mssql = require('./connectors/mssql/Database.js');
 var url = require('url');
 var path = require('path');
 var tunnel = require('tunnel-ssh');
@@ -39,6 +40,8 @@ var Executor = {
             var db = cassandra;
         } else if (connstr.indexOf('mysql://') == 0){
             var db = mysql;
+        } else if (connstr.indexOf('mssql://') == 0){
+            var db = mssql;
         } else {
             var db = postgres;
         }
