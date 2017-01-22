@@ -23,6 +23,7 @@
     "marked": "^0.3.3",
     "microevent": "1.0.0",
     "mkdirp": "*",
+    "mssql": "^3.3.0",
     "mysql2": "^1.1.2",
     "performance-now": "^0.2.0",
     "pg": "git+https://github.com/sasha-alias/node-postgres.git",
