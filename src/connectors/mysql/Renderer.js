@@ -224,13 +224,18 @@ var Renderer = {
 
         // pk
         if (info.object.pk != null){
-            var pk_cols = info.object.pk.columns.replace(/^\{/, '');
-            var pk_cols = pk_cols.replace(/\}$/, '');
-            pk = <p><span className="ace_keyword">CONSTRAINT</span> {info.object.pk.pk_name}
-            <span className="ace_keyword"> PRIMARY KEY</span> ({pk_cols})</p>;
+            var pk = [];
+            for (var i=0; i < info.object.pk.length; i++){
+                var pkd = <p key={"pk_" + info.object.pk[i].name}>
+                    <span className="ace_keyword">CONSTRAINT</span> {info.object.pk[i].name}
+                    <span className="ace_keyword"> </span> ({info.object.pk[i].columns})
+                </p>;
+                pk.push(pkd);
+            }
         } else {
-            pk = null;
+            var pk = null;
         }
+
 
         // check constraints
         if (info.object.check_constraints != null){
@@ -238,7 +243,7 @@ var Renderer = {
             for (var i=0; i < info.object.check_constraints.length; i++){
                 var check = <p key={"check_" + info.object.check_constraints[i].name}>
                     <span className="ace_keyword">CONSTRAINT</span> {info.object.check_constraints[i].name}
-                    <span className="ace_keyword"> CHECK </span> {info.object.check_constraints[i].src}
+                    <span className="ace_keyword"> CHECK </span> ({info.object.check_constraints[i].columns})
                 </p>;
                 check_constraints.push(check);
             }
@@ -252,23 +257,21 @@ var Renderer = {
             for (var i=0; i < info.object.indexes.length; i++){
 
                 var idx = info.object.indexes[i];
-                var idx_cols = idx.columns.replace(/^\{/, '');
-                var idx_cols = idx_cols.replace(/\}$/, '');
 
-                if (idx.unique == 't'){
+                if (idx.non_unique == '0'){
                     var unique = "UNIQUE ";
                 } else {
                     var unique = "";
                 }
-                if (idx.predicate){
-                    var predicate = <span><span className="ace_keyword">WHERE </span>{idx.predicate}</span>
+                if (idx.comment){
+                    var comment = "-- {comment}";
                 } else {
-                    var predicate = null;
+                    var comment = null;
                 }
                 var index = <p key={"idx_" + idx.name}>
                 <span className="ace_keyword">{unique}INDEX </span>{idx.name}
-                <span className="ace_keyword"> {idx.method} </span>({idx_cols}) {predicate}
-                </p>
+                <span className="ace_keyword"> {idx.method} </span>({idx.columns}) {comment}
+                </p>;
 
                 indexes.push(index);
             }
@@ -281,7 +284,7 @@ var Renderer = {
         if (info.object.triggers != null){
             var triggers = info.object.triggers.map(function(item, idx){
                 var id = 'trigger_'+tabid+'+'+idx;
-                return <li key={id}><a href="#" onClick={function(){getFunction('trigger:'+item.oid);}}>{item.trigger_name}</a></li>;
+                return <li key={id}><a href="#" onClick={function(){getFunction('trigger:'+item.oid);}}>{item.name}</a></li>;
             });
 
             triggers = <div>Triggers:<ul>
