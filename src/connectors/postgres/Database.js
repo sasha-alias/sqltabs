@@ -10,18 +10,20 @@ var Database = {
 
     DEFAULT_PORT: 5432,
 
+    redshift: false,
+
     _getClient: function(id, connstr, password, cache){
 
         if (id in cache && cache[id].connstr == connstr && cache[id].connected){
             var client = cache[id];
             if (client.isBusy){ // when previous query is running
                 client.silentCancel(); // just drop it
-                var client = new PqClient(connstr, password); // and get new client, so async errors won't come in
+                var client = new PqClient(connstr, password, this.redshift); // and get new client, so async errors won't come in
                 cache[id] = client;
             }
             client.setPassword(password);
         } else {
-            var client = new PqClient(connstr, password);
+            var client = new PqClient(connstr, password, this.redshift);
             cache[id] = client;
         }
         return client;
@@ -284,7 +286,19 @@ var Database = {
     _findRelation: function(id, connstr, password, object, callback, err_callback){
         var self = this;
 
-        query = "select n.nspname, c.relname, c.relkind, \
+        if (self.redshift){
+            var query = "select n.nspname, c.relname, c.relkind, \
+'<not supported>' size, \
+'<not supported>' total_size, \
+reltuples::bigint \
+from  \
+pg_class c, \
+pg_namespace n \
+where c.oid = '"+object+"'::regclass \
+and n.oid = c.relnamespace;";
+        }
+        else {
+            var query = "select n.nspname, c.relname, c.relkind, \
 pg_size_pretty(pg_relation_size(c.oid)) size, \
 pg_size_pretty(pg_total_relation_size(c.oid)) total_size, \
 reltuples::bigint \
@@ -293,6 +307,7 @@ pg_class c, \
 pg_namespace n \
 where c.oid = '"+object+"'::regclass \
 and n.oid = c.relnamespace;";
+        }
 
         this._getData(id, connstr, password, query,
         function(data){
@@ -405,6 +420,7 @@ and n.oid = c.relnamespace;";
             }
         },
         function(err){
+            console.log(err);
             callback(null); // ignore error, behave like relation not found
         });
     },
@@ -557,7 +573,10 @@ ORDER BY a.attnum';
             }
             callback(columns);
         },
-        err_callback);
+        function(err){ // ignore error
+            console.log(err);
+            callback(columns);
+        });
     },
 
     _getRelationPK: function(id, connstr, password, object, callback, err_callback){
@@ -584,7 +603,10 @@ GROUP BY conname, conindid;";
                 callback(pk);
             }
         },
-        err_callback);
+        function(err){ // ignore error
+            console.log(err);
+            callback();
+        });
 
     },
 
@@ -612,7 +634,10 @@ AND contype = 'c'";
                 callback(constraints);
             }
         },
-        err_callback);
+        function(err){ // ignore error
+            console.log(err);
+            callback({});
+        });
 
     },
 
@@ -659,7 +684,10 @@ GROUP BY a.indexrelid, a.indisunique, d.amname, a.indrelid, a.indpred";
                 callback(indexes);
             }
         },
-        err_callback);
+        function(err){ // ignore error
+            console.log(err);
+            callback([]);
+        });
     },
 
     _getTriggers: function(id, connstr, password, object, callback, err_callback){
@@ -683,7 +711,10 @@ order by 1 \
                     callback(null);
                 }
             },
-            err_callback);
+            function(err){ // ignore error
+                console.log(err);
+                callback({});
+            });
     },
 
     _getTrigger: function(id, connstr, password, trigger_oid, callback, err_callback){
@@ -774,7 +805,10 @@ ORDER BY 1 \
                 }
                 done();
             },
-            err_callback);
+            function(err){ // ignore error (redshift specific)
+                console.log(err);
+                done();
+            });
         }
 
         // get databases
@@ -825,7 +859,10 @@ ORDER BY 1 \
                 }
                 done();
             },
-            err_callback);
+            function(err){ // ignore error (redshift specific)
+                console.log(err);
+                done()
+            });
         }
 
         async.series([get_current_database, get_schemas, get_roles, get_databases, get_tablespaces, get_event_triggers], function(){
@@ -988,17 +1025,22 @@ SELECT DISTINCT word FROM ( \
 
         for (var tab in Clients){
 
+            if (Clients[tab].redshift){ // ignore redshift
+                continue;
+            }
+
             needUpdate[tab] = false;
 
             var hash = null;
 
             var get_words_hash = function(tab){return function(done){
                 var tabClient = Clients[tab];
-                var client = new PqClient(tabClient.connstr, tabClient.password);
+                var client = new PqClient(tabClient.connstr, tabClient.password, tabClient.redshift);
                 client.sendQuery(query1, // get hash of words
                 function(result){
                     if (result.datasets.length > 0 && result.datasets[0].resultStatus == 'PGRES_FATAL_ERROR'){ // error
                         // error ignore
+                        console.log(result);
                     } else {
                         if (tab in AutocompletionHashes &&
                             result.datasets[0].data.length > 0 &&
@@ -1014,6 +1056,7 @@ SELECT DISTINCT word FROM ( \
                     done();
                 },
                 function(err){
+                    console.log(err);
                     client.disconnect();
                     done();
                 });
@@ -1022,7 +1065,7 @@ SELECT DISTINCT word FROM ( \
             var get_words = function(tab){return function(done){
                 if (needUpdate[tab]){
                     var tabClient = Clients[tab];
-                    var client = new PqClient(tabClient.connstr, tabClient.password);
+                    var client = new PqClient(tabClient.connstr, tabClient.password, tabClient.redhsift);
 
                     client.sendQuery(query2, // get words themselves
                     function(result){
@@ -1042,6 +1085,7 @@ SELECT DISTINCT word FROM ( \
                         done();
                     },
                     function(err){
+                        console.log(err);
                         client.disconnect();
                         done();
                     });

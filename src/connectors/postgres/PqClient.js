@@ -21,12 +21,13 @@ var util = require('util');
 var url = require('url');
 var now = require("performance-now")
 
-var Client = function(connstr, password){
+var Client = function(connstr, password, redshift){
     var self = this;
 
     this.connstr = connstr;
     this.password = password;
-    this._connstr = normalizeConnstr(connstr, password);
+    this.redshift = redshift;
+    this._connstr = normalizeConnstr(connstr, password, self.redshift);
     this.client = new pg.Client(this._connstr);
 
     this.setPassword = function(password){
@@ -35,7 +36,7 @@ var Client = function(connstr, password){
             self.disconnect();
         }
         self.password = password;
-        self._connstr = normalizeConnstr(this.connstr, password);
+        self._connstr = normalizeConnstr(this.connstr, password, self.redshift);
     };
 
     this.connected = false;
@@ -71,8 +72,6 @@ var Client = function(connstr, password){
             }
 
         });
-
-        //self.client.cancel(self.client, self.client.activeQuery.text);
     };
 
     this.silentCancel = function(){
@@ -176,18 +175,22 @@ var Response = function(query){
 }
 
 // normalizes connect string: ensures protocol, and substitutes password, rewrite mistaken defaults etc
-var normalizeConnstr = function(connstr, password){
+var normalizeConnstr = function(connstr, password, redshift){
     if (connstr){
         var meta_start = connstr.indexOf('---'); // cut sqltabs extension of connect string
         if (meta_start != -1){
             connstr = connstr.substr(0, meta_start).trim();
         }
-        if (connstr.lastIndexOf('postgresql://', 0) !== 0 && connstr.lastIndexOf('postgres://', 0) !== 0) {
+        if (connstr.lastIndexOf('postgresql://', 0) !== 0 && connstr.lastIndexOf('postgres://', 0) !== 0 && connstr.lastIndexOf('redshift://', 0) !== 0) {
             connstr = 'postgres://'+connstr;
         }
         parsed = url.parse(connstr);
         if (parsed.query == null){
-            var params = "application_name=sqltabs";
+            if (!redshift){ // redhsift doesn't support this
+                var params = "application_name=sqltabs";
+            } else {
+                var params = "";
+            }
         } else {
             var params = parsed.query;
         }
