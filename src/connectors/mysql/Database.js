@@ -146,6 +146,7 @@ var Database = {
             cache = Clients;
         }
         if (id in cache && cache[id].connstr == connstr && cache[id].config.password == password){
+            console.log(cache[id]);
             return cache[id];
         } else {
             parsed_connstr = parse_connstr(connstr);
@@ -177,6 +178,17 @@ var Database = {
             }
         });
 
+    },
+
+    cancelQuery: function(id){
+        var client = Clients[id];
+        console.log(client);
+        var extraClient = this.getClient(id, client.connstr, client.config.password, {});
+        extraClient.query("KILL QUERY "+client.connectionId, function(err, result){
+            if (err){
+                console.log(err);
+            }
+        });
     },
 
     _getData: function(id, connstr, password, query, callback, err_callback){

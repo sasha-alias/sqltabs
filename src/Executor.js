@@ -42,6 +42,9 @@ var Executor = {
             var db = mysql;
         } else if (connstr.indexOf('mssql://') == 0){
             var db = mssql;
+        } else if (connstr.indexOf('redshift://') == 0){
+            var db = postgres;
+            db.redshift = true;
         } else {
             var db = postgres;
         }
