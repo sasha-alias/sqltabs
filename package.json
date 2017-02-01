@@ -35,7 +35,7 @@
     "tunnel-ssh": "^4.0.0"
   },
   "devDependencies": {
-    "electron-packager": "^5.1.1",
+    "electron-packager": "^8.5.1",
     "uglifyjs": "^2.4.10"
   },
   "scripts": {

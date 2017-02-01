@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+        <key>CFBundleDocumentTypes</key>
+        <array>
+                <dict>
+                        <key>CFBundleTypeIconFile</key>
+                        <string>logo_sql.icns</string>
+                        <key>LSIsAppleDefaultForType</key>
+                        <true/>
+                         <key>CFBundleTypeExtensions</key>
+                        <array>
+                                <string>sql</string>
+                        </array>
+                        <key>CFBundleTypeName</key>
+                        <string>SQLDocument</string>
+                        <key>CFBundleTypeRole</key>
+                        <string>Editor</string>
+                        <key>NSDocumentClass</key>
+                        <string>SQLDocument</string>
+                </dict>
+        </array>
+</dict>
+</plist>
