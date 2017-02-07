@@ -9,6 +9,10 @@ var InfoClients = {};
 
 var parse_connstr = function(connstr){
 
+    if (connstr.indexOf('---') > 0){
+        connstr = connstr.split('---')[0];
+    }
+
     var parsed = url.parse(connstr);
 
     if (parsed.pathname != 'undefined' && parsed.pathname != null){

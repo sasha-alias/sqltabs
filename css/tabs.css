@@ -474,4 +474,6 @@ body{
     margin-right: 3px;
 }
 
-
+.non-printed-char{
+    color: red;
+}
