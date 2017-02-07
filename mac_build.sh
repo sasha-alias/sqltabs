@@ -13,6 +13,6 @@ cp -r css .build/
 cp -r node_modules .build/
 
 cd .build
-electron-packager ./ "SQL Tabs" --platform=darwin --arch=x64 --version=1.4.7 --icon logo.icns --asar --prune
+electron-packager ./ "SQL Tabs" --platform=darwin --arch=x64 --electron-version=1.4.7 --icon logo.icns --asar --prune --extend-info ../Info.plist --extra-resource ../logo_sql.icns
 cd ..
 
