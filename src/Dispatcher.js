@@ -69,8 +69,13 @@ AppDispatcher.register( function(payload) {
     switch( payload.eventName ) {
         case 'select-tab':
             if (payload.key == 0) { // select tab 0 (+) means create a new tab
-                TabsStore.newTab();
+                var tabid = TabsStore.newTab();
                 TabsStore.tmpScript = payload.script;
+                TabsStore.trigger('change');
+                if (payload.filename){
+                    TabsStore.openFile(payload.filename, tabid);
+                    TabsStore.trigger('open-file-'+tabid, payload.filename);
+                }
             } else {
                 TabsStore.selectTab(payload.key);
             }
@@ -184,6 +189,7 @@ AppDispatcher.register( function(payload) {
             TabsStore.trigger('open-file-'+TabsStore.selectedTab, payload.filename);
             TabsStore.trigger('change');
             break;
+
 
         case 'save-file':
             TabsStore.saveFile(payload.filename);

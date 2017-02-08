@@ -27,7 +27,7 @@ var app = electron.app;
 var BrowserWindow = electron.BrowserWindow;
 
 var mainWindow = null;
-var file2open = null;
+var files2open = [];
 
 var createWindow = function(){
     mainWindow = new BrowserWindow({
@@ -48,19 +48,27 @@ app.on('window-all-closed', function() {
 
 app.on('open-file', function(event, path){
     event.preventDefault();
-    file2open = path;
     if (mainWindow != null){
         var contents = mainWindow.webContents;
-        contents.send('open-file', file2open);
+        contents.send('open-file', path);
+    } else {
+        files2open.push(path);
     }
 });
 
 app.on('ready', function() {
     createWindow();
-    if (file2open != null){
+    if (files2open.length != 0){
         var contents = mainWindow.webContents;
-        contents.on('did-finish-load', function(){
-            contents.send('open-file', file2open);
-        });
+        for (i in files2open){
+            var path = files2open[i];
+            var getEmitter = function(contents, path){
+                return function(){
+                    contents.send('open-file', path);
+                }
+            }
+            var emit_open_file = getEmitter(contents, path);
+            contents.on('did-finish-load', emit_open_file);
+        }
     }
 });

@@ -19,6 +19,7 @@ var React = require('react');
 var PasswordDialog = require('./PasswordDialog');
 var About = require('./About');
 var TabsNav = require('./TabsNav');
+var TabsStore = require('./TabsStore');
 var TabContainer = require('./TabContainer');
 var HistoryCarousel = require('./HistoryCarousel');
 var Config = require('./Config');
@@ -27,8 +28,12 @@ var CloudMessage = require('./CloudMessage');
 var UpgradeMessage = require('./UpgradeMessage');
 
 require('electron').ipcRenderer.on('open-file', function(event, path) {
-    Actions.newTab();
-    Actions.openFile(path);
+    var existing_tab = TabsStore.getTabByFilename(path);
+    if (existing_tab != null){
+        Actions.select(existing_tab);
+    } else {
+        Actions.newTab(null, path);
+    }
 })
 
 require('./Menu');

@@ -29,20 +29,17 @@ if (typeof(DEVMODE) == 'undefined'){
 }
 
 var openFile = function(){
-    dialog.showOpenDialog({ properties: ['openFile']},
+    dialog.showOpenDialog({ properties: ['openFile', 'multiSelections']},
     function(filenames){
-        if (typeof(filenames) != 'undefined' && filenames.length == 1){
-            var filename = filenames[0];
+        filenames.forEach(function(filename){
             var existing_tab = TabsStore.getTabByFilename(filename);
             if ( existing_tab != null){
                 Actions.select(existing_tab);
             } else {
-                Actions.newTab();
-                Actions.openFile(filename);
+                Actions.newTab(null, filename);
             }
-        }
-    }
-    );
+        });
+    });
 }
 
 var saveFile = function(){

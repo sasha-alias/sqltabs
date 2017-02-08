@@ -99,7 +99,7 @@ var _TabsStore = function(){
         this.tabs[newid] = new Tab(newid, connstr, password);
         this.order.push(newid);
         this.selectedTab = newid;
-
+        return newid;
     };
 
     this.selectTab = function(id){
@@ -250,8 +250,11 @@ var _TabsStore = function(){
         };
     };
 
-    this.openFile = function(filename){
-        this.tabs[this.selectedTab].filename = filename;
+    this.openFile = function(filename, tabid){
+        if (tabid == null){
+            tabid = this.selectedTab;
+        }
+        this.tabs[tabid].filename = filename;
     }
 
     this.saveFile = function(filename){
