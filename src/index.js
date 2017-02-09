@@ -84,7 +84,7 @@ function mount_charts(){
 
                     data.x = xfield.name;
 
-                    if (xfield.type == 'DATE'){
+                    if (['DATE', 'Date'].indexOf(xfield.type) > -1){
                         var axis = {
                             x: {
                                 type: 'timeseries',
@@ -95,7 +95,7 @@ function mount_charts(){
                         };
                     }
 
-                    if (xfield.type == 'TIMESTAMPTZ'){
+                    if (['TIMESTAMPTZ'].indexOf(xfield.type) > -1 ){
                         var axis = {
                             x: {
                                 type: 'timeseries',
@@ -115,7 +115,7 @@ function mount_charts(){
 
                     }
 
-                    if (xfield.type == 'TIMESTAMP'){
+                    if (['TIMESTAMP', 'DATETIME', 'DateTime', 'DateTime2'].indexOf(xfield.type) > -1){
                         var axis = {
                             x: {
                                 type: 'timeseries',

@@ -40,6 +40,33 @@ var parse_connstr = function(connstr){
     return config
 }
 
+function formatDate(date, type) {
+    var month = date.getMonth() + 1;
+    var day = date.getDate();
+    var hour = date.getHours();
+    var min = date.getMinutes();
+    var sec = date.getSeconds();
+    var msec = date.getMilliseconds();
+
+    month = (month < 10 ? "0" : "") + month;
+    day = (day < 10 ? "0" : "") + day;
+    hour = (hour < 10 ? "0" : "") + hour;
+    min = (min < 10 ? "0" : "") + min;
+    sec = (sec < 10 ? "0" : "") + sec;
+
+    if (type == 'Date'){
+        var str =  date.getFullYear() + "-" + month + "-" + day;
+    } else if(type == 'SmallDateTime') {
+        var str = date.getFullYear() + "-" + month + "-" + day + " " +  hour + ":" + min + ":" + sec;
+    } else if (type == 'Time'){
+        var str = hour + ":" + min + ":" + sec + "." + msec;
+    } else {
+        var str = date.getFullYear() + "-" + month + "-" + day + " " +  hour + ":" + min + ":" + sec + "." + msec;
+    }
+
+    return str;
+}
+
 var Response = function(query){
     self = this;
     this.query = query
@@ -83,15 +110,33 @@ var Response = function(query){
             var fields = [];
 
             for (cn in recordsets[rsn].columns){
-                fields.push({
-                    name: recordsets[rsn].columns[cn].name,
-                    type: recordsets[rsn].columns[cn].type.name,
-                });
+                if (typeof(recordsets[rsn].columns[cn].type) != 'undefined'){
+                    fields.push({
+                        name: recordsets[rsn].columns[cn].name,
+                        type: recordsets[rsn].columns[cn].type.name,
+                    });
+                } else {
+                    fields.push({
+                        name: recordsets[rsn].columns[cn].name,
+                        type: "",
+                    });
+                }
             }
+
             for (rn in recordsets[rsn]){
                 var r = [];
                 for (fn in recordsets[rsn][rn]){
-                    r.push(String(recordsets[rsn][rn][fn]));
+                    if (typeof(recordsets[rsn].columns[fn].type) != 'undefined'){
+                        var type = recordsets[rsn].columns[fn].type.name;
+                    } else {
+                        var type = '';
+                    }
+                    if (['DateTime2', 'DateTime', 'Time', 'Date', 'SmallDateTime'].indexOf(type) > -1){
+                        var val = formatDate(recordsets[rsn][rn][fn], type);
+                    } else {
+                        var val = String(recordsets[rsn][rn][fn]);
+                    }
+                    r.push(val);
                 }
 
                 data.push(r);

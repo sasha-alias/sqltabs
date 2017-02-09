@@ -1,16 +1,16 @@
 /*
   Copyright (C) 2015  Aliaksandr Aliashkevich
-  
+
       This program is free software: you can redistribute it and/or modify
       it under the terms of the GNU General Public License as published by
       the Free Software Foundation, either version 3 of the License, or
       (at your option) any later version.
-  
+
       This program is distributed in the hope that it will be useful,
       but WITHOUT ANY WARRANTY; without even the implied warranty of
       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
       GNU General Public License for more details.
-  
+
       You should have received a copy of the GNU General Public License
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -30,7 +30,7 @@ var ConnInput = React.createClass({
         };
     },
 
-    componentDidMount: function() {  
+    componentDidMount: function() {
         TabsStore.bind('change', this.storeChangedHandler);
         TabsStore.bind('goto-connstr-'+this.props.eventKey, this.focusConnstr);
 
@@ -135,7 +135,7 @@ var ConnInput = React.createClass({
             });
             e.preventDefault();
             e.stopPropagation();
-        } 
+        }
     },
 
     itemMouseOverHandler: function(e){
@@ -164,9 +164,9 @@ var ConnInput = React.createClass({
             }
             if (i == self.state.hilight) {
                 var highlighted = ' conn_history_item_active'
-                var remove_item = <span 
-                    data-idx={i} 
-                    key={"remove_connstr_"+i} 
+                var remove_item = <span
+                    data-idx={i}
+                    key={"remove_connstr_"+i}
                     onClick={self.removeHandler}
                     className="conn_item_remove glyphicon glyphicon-minus-sign"></span>
             } else {
@@ -180,10 +180,10 @@ var ConnInput = React.createClass({
                 var alias = '';
             }
 
-            return <li data-idx={i} 
-                onMouseOver={self.itemMouseOverHandler} 
-                onClick={self.pickHandler} 
-                className={"conn_history_item"+highlighted} 
+            return <li data-idx={i}
+                onMouseOver={self.itemMouseOverHandler}
+                onClick={self.pickHandler}
+                className={"conn_history_item"+highlighted}
                 key={'connhist'+i}>
                     {alias}
                     <span data-idx={i} className="conn_item_str">{conn_str}</span>
@@ -196,8 +196,8 @@ var ConnInput = React.createClass({
         } else {
             var visibility = "conn_history_hidden"
         }
-        
-        var history_div = 
+
+        var history_div =
             <div className={"conn_history "+visibility} onMouseEnter={this.dontLoseFocus} onMouseLeave={this.allowLoseFocus}>
                 <ul className="conn_history_list">
                 {history}
@@ -206,20 +206,20 @@ var ConnInput = React.createClass({
 
 
         return (
-            <div className="input-connstr-div"> 
-                
+            <div className="input-connstr-div">
+
                 <form className="tab-toolbar-form" onSubmit={this.connectionSubmitHandler}>
 
                     <input
                         className="input-connstr form-control"
                         ref="connInput"
-                        onChange={this.connectionChangeHandler} 
-                        type="text" 
-                        placeholder="user@host:port/dbname"
+                        onChange={this.connectionChangeHandler}
+                        type="text"
+                        placeholder="protocol://user@host:port/dbname --- alias"
                         value={this.state.connstr}
                         onFocus={this.focusHandler}
                         onKeyDown={this.keyPressHandler}
-                    /> 
+                    />
                 </form>
                 {history_div}
             </div>

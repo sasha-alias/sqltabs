@@ -43,12 +43,13 @@ var parse_connstr = function(connstr){
     }
 }
 
-function formatDate(date) {
+function formatDate(date, type) {
     var month = date.getMonth() + 1;
     var day = date.getDate();
     var hour = date.getHours();
     var min = date.getMinutes();
     var sec = date.getSeconds();
+    var msec = date.getMilliseconds();
 
     month = (month < 10 ? "0" : "") + month;
     day = (day < 10 ? "0" : "") + day;
@@ -56,7 +57,11 @@ function formatDate(date) {
     min = (min < 10 ? "0" : "") + min;
     sec = (sec < 10 ? "0" : "") + sec;
 
-    var str = date.getFullYear() + "-" + month + "-" + day + " " +  hour + ":" + min + ":" + sec + ".000000";
+    if (type == 'DATE'){
+        var str = date.getFullYear() + "-" + month + "-" + day;
+    } else {
+        var str = date.getFullYear() + "-" + month + "-" + day + " " +  hour + ":" + min + ":" + sec + "." + msec;
+    }
 
     return str;
 }
@@ -116,10 +121,11 @@ var Response = function(query){
                     var rec = [];
                     for (column in fields) {
                         var value = result[res][rn][fields[column].name];
-                        if(['TEXT', 'VARCHAR', 'ASCII', 'STRING', 'VAR_STRING'].indexOf(fields[column].type) > -1){
+                        var type = fields[column].type;
+                        if(['TEXT', 'VARCHAR', 'ASCII', 'STRING', 'VAR_STRING'].indexOf(type) > -1){
                             rec.push(value);
-                        } else if (fields[column].type == 'TIMESTAMP') {
-                            rec.push(formatDate(value));
+                        } else if (['TIMESTAMP', 'DATE', 'DATETIME'].indexOf(type) > -1) {
+                            rec.push(formatDate(value, type));
                         } else {
                             rec.push(JSON.stringify(value));
                         }
@@ -150,7 +156,6 @@ var Database = {
             cache = Clients;
         }
         if (id in cache && cache[id].connstr == connstr && cache[id].config.password == password){
-            console.log(cache[id]);
             return cache[id];
         } else {
             parsed_connstr = parse_connstr(connstr);
@@ -171,7 +176,7 @@ var Database = {
     runQuery: function(id, connstr, password, query, callback, err_callback){
         var client = this.getClient(id, connstr, password);
         var response = new Response(query);
-        client.query(query.replace(/^\s*---/mg,''),
+        client.query(query.replace(/^\s*---.*/mg,''),
         function(err, result, fielddata){
             if (err){
                 err_callback(id, err);
@@ -186,7 +191,6 @@ var Database = {
 
     cancelQuery: function(id){
         var client = Clients[id];
-        console.log(client);
         var extraClient = this.getClient(id, client.connstr, client.config.password, {});
         extraClient.query("KILL QUERY "+client.connectionId, function(err, result){
             if (err){
