@@ -1,6 +1,19 @@
 # SQL Tabs
 
-Rich SQL console for Postgresql. Home [www.sqltabs.com](http://www.sqltabs.com)
+Rich SQL client. Home [www.sqltabs.com](http://www.sqltabs.com)
+
+Supported databases:
+
+    - Postgresql
+    - MySQL / MariaDB
+    - MS SQL
+    - Amazon Redshift
+
+Supported Platforms:
+
+    - Mac
+    - Windows
+    - Linux
 
 ## Building
 

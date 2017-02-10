@@ -41,6 +41,9 @@ var parse_connstr = function(connstr){
 }
 
 function formatDate(date, type) {
+    if (date == null){
+        return date;
+    }
     var month = date.getMonth() + 1;
     var day = date.getDate();
     var hour = date.getHours();
