@@ -238,6 +238,11 @@ if (process.platform == 'darwin'){
                 {label: "Echo on", click: function(){TabsStore.setEcho(true);}},
                 {label: "Echo off", click: function(){TabsStore.setEcho(false);}},
             ]},
+            {label: "Autocompletion",
+            submenu: [
+                {label: "On", click: function(){TabsStore.setAutocompletion(true);}},
+                {label: "Off", click: function(){TabsStore.setAutocompletion(false);}},
+            ]},
         ]},
         {label: "Window", submenu:[
             {label: "Next Tab",
@@ -380,6 +385,11 @@ if (process.platform == 'darwin'){
             submenu: [
                 {label: "Echo on", click: function(){TabsStore.setEcho(true);}},
                 {label: "Echo off", click: function(){TabsStore.setEcho(false);}},
+            ]},
+            {label: "Autocompletion",
+            submenu: [
+                {label: "On", click: function(){TabsStore.setAutocompletion(true);}},
+                {label: "Off", click: function(){TabsStore.setAutocompletion(false);}},
             ]},
         ]},
 

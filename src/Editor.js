@@ -365,6 +365,9 @@ var Editor = React.createClass({
     },
 
     adjustCompletion: function(){
+        if (!TabsStore.auto_completion){
+            return;
+        }
         var completer = $(React.findDOMNode(this.refs.completer));
         var cursor = $("#"+this.props.name).find(".ace_cursor");
         var offset = {
