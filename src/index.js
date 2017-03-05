@@ -40,6 +40,39 @@ function scrollToUp(div, to){
     }
 }
 
+// return a pivot data for a dataset
+function pivotTable(dataset){
+    var column_names = [];
+    var xvalues = [];
+    var rows = {};
+    console.log(dataset.data);
+    for (rn in dataset.data){
+        if (rn == 0){ // skip first row as it contains column names we don't need for pivot
+            continue;
+        }
+        var val1 = dataset.data[rn][0];
+        var val2 = dataset.data[rn][1];
+        if (column_names.indexOf(val2) == -1){
+            column_names.push(val2);
+        }
+        if (xvalues.indexOf(val1) == -1){
+            xvalues.push(val1);
+        }
+        if (!(val1 in rows)){
+            rows[val1] = [];
+        }
+        rows[val1].push(dataset.data[rn][2]);
+    }
+    var res = [];
+    column_names.unshift(dataset.fields[0].name);
+    res.push(column_names); // first row is pivot column names
+    xvalues.forEach(function(item){
+        var r = [item].concat(rows[item]);
+        res.push(r);
+    });
+    return res;
+}
+
 
 function mount_charts(){
 
@@ -58,6 +91,8 @@ function mount_charts(){
             chart_arg_x = chart_arg_x[1];
         }
 
+        var pivot = chart_args.match("\\s*pivot\\s*");
+
         var fields = dataset.fields.map(function(field, i){
             return field.name;
         });
@@ -75,6 +110,11 @@ function mount_charts(){
             data = {
                 rows: rows,
                 type: chart_type,
+            }
+
+            if (pivot){
+                data.rows = pivotTable(dataset);
+                chart_arg_x = 1; // in pivot charts first column is always at axis X
             }
 
             if (chart_arg_x){
