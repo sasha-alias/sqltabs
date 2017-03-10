@@ -16,5 +16,7 @@ electron-packager ./ "sqltabs" --platform=linux --arch=x64 --electron-version=1.
 rm sqltabs-linux-x64/LICENSE
 rm sqltabs-linux-x64/version
 cp ../logo.png sqltabs-linux-x64/logo.png
+tar -zcvf sqltabs.linux.tar.gz sqltabs-linux-x64
+cp sqltabs.linux.tar.gz ../release/
 cd ..
 
