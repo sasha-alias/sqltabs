@@ -185,6 +185,7 @@ body{
 
 .table-resultset {
     width: auto;
+    margin-left: 10px;
 }
 
 .table-resultset td {

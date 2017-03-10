@@ -1,6 +1,7 @@
+#!/bin/bash
 rm -rf .build
 mkdir .build
-jsx src/ build/
+npm install
 ./minify.sh
 cp index.html .build/
 cp main.js .build/
@@ -11,7 +12,7 @@ cp -r css .build/
 cp -r node_modules .build/
 
 cd .build
-electron-packager ./ "sqltabs" --platform=linux --arch=x64 --version=1.4.7 --icon logo.png --asar --prune
+electron-packager ./ "sqltabs" --platform=linux --arch=x64 --electron-version=1.4.7 --icon logo.png --asar --prune
 rm sqltabs-linux-x64/LICENSE
 rm sqltabs-linux-x64/version
 cp ../logo.png sqltabs-linux-x64/logo.png

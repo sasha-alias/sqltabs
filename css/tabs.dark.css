@@ -168,3 +168,22 @@ table {
     background: rgba(40, 40, 40, 0.8);
     color: #ffffff;
 }
+
+/* sqldoc table records */
+.record-negative-hl{
+    background-color: #c74946;
+    color: white;
+}
+.record-negative-hl:hover{
+    background-color: red;
+    color: white;
+}
+.record-neutral-hl{
+    background-color: #319e31;
+    color: white;
+}
+.record-positive-hl{
+    background-color: #337ab7;
+    color: white;
+}
+

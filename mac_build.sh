@@ -1,7 +1,7 @@
 #!/bin/bash
 rm -rf .build
 mkdir .build
-jsx src/ build/
+npm install
 ./minify.sh
 cp index.html .build/
 cp main.js .build/

@@ -11,6 +11,7 @@
     "toolbar": false
   },
   "dependencies": {
+    "alasql": "^0.3.7",
     "async": "^1.4.2",
     "bootstrap": "3.3.2",
     "brace": "^0.9.0",
@@ -31,14 +32,17 @@
     "react": "^0.13.0",
     "react-bootstrap": "^0.23.0",
     "request": "^2.60.0",
-    "sqldoc": "^0.5.0",
+    "sqldoc": "^0.6.0",
     "tunnel-ssh": "^4.0.0"
   },
   "devDependencies": {
+    "babel-cli": "^6.23.0",
+    "babel-plugin-transform-react-jsx": "^6.23.0",
     "electron-packager": "^8.5.1",
     "uglifyjs": "^2.4.10"
   },
   "scripts": {
-    "postinstall": "rm -r node_modules/c3/node_modules; jsx src/ build/"
+    "postinstall": "rm -r node_modules/c3/node_modules; babel --plugins transform-react-jsx --out-dir=build src/",
+    "build-watch": "babel --plugins transform-react-jsx --out-dir=build src/ --watch"
   }
 }

@@ -44,9 +44,9 @@ function scrollToUp(div, to){
 function pivotTable(dataset){
     var column_names = [];
     var xvalues = [];
+    var values = {};
     var rows = {};
-    console.log(dataset.data);
-    for (rn in dataset.data){
+    for (rn in dataset.data){ // at first run fill the existing data (rows/columns/values)
         if (rn == 0){ // skip first row as it contains column names we don't need for pivot
             continue;
         }
@@ -58,11 +58,25 @@ function pivotTable(dataset){
         if (xvalues.indexOf(val1) == -1){
             xvalues.push(val1);
         }
-        if (!(val1 in rows)){
-            rows[val1] = [];
+        if (!(val1 in values)){
+            values[val1] = [];
         }
-        rows[val1].push(dataset.data[rn][2]);
+        values[val1][val2] = dataset.data[rn][2];
     }
+
+    for (n in xvalues){ // at second run fill the missing values with nulls
+        var val1 = xvalues[n];
+        rows[val1] = [];
+        for (m in column_names){
+            var val2 = column_names[m];
+            if (val1 in values && val2 in values[val1]){
+                rows[val1].push(values[val1][val2]);
+            } else {
+                rows[val1].push(null);
+            }
+        }
+    }
+
     var res = [];
     column_names.unshift(dataset.fields[0].name);
     res.push(column_names); // first row is pivot column names
@@ -70,6 +84,9 @@ function pivotTable(dataset){
         var r = [item].concat(rows[item]);
         res.push(r);
     });
+
+    console.log(res);
+
     return res;
 }
 
@@ -99,8 +116,8 @@ function mount_charts(){
 
         var data = {};
 
-        var column_charts = ['line', 'spline', 'area', 'step', 'area-spline', 'area-step', 'bar'];
-        var row_charts = ['pie', 'donut'];
+        var column_charts = ['line', 'spline', 'area', 'step', 'area-spline', 'area-step', 'bar', 'scatter'];
+        var row_charts = ['pie', 'donut', 'gauge'];
 
         if (column_charts.indexOf(chart_type) != -1){
             // field name as a header
@@ -197,7 +214,7 @@ function mount_charts(){
             });
         } catch (err){
             var _div = $("div[data-chart-id='"+chart_id+"']");
-            _div.html('<div class="connection-error alert alert-danger">Chart building error<div>');
+            _div.html('<div class="connection-error alert alert-danger">Chart building error: '+err+'<div>');
             console.log(err);
             return;
         }

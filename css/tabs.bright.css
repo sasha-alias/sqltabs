@@ -92,3 +92,18 @@
 .floating-cols-header {
     background: rgba(255, 255, 255, 0.9);
 }
+
+/* sqldoc table records */
+.record-negative-hl{
+    background-color: #d6481c;
+    color: white;
+}
+.record-neutral-hl{
+    background-color: #498a4a;
+    color: white;
+}
+.record-positive-hl{
+    background-color: #55a9f3;
+    color: white;
+}
+

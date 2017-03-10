@@ -79,7 +79,7 @@ var Conf = {
         return config.projects;
     },
 
-    saveAutoCompletion(auto_completion){
+    saveAutoCompletion: function(auto_completion){
         config.auto_completion = auto_completion;
         this.saveSync();
     },
