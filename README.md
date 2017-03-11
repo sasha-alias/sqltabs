@@ -8,6 +8,7 @@ Supported databases:
     - MySQL / MariaDB
     - MS SQL
     - Amazon Redshift
+    - AlaSQL
 
 Supported Platforms:
 
