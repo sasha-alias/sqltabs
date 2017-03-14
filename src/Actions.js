@@ -124,6 +124,13 @@ var Actions = {
         });
     },
 
+    setSchemaFilter: function (filter) {
+        AppDispatcher.dispatch({
+            eventName: 'set-schema-filter',
+            key: filter,
+        });
+    },
+
     setConnection: function(key, value){
         AppDispatcher.dispatch({
             eventName: 'set-connection',
