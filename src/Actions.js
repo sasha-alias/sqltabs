@@ -92,10 +92,12 @@ var Actions = {
     },
 
     close: function(id){
-        AppDispatcher.dispatch({
-            eventName: 'close-tab',
-            key: id,
-        });
+        if (typeof id !== 'undefined' || window.confirm('Are you sure you want to close the current tab?')) {
+            AppDispatcher.dispatch({
+                eventName: 'close-tab',
+                key: id,
+            });
+        }
     },
 
     nextTab: function(){
@@ -336,6 +338,12 @@ var Actions = {
     showProject: function(){
         AppDispatcher.dispatch({
             eventName: 'show-project',
+        });
+    },
+
+    showSettings: function(){
+        AppDispatcher.dispatch({
+            eventName: 'show-settings',
         });
     },
 

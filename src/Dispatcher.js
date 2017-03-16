@@ -67,6 +67,11 @@ SignalsDispatcher.register(function(payload){
 
 AppDispatcher.register( function(payload) {
     switch( payload.eventName ) {
+        case 'show-settings':
+            // Only one settings tab open at the time, so firstly search the open one
+            var tabId = TabsStore.newTab('about:settings');
+            TabsStore.trigger('change');
+            break;
         case 'select-tab':
             if (payload.key == 0) { // select tab 0 (+) means create a new tab
                 var tabid = TabsStore.newTab();
@@ -78,8 +83,8 @@ AppDispatcher.register( function(payload) {
                 }
             } else {
                 TabsStore.selectTab(payload.key);
+                TabsStore.trigger('change');
             }
-            TabsStore.trigger('change');
             break;
 
         case 'close-tab':

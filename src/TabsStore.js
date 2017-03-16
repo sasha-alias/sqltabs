@@ -46,24 +46,24 @@ var Tab = function(id, connstr){
 
     this.getTitle = function(){
         if (this.filename != null){
-            var ret = this.filename;
+            return this.filename;
         } else {
             if (typeof(this.connstr) != 'undefined' && this.connstr != null) {
 
                     if (this.connstr.indexOf('---') != -1){ // show alias
-                        var ret = '[ '+this.connstr.match(/---\s*(.*)/)[1]+' ]';
+                       return '[ '+this.connstr.match(/---\s*(.*)/)[1]+' ]';
+                    } else if (this.connstr.startsWith('about:')) {
+                        return this.connstr[6].toUpperCase() + this.connstr.substr(7).toLowerCase()
                     } else {
                         if (this.connstr.length > 30){ // cut too long connstr
-                            var ret = '[...'+this.connstr.substr(this.connstr.length-20)+' ]';
+                           return '[...'+this.connstr.substr(this.connstr.length-20)+' ]';
                         } else {
-                            var ret = '[ '+this.connstr+' ]';
+                           return '[ '+this.connstr+' ]';
                         }
                     }
-            } else {
-                return '';
             }
         }
-        return ret;
+        return '';
     }
 };
 
@@ -89,6 +89,9 @@ var _TabsStore = function(){
     this.newTab = function(connstr){
         if (typeof(connstr) == 'undefined'){
             connstr = this.getConnstr(this.selectedTab);
+            if (connstr.startsWith('about:')) {
+                connstr = ''
+            }
         }
         if (this.selectedTab > 0) {
             password = this.tabs[this.selectedTab].password;

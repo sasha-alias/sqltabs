@@ -83,7 +83,12 @@ if (process.platform == 'darwin'){
         {label: "SQL Tabs",
         submenu: [
           { label: "About SQL Tabs",
-            click: function(){Actions.about();}
+            click: Actions.about
+          },
+          {
+            label: 'Preferences',
+            accelerator: 'Command+,',
+            click: Actions.showSettings
           },
           {
             label: 'Hide SQL Tabs',
@@ -105,7 +110,7 @@ if (process.platform == 'darwin'){
           {
             label: 'Quit',
             accelerator: 'Command+Q',
-            click: function(){app.quit()},
+            click: app.quit,
           },
         ]
         },
@@ -113,18 +118,18 @@ if (process.platform == 'darwin'){
         submenu: [
             {label: "Open",
              accelerator: "Command+O",
-             click: function(){openFile();},
+             click: openFile,
             },
             {label: "Save",
              accelerator: "Command+S",
-             click: function(){saveFile();},
+             click: saveFile,
             },
             {label: "Save As",
              accelerator: "Command+Shift+S",
-             click: function(){saveFileAs();},
+             click: saveFileAs,
             },
             {label: "Close File",
-             click: function(){Actions.closeFile()},
+             click: Actions.closeFile,
             },
             {type: 'separator'},
             {label: "Export to JSON",
@@ -140,7 +145,7 @@ if (process.platform == 'darwin'){
             },
             {label: "Close Tab",
              accelerator: "Command+W",
-             click: function(){Actions.close()},
+             click: Actions.close,
             },
         ]
         },
@@ -148,7 +153,7 @@ if (process.platform == 'darwin'){
         submenu: [
             {label: 'Find',
              accelerator: 'Command+F',
-             click: function(){Actions.toggleFindBox()},
+             click: Actions.toggleFindBox,
             },
             {label: 'Undo',
              accelerator: 'Command+Z',
@@ -180,35 +185,35 @@ if (process.platform == 'darwin'){
         {label: "Database",
          submenu:[
             {label: "Database Info",
-             click: function(){Actions.getObjectInfo()},
+             click: Actions.getObjectInfo,
             },
             {label: "Run Script",
              accelerator: "Command+R",
-             click: function(){Actions.execScript()},
+             click: Actions.execScript,
             },
             {label: "Execute Block",
              accelerator: "Command+E",
-             click: function(){Actions.execBlock()},
+             click: Actions.execBlock,
             },
             {label: "Execute All Blocks",
              accelerator: "Command+Shift+E",
-             click: function(){Actions.execAll()},
+             click: Actions.execAll,
             },
             {label: "Break Execution",
              accelerator: "Command+B",
-             click: function(){Actions.cancelQuery()},
+             click: Actions.cancelQuery,
             },
             {label: "Edit connect string",
              accelerator: "Command+L",
-             click: function(){Actions.gotoConnstr()},
+             click: Actions.gotoConnstr,
             },
             {label: "Object Info",
              accelerator: "Command+I",
-             click: function(){Actions.objectInfo()},
+             click: Actions.objectInfo,
             },
             {label: "History",
              accelerator: "Command+Y",
-             click: function(){Actions.toggleHistory()},
+             click: Actions.toggleHistory,
             },
          ]
         },
@@ -252,23 +257,23 @@ if (process.platform == 'darwin'){
         {label: "Window", submenu:[
             {label: "Next Tab",
              accelerator: "Command+]",
-             click: function(){Actions.nextTab()},
+             click: Actions.nextTab
             },
             {label: "Previous Tab",
              accelerator: "Command+[",
-             click: function(){Actions.previosTab();},
+             click: Actions.previosTab
             },
             {label: "Switch Tab View",
              accelerator: "Command+\\",
-             click: function(){Actions.switchView();}
+             click: Actions.switchView
             },
             {label: "Show Project",
              accelerator: "Command+P",
-             click: function(){Actions.showProject();}
+             click: Actions.showProject
             },
             {label: "Hide Project",
              accelerator: "Command+Shift+P",
-             click: function(){Actions.hideProject();}
+             click: Actions.hideProject
             },
         ]
         },
