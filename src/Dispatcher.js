@@ -69,7 +69,12 @@ AppDispatcher.register( function(payload) {
     switch( payload.eventName ) {
         case 'show-settings':
             // Only one settings tab open at the time, so firstly search the open one
-            var tabId = TabsStore.newTab('about:settings');
+            var settingsTab = TabsStore.findIndexByProperty('connstr', 'about:settings')
+            if (settingsTab !== -1) {
+                TabsStore.selectTab(settingsTab)
+            } else {
+                TabsStore.newTab('about:settings');
+            }
             TabsStore.trigger('change');
             break;
         case 'select-tab':

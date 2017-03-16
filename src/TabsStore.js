@@ -86,6 +86,20 @@ var _TabsStore = function(){
 
     this.getAll = function(){return this.tabs;};
 
+    this.getAllAsArray = function () {
+        return this.order.map(function (key) { return this.tabs[key];}, this)
+    }
+
+    this.findIndexByProperty = function (property, value) {
+        var indexOnOrder = this.getAllAsArray().findIndex(function (tab) {
+            return tab[property] == value
+        })
+        if (indexOnOrder === -1) {
+            return -1
+        }
+        return this.order[indexOnOrder]
+    }
+
     this.newTab = function(connstr){
         if (typeof(connstr) == 'undefined'){
             connstr = this.getConnstr(this.selectedTab);
