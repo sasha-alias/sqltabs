@@ -36,11 +36,11 @@ var TabContent = React.createClass({
     },
 
     componentDidMount: function() {  
-        TabsStore.bind('change', this.storeChangedHandler);
+        TabsStore.bind('change-theme', this.storeChangedHandler);
     },
 
     componentWillUnmount: function() {  
-        TabsStore.unbind('change', this.storeChangedHandler);
+        TabsStore.unbind('change-theme', this.storeChangedHandler);
     },
 
     storeChangedHandler: function(){
@@ -58,7 +58,7 @@ var TabContent = React.createClass({
             return (
 
               <div className={cls}>
-                  <Settings theme={this.state.theme} />
+                  <Settings />
               </div>
             )
         }

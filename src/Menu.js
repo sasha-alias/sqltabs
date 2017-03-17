@@ -145,7 +145,7 @@ if (process.platform == 'darwin'){
             },
             {label: "Close Tab",
              accelerator: "Command+W",
-             click: Actions.close,
+             click: function() {  Actions.close() },
             },
         ]
         },
@@ -185,7 +185,7 @@ if (process.platform == 'darwin'){
         {label: "Database",
          submenu:[
             {label: "Database Info",
-             click: Actions.getObjectInfo,
+             click: function() { Actions.getObjectInfo() },
             },
             {label: "Run Script",
              accelerator: "Command+R",
@@ -219,25 +219,6 @@ if (process.platform == 'darwin'){
         },
         {label: "Options",
         submenu: [
-            {label: "Theme",
-            submenu:[
-                {label: "Dark", click: function(){Actions.setTheme("dark");}},
-                {label: "Bright", click: function(){Actions.setTheme("bright");}},
-            ]},
-            {label: "Mode",
-            submenu: [
-                {label: "Classic", click: function(){Actions.setMode("classic");}},
-                {label: "Vim", click: function(){Actions.setMode("vim");}},
-            ]},
-            {label: "Font",
-            submenu: [
-                {label: "X-Small", click: function(){setFontSize("x-small");}},
-                {label: "Small", click: function(){setFontSize("small");}},
-                {label: "Medium", click: function(){setFontSize("medium");}},
-                {label: "Large", click: function(){setFontSize("large");}},
-                {label: "X-Large", click: function(){setFontSize("x-large");}},
-                {label: "XX-Large", click: function(){setFontSize("xx-large");}},
-            ]},
             {label: "Output",
             submenu: [
                 {label: "Echo on", click: function(){TabsStore.setEcho(true);}},
