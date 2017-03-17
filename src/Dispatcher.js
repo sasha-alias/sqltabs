@@ -132,9 +132,27 @@ AppDispatcher.register( function(payload) {
             TabsStore.trigger('change-mode');
             break;
 
-        case 'set-schema-filter':
-            TabsStore.setSchemaFilter(payload.key);
-            Config.saveSchemaFilter(payload.key);
+        case 'enable-schema-filter':
+            TabsStore.enableSchemaFilter(payload.key);
+            Config.saveSchemaFilter({
+                enabled: payload.key
+            });
+            TabsStore.trigger('change-schema-filter');
+            break;
+
+        case 'set-schema-filter-mode':
+            TabsStore.setSchemaFilterMode(payload.mode);
+            Config.saveSchemaFilter({
+                mode: payload.mode
+            });
+            TabsStore.trigger('change-schema-filter');
+            break;
+
+        case 'set-schema-filter-regex':
+            TabsStore.setSchemaFilterRegex(payload.regex);
+            Config.saveSchemaFilter({
+                regex: payload.regex
+            });
             TabsStore.trigger('change-schema-filter');
             break;
 

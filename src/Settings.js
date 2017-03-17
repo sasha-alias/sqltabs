@@ -26,27 +26,34 @@ var Settings = React.createClass({
             theme: TabsStore.theme,
             mode: TabsStore.mode,
             fontSize: TabsStore.fontSize,
+            showQuery: TabsStore.showQuery,
+            autoCompletion: TabsStore.auto_completion,
+            schemaFilter: TabsStore.schemaFilter,
+            schemaFilterMode: TabsStore.schemaFilterMode,
+            schemaFilterRegEx: TabsStore.schemaFilterRegEx,
         };
+    },
+
+    storeChangedHandler: function(){
+        this.setState(this.getInitialState());
     },
 
     componentDidMount: function() {
         TabsStore.bind('change-theme', this.storeChangedHandler);
         TabsStore.bind('change-mode', this.storeChangedHandler);
         TabsStore.bind('font-size-changed', this.storeChangedHandler);
+        TabsStore.bind('change-show-query', this.storeChangedHandler);
+        TabsStore.bind('change-auto-completion', this.storeChangedHandler);
+        TabsStore.bind('change-schema-filter', this.storeChangedHandler);
     },
 
     componentWillUnmount: function() {
         TabsStore.unbind('change-theme', this.storeChangedHandler);
         TabsStore.unbind('change-mode', this.storeChangedHandler);
         TabsStore.unbind('font-size-changed', this.storeChangedHandler);
-    },
-
-    storeChangedHandler: function(){
-        this.setState({
-            theme: TabsStore.theme,
-            mode: TabsStore.mode,
-            fontSize: TabsStore.fontSize,
-        });
+        TabsStore.unbind('change-show-query', this.storeChangedHandler);
+        TabsStore.unbind('change-auto-completion', this.storeChangedHandler);
+        TabsStore.unbind('change-schema-filter', this.storeChangedHandler);
     },
 
     setTheme(ev) {
@@ -61,8 +68,42 @@ var Settings = React.createClass({
         Actions.setFontSize(ev.target.value);
     },
 
+    setSchemaFilterMode(ev) {
+        Actions.setSchemaFilterMode(ev.target.value);
+    },
+
+    setSchemaFilterRegEx(ev) {
+        Actions.setSchemaFilterRegEx(ev.target.value);
+    },
+
     setEcho(ev) {
         TabsStore.setEcho(ev.target.checked);
+    },
+
+    setAutoCompletion(ev) {
+        TabsStore.setAutocompletion(ev.target.checked);
+    },
+
+    enableSchemaFilter(ev) {
+        Actions.enableSchemaFilter(ev.target.checked);
+    },
+
+    getSchemaFilterAdvanced() {
+        console.log(this.state);
+        if (this.state.schemaFilter) {
+            return (
+                <blockquote>
+                    <label htmlFor="schema-filter-mode-select">Filter mode</label>
+                    <select id="schema-filter-mode-select" className="form-control" value={this.state.schemaFilterMode} onChange={this.setSchemaFilterMode}>
+                        <option value="white">Whitelist</option>
+                        <option value="black">Blacklist</option>
+                    </select>
+                    <label htmlFor="schema-filter-regex-input">Filter regex</label>
+                    <input type="text" className="form-control" placeholder=".*text.*" value={this.state.schemaFilterRegEx} onChange={this.setSchemaFilterRegEx}/>
+                </blockquote>
+            )
+        }
+        return null
     },
 
     render(){
@@ -103,13 +144,14 @@ var Settings = React.createClass({
                 </div>
                 <div className="checkbox">
                     <label>
-                        <input type="checkbox" value="option1" />
-                        Enable filter
+                        <input type="checkbox" value="true" checked={this.state.schemaFilter} onChange={this.enableSchemaFilter} />
+                        Enable schema filter
                     </label>
                 </div>
+                {this.getSchemaFilterAdvanced()}
                 <div className="checkbox">
                     <label>
-                        <input type="checkbox" value="option1" />
+                        <input type="checkbox" value="true" checked={this.state.autoCompletion} onChange={this.setAutoCompletion} />
                         Auto-completation
                     </label>
                 </div>

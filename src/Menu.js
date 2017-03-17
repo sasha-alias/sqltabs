@@ -72,11 +72,6 @@ var exportResult = function(format){
 }
 
 
-
-var setFontSize = function(size){
-    Actions.setFontSize(size);
-}
-
 if (process.platform == 'darwin'){
 
     var template = [
@@ -217,24 +212,6 @@ if (process.platform == 'darwin'){
             },
          ]
         },
-        {label: "Options",
-        submenu: [
-            {label: "Output",
-            submenu: [
-                {label: "Echo on", click: function(){TabsStore.setEcho(true);}},
-                {label: "Echo off", click: function(){TabsStore.setEcho(false);}},
-            ]},
-            {label: "Filter Schemas",
-            submenu: [
-                {label: "Filter on", click: function(){Actions.setSchemaFilter(true);}},
-                {label: "Filter off", click: function(){Actions.setSchemaFilter(false);}},
-            ]},
-            {label: "Autocompletion",
-            submenu: [
-                {label: "On", click: function(){TabsStore.setAutocompletion(true);}},
-                {label: "Off", click: function(){TabsStore.setAutocompletion(false);}},
-            ]},
-        ]},
         {label: "Window", submenu:[
             {label: "Next Tab",
              accelerator: "Command+]",
@@ -351,40 +328,6 @@ if (process.platform == 'darwin'){
          ]
         },
 
-        {label: "Options",
-        submenu: [
-            {label: "Theme",
-            submenu:[
-                {label: "Dark", click: function(){Actions.setTheme("dark");}},
-                {label: "Bright", click: function(){Actions.setTheme("bright");}},
-            ]},
-            {label: "Mode",
-            submenu: [
-                {label: "Classic", click: function(){Actions.setMode("classic");}},
-                {label: "Vim", click: function(){Actions.setMode("vim");}},
-            ]},
-            {label: "Font",
-            submenu: [
-                {label: "X-Small", click: function(){setFontSize("x-small");}},
-                {label: "Small", click: function(){setFontSize("small");}},
-                {label: "Medium", click: function(){setFontSize("medium");}},
-                {label: "Large", click: function(){setFontSize("large");}},
-                {label: "X-Large", click: function(){setFontSize("x-large");}},
-                {label: "XX-Large", click: function(){setFontSize("xx-large");}},
-            ]},
-            {label: "Output",
-            submenu: [
-                {label: "Echo on", click: function(){TabsStore.setEcho(true);}},
-                {label: "Echo off", click: function(){TabsStore.setEcho(false);}},
-            ]},
-            {label: "Autocompletion",
-            submenu: [
-                {label: "On", click: function(){TabsStore.setAutocompletion(true);}},
-                {label: "Off", click: function(){TabsStore.setAutocompletion(false);}},
-            ]},
-        ]},
-
-
         {label: "Window", submenu:[
             {label: "Next Tab",
              accelerator: "Ctrl+Tab",
@@ -411,6 +354,11 @@ if (process.platform == 'darwin'){
         },
 
         {label: "Help", submenu:[
+            {
+                label: 'Preferences',
+                accelerator: 'Ctrl+,',
+                click: Actions.showSettings
+            },
             {label: "About",
              click: function(){Actions.about()},
             }

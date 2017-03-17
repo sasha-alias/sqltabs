@@ -82,7 +82,11 @@ var ObjectInfo = React.createClass({
 
     filterSchemas: function(item){
          if (TabsStore.schemaFilter) {
-             return item.indexOf('temp') === -1;
+             if (TabsStore.schemaFilterMode === 'white') {
+                 return TabsStore.schemaFilterCompiledRegEx.test(item);
+             } else {
+                 return !TabsStore.schemaFilterCompiledRegEx.test(item);
+             }
          }
          return true;
     },

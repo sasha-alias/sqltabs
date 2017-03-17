@@ -126,9 +126,9 @@ var Actions = {
         });
     },
 
-    setSchemaFilter: function (filter) {
+    enableSchemaFilter: function (filter) {
         AppDispatcher.dispatch({
-            eventName: 'set-schema-filter',
+            eventName: 'enable-schema-filter',
             key: filter,
         });
     },
@@ -244,6 +244,20 @@ var Actions = {
         AppDispatcher.dispatch({
             eventName: 'set-font-size',
             size: size,
+        });
+    },
+
+    setSchemaFilterMode: function(mode){
+        AppDispatcher.dispatch({
+            eventName: 'set-schema-filter-mode',
+            mode: mode,
+        });
+    },
+
+    setSchemaFilterRegEx: function(regex){
+        AppDispatcher.dispatch({
+            eventName: 'set-schema-filter-regex',
+            regex: regex,
         });
     },
 

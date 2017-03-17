@@ -101,9 +101,9 @@ var _TabsStore = function(){
     }
 
     this.newTab = function(connstr){
-        if (typeof(connstr) == 'undefined'){
+        if (typeof(connstr) === 'undefined'){
             connstr = this.getConnstr(this.selectedTab);
-            if (connstr.startsWith('about:')) {
+            if (typeof connstr === 'string' && connstr.startsWith('about:')) {
                 connstr = ''
             }
         }
@@ -179,9 +179,18 @@ var _TabsStore = function(){
         this.mode = mode;
     };
 
-    this.setSchemaFilter = function (schemaFilter) {
+    this.enableSchemaFilter = function (schemaFilter) {
         this.schemaFilter = schemaFilter;
-    },
+    }
+
+    this.setSchemaFilterMode = function (mode) {
+        this.schemaFilterMode = mode;
+    }
+
+    this.setSchemaFilterRegex = function (regex) {
+        this.schemaFilterRegEx = regex;
+        this.schemaFilterCompiledRegEx = new RegExp(regex, 'i');
+    }
 
     this.getEditorMode = function(){
         if (this.mode == 'vim'){
@@ -380,6 +389,7 @@ var _TabsStore = function(){
 
     this.setEcho = function(boolean_echo){
         this.showQuery = boolean_echo;
+        this.trigger('change-show-query')
     }
 
     this.exportResult = function(filename, format){
@@ -425,6 +435,7 @@ var _TabsStore = function(){
 
     this.setAutocompletion = function(auto_completion){
         this.auto_completion = auto_completion;
+        this.trigger('change-auto-completion');
         Config.saveAutoCompletion(auto_completion);
     }
 

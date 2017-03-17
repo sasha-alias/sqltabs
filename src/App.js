@@ -61,8 +61,16 @@ var app = <App/>;
 
 var theme = (Config.getTheme() || 'dark');
 var size = (Config.getFontSize() || 'medium');
+var schemaFilter = (Config.getSchemaFilter() || {
+    enabled: false,
+    mode: 'black',
+    regex: '.*temp.*',
+});
 Actions.setTheme(theme);
 Actions.setFontSize(size);
+Actions.enableSchemaFilter(schemaFilter.enabled);
+Actions.setSchemaFilterMode(schemaFilter.mode);
+Actions.setSchemaFilterRegEx(schemaFilter.regex);
 Actions.upgradeCheck();
 
 React.render(app, mountNode);
