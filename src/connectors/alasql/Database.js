@@ -70,8 +70,9 @@ var Response = function(query){
                 }
 
                 var rec = [];
-                for (k in data[rn]){
-                    rec.push(String(data[rn][k]));
+                for (fn in fields){
+                    var field = fields[fn].name;
+                    rec.push(String(data[rn][field]));
                 }
                 records.push(rec);
             }
