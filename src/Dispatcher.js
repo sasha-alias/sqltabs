@@ -69,7 +69,7 @@ AppDispatcher.register( function(payload) {
     switch( payload.eventName ) {
         case 'select-tab':
             if (payload.key == 0) { // select tab 0 (+) means create a new tab
-                var tabid = TabsStore.newTab();
+                var tabid = TabsStore.newTab(payload.connstr);
                 TabsStore.tmpScript = payload.script;
                 TabsStore.trigger('change');
                 if (payload.filename){

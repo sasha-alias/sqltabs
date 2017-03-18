@@ -36,6 +36,10 @@ require('electron').ipcRenderer.on('open-file', function(event, path) {
     }
 })
 
+require('electron').ipcRenderer.on('open-url', function(event, url) {
+    Actions.newTab(null, null, url);
+})
+
 require('./Menu');
 
 var mountNode = document.body;
