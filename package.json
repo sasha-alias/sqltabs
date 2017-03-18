@@ -39,10 +39,12 @@
     "babel-cli": "^6.23.0",
     "babel-plugin-transform-react-jsx": "^6.23.0",
     "electron-packager": "^8.5.1",
+    "electron-prebuilt": "^1.4.7",
     "uglifyjs": "^2.4.10"
   },
   "scripts": {
     "postinstall": "rm -r node_modules/c3/node_modules; babel --plugins transform-react-jsx --out-dir=build src/",
-    "build-watch": "babel --plugins transform-react-jsx --out-dir=build src/ --watch"
+    "build-watch": "babel --plugins transform-react-jsx --out-dir=build src/ --watch",
+    "start": "electron ./"
   }
 }

@@ -24,19 +24,15 @@ In order to run SQL Tabs from source code follow the next steps:
 
 1. Install [npm](https://www.npmjs.com) - a javascript package manager
 
-2. Install [electron](http://electron.atom.io) - a runtime environment for application (version is important):
-
-        npm install electron-prebuilt@1.4.7 -g
-
-3. Get the code, install dependencies and build the application:
+2. Get the code, install dependencies and build the application:
 
         git clone https://github.com/sasha-alias/sqltabs
         cd sqltabs
         npm install
 
-4. Run the application:
+3. Run the application:
 
-        electron .
+        npm start
 
 
 Contribution and issues reports are very appreciated.
