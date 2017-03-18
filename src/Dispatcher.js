@@ -67,6 +67,16 @@ SignalsDispatcher.register(function(payload){
 
 AppDispatcher.register( function(payload) {
     switch( payload.eventName ) {
+        case 'show-settings':
+            // Only one settings tab open at the time, so firstly search the open one
+            var settingsTab = TabsStore.findIndexByProperty('connstr', 'about:settings')
+            if (settingsTab !== -1) {
+                TabsStore.selectTab(settingsTab)
+            } else {
+                TabsStore.newTab('about:settings');
+            }
+            TabsStore.trigger('change');
+            break;
         case 'select-tab':
             if (payload.key == 0) { // select tab 0 (+) means create a new tab
                 var tabid = TabsStore.newTab();
@@ -78,8 +88,8 @@ AppDispatcher.register( function(payload) {
                 }
             } else {
                 TabsStore.selectTab(payload.key);
+                TabsStore.trigger('change');
             }
-            TabsStore.trigger('change');
             break;
 
         case 'close-tab':
@@ -122,9 +132,27 @@ AppDispatcher.register( function(payload) {
             TabsStore.trigger('change-mode');
             break;
 
-        case 'set-schema-filter':
-            TabsStore.setSchemaFilter(payload.key);
-            Config.saveSchemaFilter(payload.key);
+        case 'enable-schema-filter':
+            TabsStore.enableSchemaFilter(payload.key);
+            Config.saveSchemaFilter({
+                enabled: payload.key
+            });
+            TabsStore.trigger('change-schema-filter');
+            break;
+
+        case 'set-schema-filter-mode':
+            TabsStore.setSchemaFilterMode(payload.mode);
+            Config.saveSchemaFilter({
+                mode: payload.mode
+            });
+            TabsStore.trigger('change-schema-filter');
+            break;
+
+        case 'set-schema-filter-regex':
+            TabsStore.setSchemaFilterRegex(payload.regex);
+            Config.saveSchemaFilter({
+                regex: payload.regex
+            });
             TabsStore.trigger('change-schema-filter');
             break;
 

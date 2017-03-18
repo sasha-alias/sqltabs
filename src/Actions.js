@@ -92,10 +92,12 @@ var Actions = {
     },
 
     close: function(id){
-        AppDispatcher.dispatch({
-            eventName: 'close-tab',
-            key: id,
-        });
+        if (typeof id !== 'undefined' || window.confirm('Are you sure you want to close the current tab?')) {
+            AppDispatcher.dispatch({
+                eventName: 'close-tab',
+                key: id,
+            });
+        }
     },
 
     nextTab: function(){
@@ -124,9 +126,9 @@ var Actions = {
         });
     },
 
-    setSchemaFilter: function (filter) {
+    enableSchemaFilter: function (filter) {
         AppDispatcher.dispatch({
-            eventName: 'set-schema-filter',
+            eventName: 'enable-schema-filter',
             key: filter,
         });
     },
@@ -245,6 +247,20 @@ var Actions = {
         });
     },
 
+    setSchemaFilterMode: function(mode){
+        AppDispatcher.dispatch({
+            eventName: 'set-schema-filter-mode',
+            mode: mode,
+        });
+    },
+
+    setSchemaFilterRegEx: function(regex){
+        AppDispatcher.dispatch({
+            eventName: 'set-schema-filter-regex',
+            regex: regex,
+        });
+    },
+
     toggleFindBox: function(){
         AppDispatcher.dispatch({
             eventName: 'toggle-find-box',
@@ -336,6 +352,12 @@ var Actions = {
     showProject: function(){
         AppDispatcher.dispatch({
             eventName: 'show-project',
+        });
+    },
+
+    showSettings: function(){
+        AppDispatcher.dispatch({
+            eventName: 'show-settings',
         });
     },
 
