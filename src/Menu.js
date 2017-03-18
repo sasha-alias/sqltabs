@@ -238,6 +238,11 @@ if (process.platform == 'darwin'){
                 {label: "Echo on", click: function(){TabsStore.setEcho(true);}},
                 {label: "Echo off", click: function(){TabsStore.setEcho(false);}},
             ]},
+            {label: "Filter Schemas",
+            submenu: [
+                {label: "Filter on", click: function(){Actions.setSchemaFilter(true);}},
+                {label: "Filter off", click: function(){Actions.setSchemaFilter(false);}},
+            ]},
             {label: "Autocompletion",
             submenu: [
                 {label: "On", click: function(){TabsStore.setAutocompletion(true);}},
