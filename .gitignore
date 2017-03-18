@@ -4,3 +4,4 @@ build/*
 .build
 node_modules/*
 sqltabs.dmg
+.idea

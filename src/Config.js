@@ -35,8 +35,8 @@ if (!db.object.config){
 var config = db.object.config;
 
 var Conf = {
-    saveSchemaFilter: function(schemaFilter){
-        config.schemaFilter = schemaFilter;
+    saveSchemaFilter: function(newProps){
+        config.schemaFilter = Object.assign({}, config.schemaFilter, newProps);
         this.saveSync();
     },
 

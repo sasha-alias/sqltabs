@@ -23,6 +23,7 @@ var TabSplit = require('./TabSplit');
 var Editor = require('./Editor');
 var TabToolbar = require('./TabToolbar');
 var SearchBox = require('./SearchBox');
+var Settings = require('./Settings');
 var Project = require('./Project');
 
 var TabContent = React.createClass({
@@ -35,11 +36,11 @@ var TabContent = React.createClass({
     },
 
     componentDidMount: function() {  
-        TabsStore.bind('change', this.storeChangedHandler);
+        TabsStore.bind('change-theme', this.storeChangedHandler);
     },
 
     componentWillUnmount: function() {  
-        TabsStore.unbind('change', this.storeChangedHandler);
+        TabsStore.unbind('change-theme', this.storeChangedHandler);
     },
 
     storeChangedHandler: function(){
@@ -51,6 +52,16 @@ var TabContent = React.createClass({
     render: function(){
 
         var cls = (this.props.visible) ? 'tab-content': 'tab-content hidden';
+        var isSettings = TabsStore.getConnstr(this.props.eventKey) === 'about:settings'
+
+        if (isSettings) {
+            return (
+
+              <div className={cls}>
+                  <Settings />
+              </div>
+            )
+        }
 
         return (
 
