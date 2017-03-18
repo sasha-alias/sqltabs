@@ -56,40 +56,39 @@ var Settings = React.createClass({
         TabsStore.unbind('change-schema-filter', this.storeChangedHandler);
     },
 
-    setTheme(ev) {
+    setTheme: function(ev) {
         Actions.setTheme(ev.target.value);
     },
 
-    setMode(ev) {
+    setMode: function(ev) {
         Actions.setMode(ev.target.value);
     },
 
-    setFontSize(ev) {
+    setFontSize: function(ev) {
         Actions.setFontSize(ev.target.value);
     },
 
-    setSchemaFilterMode(ev) {
+    setSchemaFilterMode: function(ev) {
         Actions.setSchemaFilterMode(ev.target.value);
     },
 
-    setSchemaFilterRegEx(ev) {
+    setSchemaFilterRegEx: function(ev) {
         Actions.setSchemaFilterRegEx(ev.target.value);
     },
 
-    setEcho(ev) {
+    setEcho: function(ev) {
         TabsStore.setEcho(ev.target.checked);
     },
 
-    setAutoCompletion(ev) {
+    setAutoCompletion: function(ev) {
         TabsStore.setAutocompletion(ev.target.checked);
     },
 
-    enableSchemaFilter(ev) {
+    enableSchemaFilter: function(ev) {
         Actions.enableSchemaFilter(ev.target.checked);
     },
 
-    getSchemaFilterAdvanced() {
-        console.log(this.state);
+    getSchemaFilterAdvanced: function() {
         if (this.state.schemaFilter) {
             return (
                 <blockquote>
@@ -106,7 +105,7 @@ var Settings = React.createClass({
         return null
     },
 
-    render(){
+    render: function(){
 
         return (
             <div style={{padding: '30px'}}>

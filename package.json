@@ -43,6 +43,9 @@
   },
   "scripts": {
     "postinstall": "rm -r node_modules/c3/node_modules; babel --plugins transform-react-jsx --out-dir=build src/",
+    "build:mac": "./mac_build.sh",
+    "build:win": "./win_build.sh",
+    "build:linux": "./linux_build.sh",
     "build-watch": "babel --plugins transform-react-jsx --out-dir=build src/ --watch"
   }
 }
