@@ -27,6 +27,7 @@ var app = electron.app;
 var BrowserWindow = electron.BrowserWindow;
 
 var mainWindow = null;
+var urlToOpen = null;
 var files2open = [];
 
 var createWindow = function(){
@@ -70,5 +71,32 @@ app.on('ready', function() {
             var emit_open_file = getEmitter(contents, path);
             contents.on('did-finish-load', emit_open_file);
         }
+    }
+    if (urlToOpen) {
+        mainWindow.webContents.on('did-finish-load', function () {
+            mainWindow.webContents.send('open-url', urlToOpen);
+        });
+    }
+
+    if (!app.isDefaultProtocolClient('postgres')) {
+        electron.dialog.showMessageBox({
+            type: 'question',
+            buttons: ['Yes', 'No'],
+            cancelId: 1,
+            message: 'Do you want to set SQL Tabs as the default postgres client?'
+        }, function (button) {
+            if (button === 0 ) {
+                app.setAsDefaultProtocolClient('postgres');
+            }
+        })
+    }
+});
+
+app.on('open-url', function (ev, url) {
+    ev.preventDefault();
+    if (app.isReady()) {
+        mainWindow.webContents.send('open-url', url);
+    } else {
+        urlToOpen = url;
     }
 });

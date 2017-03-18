@@ -21,5 +21,16 @@
                         <string>SQLDocument</string>
                 </dict>
         </array>
+        <key>CFBundleURLTypes</key>
+        <array>
+            <dict>
+                <key>CFBundleURLName</key>
+                <string>Postgres Database</string>
+                <key>CFBundleURLSchemes</key>
+                <array>
+                    <string>postgres</string>
+                </array>
+             </dict>
+        </array>
 </dict>
 </plist>
