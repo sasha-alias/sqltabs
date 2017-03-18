@@ -82,11 +82,12 @@ var Actions = {
         });
     },
 
-    newTab: function(script, filename){
+    newTab: function(script, filename, connstr){
         AppDispatcher.dispatch({
             eventName: 'select-tab',
             key: 0,
             script: script,
+            connstr: connstr,
             filename: filename,
         });
     },
