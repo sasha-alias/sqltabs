@@ -122,6 +122,12 @@ AppDispatcher.register( function(payload) {
             TabsStore.trigger('change-mode');
             break;
 
+        case 'set-schema-filter':
+            TabsStore.setSchemaFilter(payload.key);
+            Config.saveSchemaFilter(payload.key);
+            TabsStore.trigger('change-schema-filter');
+            break;
+
         case 'remove-connection-item':
             TabsStore.removeConnectionItem(payload.value);
             Config.saveConnHistory(TabsStore.connectionHistory);

@@ -162,6 +162,10 @@ var _TabsStore = function(){
         this.mode = mode;
     };
 
+    this.setSchemaFilter = function (schemaFilter) {
+        this.schemaFilter = schemaFilter;
+    },
+
     this.getEditorMode = function(){
         if (this.mode == 'vim'){
             return 'ace/keyboard/vim';

@@ -35,6 +35,15 @@ if (!db.object.config){
 var config = db.object.config;
 
 var Conf = {
+    saveSchemaFilter: function(schemaFilter){
+        config.schemaFilter = schemaFilter;
+        this.saveSync();
+    },
+
+    getSchemaFilter: function(){
+        return config.schemaFilter;
+    },
+
     saveTheme: function(theme){
         config.theme = theme;
         this.saveSync();
