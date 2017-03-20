@@ -42,6 +42,14 @@ SignalsDispatcher.register(function(payload){
             TabsStore.setRenderer('auto');
             TabsStore.trigger('execute-all-'+TabsStore.selectedTab);
             break;
+        case 'format-block':
+            TabsStore.setRenderer('auto');
+            TabsStore.trigger('format-block-'+TabsStore.selectedTab);
+            break;
+        case 'format-all':
+            TabsStore.setRenderer('auto');
+            TabsStore.trigger('format-all-'+TabsStore.selectedTab);
+            break;
         case 'object-info':
             TabsStore.trigger('object-info-'+TabsStore.selectedTab);
             break

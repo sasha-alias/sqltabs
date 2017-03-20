@@ -177,6 +177,18 @@ var Actions = {
         });
     },
 
+    formatBlock: function(){
+        SignalsDispatcher.dispatch({
+            eventName: 'format-block',
+        });
+    },
+
+    formatAll: function(){
+        SignalsDispatcher.dispatch({
+            eventName: 'format-all',
+        });
+    },
+
     runQuery: function(key, query){ // sends query to db for execution
 
         AppDispatcher.dispatch(

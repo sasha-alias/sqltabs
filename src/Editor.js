@@ -17,6 +17,7 @@
 
 var React = require('react');
 var Ace = require('brace');
+var FormatSQL = require('sql-formatter');
 var Range = ace.acequire('ace/range').Range;
 var TabsStore = require('./TabsStore');
 var Actions = require('./Actions');
@@ -63,6 +64,8 @@ var Editor = React.createClass({
         TabsStore.bind('execute-script-'+this.props.eventKey, this.execHandler);
         TabsStore.bind('execute-block-'+this.props.eventKey, this.execBlockHandler);
         TabsStore.bind('execute-all-'+this.props.eventKey, this.execAllHandler);
+        TabsStore.bind('format-block-'+this.props.eventKey, this.reFormatBlockHandler);
+        TabsStore.bind('format-all-'+this.props.eventKey, this.reFormatAllHandler);
         TabsStore.bind('editor-find-next', this.findNext);
         TabsStore.bind('object-info-'+this.props.eventKey, this.objectInfoHandler);
         TabsStore.bind('paste-history-item-'+this.props.eventKey, this.pasteHistoryHandler);
@@ -133,6 +136,8 @@ var Editor = React.createClass({
         TabsStore.unbind('execute-script-'+this.props.eventKey, this.execHandler);
         TabsStore.unbind('execute-block-'+this.props.eventKey, this.execBlockHandler);
         TabsStore.unbind('execute-all-'+this.props.eventKey, this.execAllHandler);
+        TabsStore.unbind('format-block-'+this.props.eventKey, this.reFormatBlockHandler);
+        TabsStore.unbind('format-all-'+this.props.eventKey, this.reFormatAllHandler);
         TabsStore.unbind('editor-find-next', this.findNext);
         TabsStore.unbind('object-info-'+this.props.eventKey, this.objectInfoHandler);
         TabsStore.unbind('paste-history-item-'+this.props.eventKey, this.pasteHistoryHandler);
@@ -189,7 +194,37 @@ var Editor = React.createClass({
         Actions.runAllBlocks(this.props.eventKey, blocks);
     },
 
-    detectBlock: function(current_line, script){
+    reFormatBlockHandler: function(){
+        var current_line = this.editor.selection.getCursor().row;
+        this.autoFormatBlock(current_line, this.editor.getValue);
+    },
+
+    reFormatAllHandler: function(){
+        var meta = /^\s*---\s*.*/;
+        var current_line = 0;
+        var block_start = 0;
+        var block_length = 0;
+        while (current_line < this.editor.session.getLength()){
+            var current_line_text = this.editor.session.getLine(current_line).trim();
+            if (current_line > 0 && meta.test(current_line_text)){ // new block started
+                // Reformat detected block
+                var block_end = block_start + block_length -1;
+                var new_block_length = this.reformatLines(block_start, block_end);
+                // Move current line based on how many lines the reformatting added
+                current_line += new_block_length - block_length;
+                block_start = current_line;
+                block_length = 0;
+            }
+            block_length++;
+            current_line++;
+        }
+
+        if (block_length > 0){ // append last block if any remained
+            this.reformatLines(block_start, block_start + block_length);
+        }
+    },
+
+    detectBlockLines: function(current_line, script){
         var meta = '^\s*---\s*.*';
         var start = 0;
         var start_found = false;
@@ -220,7 +255,26 @@ var Editor = React.createClass({
             current_line++;
         }
 
-        return this.editor.session.getLines(start, end).join('\n');
+        return [start, end];
+    },
+
+    detectBlock: function(current_line, script) {
+        var lines = this.detectBlockLines(current_line, script);
+        return this.editor.session.getLines(lines[0], lines[1]).join('\n');
+    },
+
+    reformatLines: function (start, end) {
+        var lastLine = this.editor.session.getLine(end);
+        var originalCode = this.editor.session.getLines(start, end).join('\n');
+        console.log(originalCode);
+        var reFormattedCode = FormatSQL.format(originalCode);
+        this.editor.session.replace(new Range(start, 0, end, lastLine.length), reFormattedCode);
+        return reFormattedCode.split('\n').length;
+    },
+
+    autoFormatBlock: function (current_line, script) {
+        var lines = this.detectBlockLines(current_line, script);
+        this.reformatLines(lines[0], lines[1]);
     },
 
     changeHandler: function(){
