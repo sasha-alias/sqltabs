@@ -88,6 +88,11 @@ var Conf = {
         return config.projects;
     },
 
+    saveProjects: function(projects){
+        config.projects = projects;
+        this.saveSync();
+    },
+
     saveAutoCompletion: function(auto_completion){
         config.auto_completion = auto_completion;
         this.saveSync();
@@ -97,17 +102,21 @@ var Conf = {
         return config.auto_completion;
     },
 
-    saveProjects: function(projects){
-        config.projects = projects;
-        this.saveSync();
-    },
-
     getSharingServer: function(){
         return config.sharing_server;
     },
 
     saveSharingServer: function(server){
         config.sharing_server = server;
+        this.saveSync();
+    },
+
+    getNoProtocolDialog: function(){
+        return config.no_protocol_dialog;
+    },
+
+    saveNoProtocolDialog: function(value){
+        config.no_protocol_dialog = value;
         this.saveSync();
     },
 
@@ -123,6 +132,7 @@ var Conf = {
         var Actions = require('./Actions');
         Actions.rereadConfig();
     },
+
 
 }
 

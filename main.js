@@ -23,6 +23,8 @@ if (process.platform == 'linux'){
 }
 
 var electron = require('electron');
+var config = require('./build/Config');
+
 var app = electron.app;
 var BrowserWindow = electron.BrowserWindow;
 
@@ -78,13 +80,14 @@ app.on('ready', function() {
         });
     }
 
-    if (!app.isDefaultProtocolClient('postgres')) {
+    if (!app.isDefaultProtocolClient('postgres') && !config.getNoProtocolDialog()) {
         electron.dialog.showMessageBox({
             type: 'question',
             buttons: ['Yes', 'No'],
             cancelId: 1,
             message: 'Do you want to set SQL Tabs as the default postgres client?'
         }, function (button) {
+            config.saveNoProtocolDialog(true); // prevent protocol dialog on next start even if No has bee chosen
             if (button === 0 ) {
                 app.setAsDefaultProtocolClient('postgres');
             }
