@@ -32,6 +32,7 @@
     "react": "^0.13.0",
     "react-bootstrap": "^0.23.0",
     "request": "^2.60.0",
+    "sql-formatter": "^1.2.0",
     "sqldoc": "^0.6.0",
     "tunnel-ssh": "^4.0.0"
   },
