@@ -122,6 +122,8 @@ var Editor = React.createClass({
             this.editor.session.setValue(this.state.script, -1);
         }
 
+        this.editor.commands.removeCommand('showSettingsMenu'); // disable Cmd+,
+
         this.editor.focus();
     },
 
