@@ -1,6 +1,7 @@
 require('./build/App.js');
 var $ = require('jquery');
 var c3 = require('c3');
+var d3 = require('d3');
 
 function openExternal(url){
     var shell = require('electron').shell;
@@ -117,7 +118,7 @@ function mount_charts(){
         var data = {};
 
         var column_charts = ['line', 'spline', 'area', 'step', 'area-spline', 'area-step', 'bar', 'scatter'];
-        var row_charts = ['pie', 'donut', 'gauge'];
+        var row_charts = ['pie', 'donut', 'gauge', 'bubble'];
 
         if (column_charts.indexOf(chart_type) != -1){
             // field name as a header
@@ -195,6 +196,10 @@ function mount_charts(){
 
         } else if (row_charts.indexOf(chart_type) != -1){
             // first column value as a header
+            if (chart_type == "bubble"){ // bubble chart is implemented not with c3
+                return mount_bubble_chart(chart_id, dataset);
+            }
+
             var columns = dataset.data;
             data = {
                 columns: columns,
@@ -220,4 +225,79 @@ function mount_charts(){
         }
     });
 
+}
+
+function mount_bubble_chart(chart_id, dataset){
+
+    var diameter = 500, //max size of the bubbles
+        color    = d3.scale.category20b(); //color category
+
+    var bubble = d3.layout.pack()
+        .sort(null)
+        .size([diameter, diameter])
+        .padding(1.5);
+
+    var svg = d3.select("[data-chart-id='"+chart_id+"']")
+        .append("svg:svg")
+          .attr("width", "100%")
+          .attr("height", 500)
+          .attr("class", "bubble");
+
+    var data = dataset.data;
+    // convert list of lists to list of dicts
+    data = data.map(function(d){ return {name: d[0], value: d[1]}; });
+
+    // keep only leaf nodes
+    var nodes = bubble.nodes({children:data}).filter(function(d) { return !d.children; });
+
+    //setup the chart
+    var bubbles = svg.append("g")
+            .attr("transform", "translate(0,0)")
+            .selectAll(".bubble")
+            .data(nodes)
+            .enter();
+
+    var tooltip = d3.select("[data-chart-id='"+chart_id+"']")
+        .append("div")
+        .style("position", "absolute")
+        .style("z-index", "10")
+        .style("visibility", "hidden")
+        .style("color", "white")
+        .style("padding", "8px")
+        .style("background-color", "rgba(0, 0, 0, 0.75)")
+        .style("border-radius", "6px")
+        .style("font", "12px sans-serif")
+        .text("tooltip");
+
+    //create the bubbles
+    bubbles.append("circle")
+        .attr("r", function(d){ return d.r; })
+        .attr("cx", function(d){ return d.x; })
+        .attr("cy", function(d){ return d.y; })
+        .style("fill", function(d) { return color(d.value); })
+        .on("mouseover", function(d) {
+            tooltip.text(d.name + ": "+ d.value);
+            tooltip.style("visibility", "visible");
+        })
+        .on("mousemove", function() {
+            return tooltip.style("top", (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");
+        })
+        .on("mouseout", function(){return tooltip.style("visibility", "hidden");});
+
+    //format the text for each bubble
+    bubbles.append("text")
+        .attr("x", function(d){ return d.x; })
+        .attr("y", function(d){ return d.y + 5; })
+        .attr("text-anchor", "middle")
+        .text(function(d){ // display text only if it fits into the bubble (calculation is very dumb)
+            var text_width = d.name.length * 12;
+            if ( text_width < d.r*2 ) {
+                return d.name;
+            }
+        })
+        .style({
+            "fill":"white",
+            "font-family":"Helvetica Neue, Helvetica, Arial, san-serif",
+            "font-size": "12px"
+        });
 }
