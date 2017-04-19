@@ -75,7 +75,6 @@ var ConnInput = React.createClass({
     unfocusHandler: function(e){
         this.setState({
             active: false,
-            connstr: TabsStore.getConnstr(this.props.eventKey),
             hilight: -1,
         });
     },
