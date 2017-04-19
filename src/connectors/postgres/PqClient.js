@@ -196,7 +196,7 @@ var normalizeConnstr = function(connstr, password, redshift){
         }
         connstr = util.format('%s//%s%s%s%s?%s',
             parsed.protocol,
-            parsed.auth,
+            (parsed.auth == null) ? '' : parsed.auth,
             (password == null) ? '' : ':'+password,
             (parsed.host == null) ? '' : '@'+parsed.host,
             (parsed.path == null) ? '' : parsed.pathname,
