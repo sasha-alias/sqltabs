@@ -1,3 +1,20 @@
+/*
+  Copyright (C) 2015  Aliaksandr Aliashkevich
+
+      This program is free software: you can redistribute it and/or modify
+      it under the terms of the GNU General Public License as published by
+      the Free Software Foundation, either version 3 of the License, or
+      (at your option) any later version.
+
+      This program is distributed in the hope that it will be useful,
+      but WITHOUT ANY WARRANTY; without even the implied warranty of
+      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+      GNU General Public License for more details.
+
+      You should have received a copy of the GNU General Public License
+      along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 var React = require('react');
 var Modal = require('react-bootstrap').Modal;
 var Button = require('react-bootstrap').Button;
@@ -38,7 +55,7 @@ var UpgradeMessage = React.createClass({
             return (
               <div className='static-modal'>
 
-                <Modal
+                <Modal.Dialog
                   bsStyle='primary'
                   backdrop={false}
                   animation={false}
@@ -47,19 +64,19 @@ var UpgradeMessage = React.createClass({
                   onRequestEnter={this.enter}
                   >
 
-                  <div className='modal-body'>
+                  <Modal.Body>
                     <table className="about-table"><tr>
                     <td><img className="about-logo" src="logo.png"/></td>
                     <td> <p> SQL Tabs v{TabsStore.newVersion.join('.')} is available for <a href="#" onClick={function(){Shell.openExternal('http://www.sqltabs.com');}}>download</a></p>
                     </td>
                     </tr></table>
 
-                  </div>
-                  <div className='modal-footer'>
+                  </Modal.Body>
+                  <Modal.Footer>
                      <Button onClick={this.hide}>OK</Button>
-                  </div>
+                  </Modal.Footer>
 
-                </Modal>
+                </Modal.Dialog>
               </div>
             );
         }

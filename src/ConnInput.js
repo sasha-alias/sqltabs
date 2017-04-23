@@ -16,6 +16,7 @@
 */
 
 var React = require('react');
+var ReactDOM = require('react-dom');
 var TabActions = require('./Actions');
 var TabsStore = require('./TabsStore');
 
@@ -34,14 +35,14 @@ var ConnInput = React.createClass({
         TabsStore.bind('change', this.storeChangedHandler);
         TabsStore.bind('goto-connstr-'+this.props.eventKey, this.focusConnstr);
 
-        React.findDOMNode(this).addEventListener("focusout", this.unfocusHandler);
+        ReactDOM.findDOMNode(this).addEventListener("focusout", this.unfocusHandler);
     },
 
     componentWillUnmount: function(){
         TabsStore.unbind('change', this.storeChangedHandler);
         TabsStore.unbind('goto-connstr-'+this.props.eventKey, this.focusConnstr);
 
-        React.findDOMNode(this).removeEventListener("focusout", this.unfocusHandler);
+        ReactDOM.findDOMNode(this).removeEventListener("focusout", this.unfocusHandler);
     },
 
     storeChangedHandler: function() {
@@ -52,7 +53,7 @@ var ConnInput = React.createClass({
     },
 
     focusConnstr: function(){
-        var connInput = React.findDOMNode(this.refs.connInput)
+        var connInput = ReactDOM.findDOMNode(this.refs.connInput)
         connInput.focus();
         connInput.select();
     },
@@ -97,11 +98,11 @@ var ConnInput = React.createClass({
     },
 
     dontLoseFocus: function(){
-        React.findDOMNode(this).removeEventListener("focusout", this.unfocusHandler);
+        ReactDOM.findDOMNode(this).removeEventListener("focusout", this.unfocusHandler);
     },
 
     allowLoseFocus: function(){
-        React.findDOMNode(this).addEventListener("focusout", this.unfocusHandler);
+        ReactDOM.findDOMNode(this).addEventListener("focusout", this.unfocusHandler);
     },
 
     keyPressHandler: function(e){
@@ -179,11 +180,15 @@ var ConnInput = React.createClass({
                 var alias = '';
             }
 
+            var connectionColor = TabsStore.getConnectionColor(item);
+            var color_circle = <span className="connection-color-circle" style={{background: connectionColor}}> &nbsp; </span>
+
             return <li data-idx={i}
                 onMouseOver={self.itemMouseOverHandler}
                 onClick={self.pickHandler}
                 className={"conn_history_item"+highlighted}
                 key={'connhist'+i}>
+                    {color_circle}
                     {alias}
                     <span data-idx={i} className="conn_item_str">{conn_str}</span>
                     {remove_item}

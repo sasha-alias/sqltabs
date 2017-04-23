@@ -16,7 +16,7 @@
 */
 
 var React = require('react');
-var $ = require('jquery');
+var ReactDOM = require('react-dom');
 var TabActions = require('./Actions');
 var TabsStore = require('./TabsStore');
 
@@ -78,9 +78,9 @@ var TabSplit = React.createClass({
     },
 
     setInitialSize: function(){
-        var main_container = $(this.getDOMNode());
-        var first_container = $(this.refs.first_container.getDOMNode());
-        var second_container = $(this.refs.second_container.getDOMNode());
+        var main_container = $(ReactDOM.findDOMNode(this));
+        var first_container = $(ReactDOM.findDOMNode(this.refs.first_container));
+        var second_container = $(ReactDOM.findDOMNode(this.refs.second_container));
 
         main_container.height($(document).height() - main_container.offset().top);
 
@@ -102,10 +102,10 @@ var TabSplit = React.createClass({
     },
 
     resizeContainers: function(){
-        var main_container = $(this.getDOMNode());
-        var first_container = $(this.refs.first_container.getDOMNode());
-        var second_container = $(this.refs.second_container.getDOMNode());
-        var splitter = $(this.refs.splitter.getDOMNode());
+        var main_container = $(ReactDOM.findDOMNode(this));
+        var first_container = $(ReactDOM.findDOMNode(this.refs.first_container));
+        var second_container = $(ReactDOM.findDOMNode(this.refs.second_container));
+        var splitter = $(ReactDOM.findDOMNode(this.refs.splitter));
 
         main_container.height($(document).height() - main_container.offset().top);
 
@@ -138,9 +138,9 @@ var TabSplit = React.createClass({
     },
 
     horizontalResize: function(e){
-        var main_container = $(this.getDOMNode());
-        var first_container = $(this.refs.first_container.getDOMNode());
-        var second_container = $(this.refs.second_container.getDOMNode());
+        var main_container = $(ReactDOM.findDOMNode(this));
+        var first_container = $(ReactDOM.findDOMNode(this.refs.first_container));
+        var second_container = $(ReactDOM.findDOMNode(this.refs.second_container));
 
         var h1 = e.pageY - first_container.offset().top;
         var h2 = main_container.height() - h1;
@@ -152,9 +152,9 @@ var TabSplit = React.createClass({
     },
 
     verticalResize: function(e){
-        var main_container = $(this.getDOMNode());
-        var first_container = $(this.refs.first_container.getDOMNode());
-        var second_container = $(this.refs.second_container.getDOMNode());
+        var main_container = $(ReactDOM.findDOMNode(this));
+        var first_container = $(ReactDOM.findDOMNode(this.refs.first_container));
+        var second_container = $(ReactDOM.findDOMNode(this.refs.second_container));
 
         var w1 = e.pageX - first_container.offset().left;
         var w2 = main_container.width() - w1;
@@ -215,8 +215,8 @@ var TabSplit = React.createClass({
     resizeHandler: function(){
         // handle risize of outer container for vertical view
         if (this.state.type == 'vertical' && !this.state.project_visible){
-            var first_container = $(this.refs.first_container.getDOMNode());
-            var second_container = $(this.refs.second_container.getDOMNode());
+            var first_container = $(ReactDOM.findDOMNode(this.refs.first_container));
+            var second_container = $(ReactDOM.findDOMNode(this.refs.second_container));
             var second_overflow = (first_container.offset().left + first_container.width() + second_container.width() + 5) - $(document).width();
             if ( second_overflow > 0) {
                 // reduce second container width
@@ -283,26 +283,14 @@ var TabSplit = React.createClass({
         if (!this.state.drag){
             return;
         }
-        var first_container = $(this.refs.first_container.getDOMNode())
-        var second_container = $(this.refs.second_container.getDOMNode())
+        var first_container = $(ReactDOM.findDOMNode(this.refs.first_container));
+        var second_container = $(ReactDOM.findDOMNode(this.refs.second_container));
 
         if (this.state.type == 'horizontal'){
             this.horizontalResize(e);
 
         } else { // vertical
             this.verticalResize(e);
-            //var pos = $(this.getDOMNode()).offset();
-            //var h = $(this.getDOMNode()).width();
-
-            //var h1 = e.pageX - pos.left;
-            //var h2 = h - h1 - 5;
-            //if (h1 > 15 && h2 > 15) {
-            //    this.setState({
-            //        h1: h1,
-            //        h2: h2,
-            //        });
-            //    TabActions.resize(this.props.eventKey);
-            //}
         }
     },
 

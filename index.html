@@ -10,8 +10,13 @@
     <link rel="stylesheet" href="css/tabs.dark.css" id="theme_tabs_stylesheet">
     <link rel="stylesheet" href="css/tabs.css" id="tabs_stylesheet">
 
+    <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+    <script src='node_modules/jquery/dist/jquery.min.js'></script>
+    <script>if (window.module) module = window.module;</script>
+
   </head>
   <body>
+    <div id="root"></div>
     <script src="build/index.js"></script>
   </body>
 </html>

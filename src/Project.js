@@ -1,4 +1,22 @@
+/*
+  Copyright (C) 2015  Aliaksandr Aliashkevich
+
+      This program is free software: you can redistribute it and/or modify
+      it under the terms of the GNU General Public License as published by
+      the Free Software Foundation, either version 3 of the License, or
+      (at your option) any later version.
+
+      This program is distributed in the hope that it will be useful,
+      but WITHOUT ANY WARRANTY; without even the implied warranty of
+      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+      GNU General Public License for more details.
+
+      You should have received a copy of the GNU General Public License
+      along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 var React = require('react');
+var ReactDOM = require('react-dom');
 var Actions = require('./Actions');
 var TabsStore = require('./TabsStore');
 var remote = require('electron').remote;
@@ -6,7 +24,6 @@ var dialog = remote.dialog;
 var fs = require('fs');
 var path = require('path');
 var async = require('async');
-var $ = require('jquery');
 
 var Project = React.createClass({
 
@@ -24,7 +41,7 @@ var Project = React.createClass({
         TabsStore.bind('show-project-'+this.props.eventKey, this.showProjectHandler);
         TabsStore.bind('hide-project-'+this.props.eventKey, this.hideProjectHandler);
         TabsStore.bind('font-size-changed', this.resize);
-        React.findDOMNode(this.refs.project_div).addEventListener("keydown", this.keyPressHandler);
+        ReactDOM.findDOMNode(this.refs.project_div).addEventListener("keydown", this.keyPressHandler);
 
     },
 
@@ -32,12 +49,12 @@ var Project = React.createClass({
         TabsStore.unbind('show-project-'+this.props.eventKey, this.showProjectHandler);
         TabsStore.unbind('hide-project-'+this.props.eventKey, this.hideProjectHandler);
         TabsStore.unbind('font-size-changed', this.resize);
-        React.findDOMNode(this.refs.project_div).removeEventListener("keydown", this.keyPressHandler);
+        ReactDOM.findDOMNode(this.refs.project_div).removeEventListener("keydown", this.keyPressHandler);
     },
 
     showProjectHandler: function(){
         this.setState({focused: true}, function(){
-            React.findDOMNode(this.refs.hidden).focus();
+            ReactDOM.findDOMNode(this.refs.hidden).focus();
         });
     },
 
@@ -51,8 +68,8 @@ var Project = React.createClass({
     },
 
     resize: function(){
-        var project_list = React.findDOMNode(this.refs.project_list);
-        var files_list = React.findDOMNode(this.refs.project_files_list);
+        var project_list = ReactDOM.findDOMNode(this.refs.project_list);
+        var files_list = ReactDOM.findDOMNode(this.refs.project_files_list);
         $(files_list).height(
             $(project_list).parent().height() - $(project_list).height() - $(".tab-navigator").height()
         );

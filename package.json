@@ -29,11 +29,13 @@
     "performance-now": "^0.2.0",
     "pg": "git+https://github.com/sasha-alias/node-postgres.git",
     "pg-connection-string": "^0.1.3",
-    "react": "^0.13.0",
-    "react-bootstrap": "^0.23.0",
+    "react": "^0.14.9",
+    "react-bootstrap": "^0.30.10",
+    "react-color": "^2.11.4",
+    "react-dom": "^0.14.9",
     "request": "^2.60.0",
     "sql-formatter": "^1.2.0",
-    "sqldoc": "^0.6.0",
+    "sqldoc": "^0.7.0",
     "tunnel-ssh": "^4.0.0"
   },
   "devDependencies": {

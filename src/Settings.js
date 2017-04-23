@@ -151,7 +151,7 @@ var Settings = React.createClass({
                 <div className="checkbox">
                     <label>
                         <input type="checkbox" value="true" checked={this.state.autoCompletion} onChange={this.setAutoCompletion} />
-                        Auto-completation
+                        Auto-completion
                     </label>
                 </div>
             </div>

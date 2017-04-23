@@ -120,6 +120,31 @@ var Conf = {
         this.saveSync();
     },
 
+    getConnectionColor: function(connstr){
+        if (typeof(config.connectionColors) == 'undefined'){
+            config.connectionColors = {};
+        }
+
+        if (connstr in config.connectionColors){
+            return  config.connectionColors[connstr];
+        } else {
+            return 'inherit';
+        }
+
+    },
+
+    saveConnectionColor: function(connstr, color){
+        if (typeof(config.connectionColors) == 'undefined'){
+            config.connectionColors = {};
+        }
+        if (color != null) {
+            config.connectionColors[connstr] = color;
+        } else {
+            delete config.connectionColors[connstr];
+        }
+        this.saveSync();
+    },
+
     saveSync: function(){
         fs.unwatchFile(config_path);
         db.saveSync();

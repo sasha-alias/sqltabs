@@ -433,6 +433,18 @@ var _TabsStore = function(){
 
     }
 
+    this.getConnectionColor = function(connstr){
+        if (connstr == null){
+            var connstr = this.getConnstr(this.selectedTab);
+        }
+        return Config.getConnectionColor(connstr);
+    }
+
+    this.saveConnectionColor = function(color){
+        var connstr = this.getConnstr(this.selectedTab);
+        Config.saveConnectionColor(connstr, color);
+    }
+
     this.setAutocompletion = function(auto_completion){
         this.auto_completion = auto_completion;
         this.trigger('change-auto-completion');

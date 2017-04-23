@@ -123,7 +123,7 @@ var CloudMessage = React.createClass({
         return(
             <div className='static-modal'>
 
-              <Modal
+              <Modal.Dialog
                 bsStyle='primary'
                 backdrop={false}
                 animation={false}
@@ -132,7 +132,7 @@ var CloudMessage = React.createClass({
                 onRequestEnter={this.enter}
                 >
 
-                <div className='modal-body'>
+                <Modal.Body>
 
                     <table className="about-table"><tr>
                     <td><img className="about-logo" src="logo.png"/></td>
@@ -143,14 +143,14 @@ var CloudMessage = React.createClass({
                     </td>
                     </tr></table>
 
-                </div>
+                </Modal.Body>
 
-                <div className='modal-footer'>
+                <Modal.Footer>
                    <Button onClick={this.share}>OK</Button>
                    <Button onClick={this.hide}>Cancel</Button>
-                </div>
+                </Modal.Footer>
 
-              </Modal>
+              </Modal.Dialog>
             </div>
         );
     },
@@ -160,7 +160,7 @@ var CloudMessage = React.createClass({
         return (
             <div className='static-modal'>
 
-              <Modal
+              <Modal.Dialog
                 bsStyle='primary'
                 backdrop={false}
                 animation={false}
@@ -169,7 +169,7 @@ var CloudMessage = React.createClass({
                 onRequestEnter={this.enter}
                 >
 
-                <div className='modal-body'>
+                <Modal.Body>
 
                     <table className="about-table"><tr>
                     <td><img className="about-logo" src="logo.png"/></td>
@@ -182,13 +182,13 @@ var CloudMessage = React.createClass({
                     </td>
                     </tr></table>
 
-                </div>
+                </Modal.Body>
 
-                <div className='modal-footer'>
+                <Modal.Footer>
                    <Button onClick={this.hide}>Cancel</Button>
-                </div>
+                </Modal.Footer>
 
-              </Modal>
+              </Modal.Dialog>
             </div>
         );
     },
@@ -198,7 +198,7 @@ var CloudMessage = React.createClass({
         return (
           <div className='static-modal'>
 
-            <Modal
+            <Modal.Dialog
               bsStyle='primary'
               backdrop={false}
               animation={false}
@@ -207,7 +207,7 @@ var CloudMessage = React.createClass({
               onRequestEnter={this.enter}
               >
 
-              <div className='modal-body'>
+              <Modal.Body>
                 <table className="about-table"><tr>
                 <td><img className="about-logo" src="logo.png"/></td>
                 <td> <p> Your document is available on the URL: </p>
@@ -215,12 +215,13 @@ var CloudMessage = React.createClass({
                 </td>
                 </tr></table>
 
-              </div>
-              <div className='modal-footer'>
-                 <Button onClick={this.open}>Open</Button>
-              </div>
+              </Modal.Body>
 
-            </Modal>
+              <Modal.Footer>
+                 <Button onClick={this.open}>Open</Button>
+              </Modal.Footer>
+
+            </Modal.Dialog>
           </div>
         );
     },
@@ -237,7 +238,7 @@ var CloudMessage = React.createClass({
         return (
           <div className='static-modal'>
 
-            <Modal
+            <Modal.Dialog
               bsStyle='primary'
               backdrop={false}
               animation={false}
@@ -246,7 +247,7 @@ var CloudMessage = React.createClass({
               onRequestEnter={this.enter}
               >
 
-              <div className='modal-body'>
+              <Modal.Body>
                 <table className="about-table"><tr>
                 <td><img className="about-logo" src="logo.png"/></td>
                 <td> <p> Error: </p>
@@ -254,12 +255,13 @@ var CloudMessage = React.createClass({
                 </td>
                 </tr></table>
 
-              </div>
-              <div className='modal-footer'>
-                 <Button onClick={this.hide}>Close</Button>
-              </div>
+              </Modal.Body>
 
-            </Modal>
+              <Modal.Footer>
+                 <Button onClick={this.hide}>Close</Button>
+              </Modal.Footer>
+
+            </Modal.Dialog>
           </div>
         );
     },

@@ -19,7 +19,6 @@ var TabsStore = require('./TabsStore');
 var Actions = require('./Actions');
 var React = require('react');
 var Ace = require('brace');
-var $ = require('jquery');
 require('brace/mode/pgsql');
 require('brace/theme/chrome');
 require('brace/theme/idle_fingers');

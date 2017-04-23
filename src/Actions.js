@@ -398,7 +398,13 @@ var Actions = {
             filename: filename,
             format: format,
         });
-    }
+    },
+
+    connectionColorChange: function(){
+        AppDispatcher.dispatch({
+            eventName: 'connection-color-change',
+        });
+    },
 }
 
 module.exports = Actions;

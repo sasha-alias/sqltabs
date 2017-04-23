@@ -16,6 +16,7 @@
 */
 
 var React = require('react');
+var ReactDOM = require('react-dom');
 var Modal = require('react-bootstrap').Modal;
 var Button = require('react-bootstrap').Button;
 var OverlayMixin = require('react-bootstrap').OverlayMixin;
@@ -57,7 +58,7 @@ var About = React.createClass({
             return (
               <div className='static-modal'>
 
-                <Modal
+                <Modal.Dialog
                   bsStyle='primary'
                   backdrop={false}
                   animation={false}
@@ -79,7 +80,7 @@ var About = React.createClass({
                      <Button onClick={this.hide}>OK</Button>
                   </div>
 
-                </Modal>
+                </Modal.Dialog>
               </div>
             );
         }

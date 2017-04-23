@@ -122,11 +122,15 @@ AppDispatcher.register( function(payload) {
 
         case 'set-theme':
             if (payload.key == 'bright'){ // brigth
-                document.getElementById("theme_stylesheet").href = "css/bootstrap.bright.css";
-                document.getElementById("theme_tabs_stylesheet").href = "css/tabs.bright.css";
+                if(typeof window !== 'undefined') {
+                    document.getElementById("theme_stylesheet").href = "css/bootstrap.bright.css";
+                    document.getElementById("theme_tabs_stylesheet").href = "css/tabs.bright.css";
+                }
             } else { // dark
-                document.getElementById("theme_stylesheet").href = "css/bootstrap.dark.css";
-                document.getElementById("theme_tabs_stylesheet").href = "css/tabs.dark.css";
+                if(typeof window !== 'undefined') {
+                    document.getElementById("theme_stylesheet").href = "css/bootstrap.dark.css";
+                    document.getElementById("theme_tabs_stylesheet").href = "css/tabs.dark.css";
+                }
             };
 
             TabsStore.setTheme(payload.key);
@@ -293,13 +297,6 @@ AppDispatcher.register( function(payload) {
 
         case 'reread-config':
             TabsStore.rereadConfig();
-            if (TabsStore.theme == 'bright'){ // brigth
-                document.getElementById("theme_stylesheet").href = "css/bootstrap.bright.css";
-                document.getElementById("theme_tabs_stylesheet").href = "css/tabs.bright.css";
-            } else { // dark
-                document.getElementById("theme_stylesheet").href = "css/bootstrap.dark.css";
-                document.getElementById("theme_tabs_stylesheet").href = "css/tabs.dark.css";
-            };
             TabsStore.trigger('change-theme');
             TabsStore.trigger('change-mode');
             TabsStore.trigger('change');
@@ -343,6 +340,10 @@ AppDispatcher.register( function(payload) {
 
         case 'export-result':
             TabsStore.exportResult(payload.filename, payload.format);
+            break;
+
+        case 'connection-color-change':
+            TabsStore.trigger('connection-color-change');
             break;
 
     }

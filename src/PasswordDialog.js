@@ -1,21 +1,22 @@
 /*
   Copyright (C) 2015  Aliaksandr Aliashkevich
-  
+
       This program is free software: you can redistribute it and/or modify
       it under the terms of the GNU General Public License as published by
       the Free Software Foundation, either version 3 of the License, or
       (at your option) any later version.
-  
+
       This program is distributed in the hope that it will be useful,
       but WITHOUT ANY WARRANTY; without even the implied warranty of
       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
       GNU General Public License for more details.
-  
+
       You should have received a copy of the GNU General Public License
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 var React = require('react');
+var ReactDOM = require('react-dom');
 var Modal = require('react-bootstrap').Modal;
 var Button = require('react-bootstrap').Button;
 var OverlayMixin = require('react-bootstrap').OverlayMixin;
@@ -29,11 +30,11 @@ var PasswordDialog = React.createClass({
     },
 
     componentDidMount: function(){
-        TabsStore.bind('ask-password', this.askPasswordHandler); 
+        TabsStore.bind('ask-password', this.askPasswordHandler);
     },
 
     componentWillUnmount: function(){
-        TabsStore.unbind('ask-password', this.askPasswordHandler); 
+        TabsStore.unbind('ask-password', this.askPasswordHandler);
     },
 
     askPasswordHandler: function(){
@@ -41,7 +42,7 @@ var PasswordDialog = React.createClass({
             hidden: false,
         });
 
-        var passwordInput = React.findDOMNode(this.refs.passwordInput);
+        var passwordInput = ReactDOM.findDOMNode(this.refs.passwordInput);
         passwordInput.focus();
     },
 
@@ -55,7 +56,7 @@ var PasswordDialog = React.createClass({
             e.stopPropagation();
         }
         this.setState({hidden: true});
-        var passwordInput = React.findDOMNode(this.refs.passwordInput);
+        var passwordInput = ReactDOM.findDOMNode(this.refs.passwordInput);
         Actions.setPassword(encodeURIComponent(passwordInput.value));
     },
 
@@ -68,7 +69,7 @@ var PasswordDialog = React.createClass({
             return (
               <div className='static-modal'>
 
-                <Modal 
+                <Modal.Dialog
                   bsStyle='primary'
                   backdrop={false}
                   animation={false}
@@ -77,20 +78,20 @@ var PasswordDialog = React.createClass({
                   onRequestEnter={this.enter}
                   >
 
-                  <div className='modal-body'>
+                  <Modal.Body>
                     <div className="form-group">
                         <label className="control-label"><span>Password</span></label>
                         <form onSubmit={this.enter}>
                             <input ref="passwordInput" type='password' label='Password' className="form-control"/>
                         </form>
                     </div>
-                  </div>
+                  </Modal.Body>
 
-                  <div className='modal-footer'>
+                  <Modal.Footer>
                     <Button onClick={this.enter}>Enter</Button>
                     <Button onClick={this.hide}>Cancel</Button>
-                  </div>
-                </Modal>
+                  </Modal.Footer>
+                </Modal.Dialog>
               </div>
             );
         }

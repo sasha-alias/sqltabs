@@ -16,6 +16,7 @@
 */
 
 var React = require('react');
+var ReactDOM = require('react-dom');
 var Ace = require('brace');
 var FormatSQL = require('sql-formatter');
 var Range = ace.acequire('ace/range').Range;
@@ -23,7 +24,6 @@ var TabsStore = require('./TabsStore');
 var Actions = require('./Actions');
 var History = require('./History');
 var fs = require('fs');
-var $ = require('jquery');
 
 require('brace/mode/pgsql');
 require('brace/theme/chrome');
@@ -279,15 +279,18 @@ var Editor = React.createClass({
         this.reformatLines(lines[0], lines[1]);
     },
 
+    componentDidUpdate: function(){
+        this.editor.setTheme('ace/theme/' + this.state.theme);
+        this.editor.setKeyboardHandler(this.state.mode);
+        this.editor.resize();
+        this.editor.focus();
+    },
+
     changeHandler: function(){
         this.setState({
             theme: TabsStore.getEditorTheme(),
             mode: TabsStore.getEditorMode(),
         });
-        this.editor.setTheme('ace/theme/' + this.state.theme);
-        this.editor.setKeyboardHandler(this.state.mode);
-        this.editor.resize();
-        this.editor.focus();
     },
 
     fileOpenHandler: function(){
@@ -370,6 +373,7 @@ var Editor = React.createClass({
             var position = this.editor.getCursorPosition();
             this.editor.getSession().insert(position, item.query);
         }
+        this.editor.focus();
     },
 
     focusEditorHandler: function(){
@@ -424,7 +428,7 @@ var Editor = React.createClass({
         if (!TabsStore.auto_completion){
             return;
         }
-        var completer = $(React.findDOMNode(this.refs.completer));
+        var completer = $(ReactDOM.findDOMNode(this.refs.completer));
         var cursor = $("#"+this.props.name).find(".ace_cursor");
         var offset = {
             top: cursor.offset().top + cursor.height(),
@@ -457,7 +461,7 @@ var Editor = React.createClass({
     hideCompleter: function(){
         this.completion_mode = false;
         this.hints = [];
-        var completer = $(React.findDOMNode(this.refs.completer));
+        var completer = $(ReactDOM.findDOMNode(this.refs.completer));
         completer.hide();
         this.editor.commands.addCommand({ // enable tab back
             name: "indent",
@@ -511,7 +515,7 @@ var Editor = React.createClass({
             this.editor.getSession().replace(range, hint);
         }
 
-        var completer = $(React.findDOMNode(this.refs.completer));
+        var completer = $(ReactDOM.findDOMNode(this.refs.completer));
         completer.html(this.renderHints());
 
     },

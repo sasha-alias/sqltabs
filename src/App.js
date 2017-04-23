@@ -16,6 +16,7 @@
 */
 
 var React = require('react');
+var ReactDOM = require('react-dom');
 var PasswordDialog = require('./PasswordDialog');
 var About = require('./About');
 var TabsNav = require('./TabsNav');
@@ -42,7 +43,7 @@ require('electron').ipcRenderer.on('open-url', function(event, url) {
 
 require('./Menu');
 
-var mountNode = document.body;
+var mountNode = document.getElementById('root');
 
 var App = React.createClass({
 
@@ -77,4 +78,4 @@ Actions.setSchemaFilterMode(schemaFilter.mode);
 Actions.setSchemaFilterRegEx(schemaFilter.regex);
 Actions.upgradeCheck();
 
-React.render(app, mountNode);
+ReactDOM.render(app, mountNode);

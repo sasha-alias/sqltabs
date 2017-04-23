@@ -1,21 +1,22 @@
 /*
   Copyright (C) 2015  Aliaksandr Aliashkevich
-  
+
       This program is free software: you can redistribute it and/or modify
       it under the terms of the GNU General Public License as published by
       the Free Software Foundation, either version 3 of the License, or
       (at your option) any later version.
-  
+
       This program is distributed in the hope that it will be useful,
       but WITHOUT ANY WARRANTY; without even the implied warranty of
       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
       GNU General Public License for more details.
-  
+
       You should have received a copy of the GNU General Public License
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 var React = require('react');
+var ReactDOM = require('react-dom');
 var Modal = require('react-bootstrap').Modal;
 var History = require('./History');
 var Ace = require('brace');
@@ -34,15 +35,15 @@ var HistoryCarousel = React.createClass({
     },
 
     componentDidMount: function(){
-        TabsStore.bind('toggle-history', this.historyHandler); 
+        TabsStore.bind('toggle-history', this.historyHandler);
         TabsStore.bind('change-theme', this.changeThemeHandler);
     },
 
     componentWillUnmount: function(){
-        TabsStore.unbind('toggle-history', this.historyHandler); 
+        TabsStore.unbind('toggle-history', this.historyHandler);
         TabsStore.unbind('change-theme', this.changeThemeHandler);
 
-        React.findDOMNode(document.body).removeEventListener("keydown", this.keyPressHandler);
+        ReactDOM.findDOMNode(document.body).removeEventListener("keydown", this.keyPressHandler);
     },
 
     componentDidUpdate: function(){
@@ -68,15 +69,21 @@ var HistoryCarousel = React.createClass({
             if (this.state.filter != ""){
                 this.editor.findAll(this.state.filter, {caseSensitive: false});
             }
+        }
 
+        if (this.state.hidden == false){
+            var history_filter = ReactDOM.findDOMNode(this.refs.history_filter);
+            history_filter.focus();
+        } else {
+            $(".edit-area:visible").focus();
         }
     },
 
     historyHandler: function(){
         if (this.state.hidden){
-            React.findDOMNode(document.body).addEventListener("keydown", this.keyPressHandler);
+            ReactDOM.findDOMNode(document.body).addEventListener("keydown", this.keyPressHandler);
         } else {
-            React.findDOMNode(document.body).removeEventListener("keydown", this.keyPressHandler);
+            ReactDOM.findDOMNode(document.body).removeEventListener("keydown", this.keyPressHandler);
             this.editor = null;
         }
         this.setState({
@@ -86,42 +93,43 @@ var HistoryCarousel = React.createClass({
     },
 
     cleanFilter: function(){
-        var history_filter = React.findDOMNode(this.refs.history_filter);
+        var history_filter = ReactDOM.findDOMNode(this.refs.history_filter);
         history_filter.value = "";
         this.setState({filter: "", idx: 0, found: true});
     },
 
     hide: function(){
-        React.findDOMNode(document.body).removeEventListener("keydown", this.keyPressHandler);
+        ReactDOM.findDOMNode(document.body).removeEventListener("keydown", this.keyPressHandler);
         this.setState({hidden: true});
         this.editor = null;
     },
 
     escHandler: function(){
         if (this.state.filter != ""){
-            this.cleanFilter(); 
+            this.cleanFilter();
             return;
         }
         this.hide();
+        Actions.focusEditor();
     },
 
-    goUp: function(next){ 
+    goUp: function(next){
         if (this.state.filter == ""){ // just go to next item
             var next_item  = History.get(this.state.idx+1);
             if (next_item != null){
-                this.setState({idx: this.state.idx+1}); 
+                this.setState({idx: this.state.idx+1});
             }
         } else { // go to next item matching a filter
             if (this.state.idx < History.length()){
                 if (next){ // start from next item
-                    var idx = this.state.idx+1; 
+                    var idx = this.state.idx+1;
                 } else { // start from current item
-                    var idx = this.state.idx; 
+                    var idx = this.state.idx;
                 }
 
                 var found = false;
                 while (idx < History.length()){
-                    var item = History.get(idx); 
+                    var item = History.get(idx);
                     var filtered = item.query.search(new RegExp(this.state.filter, "i"));
 
                     if (filtered == -1){
@@ -144,7 +152,7 @@ var HistoryCarousel = React.createClass({
         if (this.state.filter == ""){
             var prev_item  = History.get(this.state.idx-1);
             if (prev_item != null){
-                this.setState({idx: this.state.idx-1}); 
+                this.setState({idx: this.state.idx-1});
             }
         } else {
             if (this.state.idx > 0){
@@ -196,10 +204,17 @@ var HistoryCarousel = React.createClass({
             return;
         }
 
+        if (e.keyCode == 27){ // esc
+            this.escHandler();
+            e.preventDefault();
+            e.stopPropagation();
+            return;
+        }
+
         // filter
         var charStr = String.fromCharCode(e.keyCode);
         if (this.state.filter == "" && /[a-z0-9]/i.test(charStr)) {
-            var history_filter = React.findDOMNode(this.refs.history_filter);
+            var history_filter = ReactDOM.findDOMNode(this.refs.history_filter);
             history_filter.focus();
         }
 
@@ -215,7 +230,7 @@ var HistoryCarousel = React.createClass({
     },
 
     filterChangeHandler: function(){
-        var history_filter = React.findDOMNode(this.refs.history_filter);
+        var history_filter = ReactDOM.findDOMNode(this.refs.history_filter);
         var filter = history_filter.value;
         this.setState({filter: filter}, function(){
             this.goUp(false);
@@ -247,29 +262,28 @@ var HistoryCarousel = React.createClass({
                     var filter = null;
                 }
 
-                return ( 
-                <div className="static-modal"> 
+                return (
+                <div className="static-modal">
 
-                    <Modal 
+                    <Modal.Dialog
                       bsStyle='primary'
                       backdrop={false}
                       animation={false}
                       container={document.body}
-                      onRequestHide={this.escHandler}
                       >
 
-                      <div className='modal-body'>
+                      <Modal.Body>
                       <p> No history queries found </p>
                       {filter}
-                      </div>
+                      </Modal.Body>
 
-                    </Modal>
-                
+                    </Modal.Dialog>
+
                 </div>
                 );
             }
 
-            
+
             if (History.length() == 1){
                 var arrows = <span/> ;
             } else if (this.state.idx == 0){
@@ -290,17 +304,16 @@ var HistoryCarousel = React.createClass({
             }
 
             return (
-            <div className="static-modal"> 
+            <div className="static-modal">
 
-                <Modal 
+                <Modal.Dialog
                   bsStyle='primary'
                   backdrop={false}
                   animation={false}
                   container={document.body}
-                  onRequestHide={this.escHandler}
                   >
 
-                  <div className='modal-body'>
+                  <Modal.Body>
                       <table className="history-header">
                       <tr><td>
                       <span>{time}  </span>
@@ -318,10 +331,10 @@ var HistoryCarousel = React.createClass({
                       {found}
                       <div id="history_view" className="history-view">
                       </div>
-                  </div>
+                  </Modal.Body>
 
-                </Modal>
-            
+                </Modal.Dialog>
+
             </div>
             );
         }
