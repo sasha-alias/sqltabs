@@ -20,7 +20,7 @@ body{
 .tab-navigator{
     display: block;
     width: 100%;
-    margin-left: 3px;
+    margin-left: 8px;
 }
 
 .tab-title{
@@ -93,6 +93,7 @@ body{
     padding: 3px 12px;
     font-size: inherit;
     height: inherit;
+    padding-right: 50px;
 }
 
 .tab-split {
@@ -530,4 +531,24 @@ body{
   position: absolute;
 }
 
+/* data charts */
+
+div[data-chart-id]{
+    margin-left: 10px;
+}
+
+
+/* bubble chart */
+
+.bubbles-tooltip{
+position: absolute;
+z-index: 10;
+visibility: hidden;
+color: white;
+padding: 8px;
+background-color: rgba(0, 0, 0, 0.75);
+border-radius: 6px;
+font: 12px sans-serif;
+}
 /* */
+

@@ -30,10 +30,10 @@ var TunnelPorts = {};
 var PortSequence = 15000;
 
 function resolveHome(filepath) {
-    if (filepath[0] === '~') {
+    if (filepath.charAt(0) === '~') {
         return path.join(process.env.HOME, filepath.slice(1));
     }
-    return path;
+    return filepath;
 }
 
 var Executor = {
@@ -77,6 +77,7 @@ var Executor = {
             function(){callback();}
         );
         client.on('error', function(e){
+            console.log("test ssh error: "+e);
             client.end();
         });
     },
@@ -100,7 +101,12 @@ var Executor = {
         if (db_url.path == null){
             var url_path= '';
         } else {
-            var url_path = db_url.path;
+            if (db_url.path.indexOf('---') > 0){ // trim connection alias
+                var url_path = db_url.path.split('---')[0];
+                url_path = decodeURI(url_path); // convert possible %20 etc
+            } else {
+                var url_path = decodeURI(db_url.path);
+            }
         }
 
         try{
@@ -111,6 +117,7 @@ var Executor = {
             }
         }
         catch(e){
+            console.log(e);
             identity_file = null;
         }
 
@@ -136,24 +143,36 @@ var Executor = {
                 readyTimeout: 30000,
             };
 
+            if (ssh_config.username == null){
+                delete ssh_config.username;
+            }
+            if (ssh_config.port == null){
+                delete ssh_config.port;
+            }
+            console.log(ssh_config);
+
             var ssh_server = tunnel(ssh_config, function (error, server) {
 
                 if (error){
+                    console.log(error);
                     err_callback(id, "create ssh tunnel error: "+error);
                     return;
                 }
+
                 Tunnels[id] = server;
                 TunnelPorts[id] = PortSequence;
 
                 self.testSSH(id, ssh_config, function(){
                     return callback(self._getConnector(mapped_db_url));
-                }, function(){
-                    err_callback(id, "ssh tunnel error");
+                }, function(err){
+                    console.log(err);
+                    err_callback(id, "ssh tunnel error: "+err);
                 });
             });
 
             ssh_server.on('error', function(err, srv){
-                self.releaseTunnel(id);
+                console.log(ssh_server.config);
+                err_callback(id, err);
             });
 
 

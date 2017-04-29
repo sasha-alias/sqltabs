@@ -215,6 +215,9 @@ function mount_charts(){
             if (chart_type == "bubble"){ // bubble chart is implemented not with c3
                 return mount_bubble_chart(chart_id, dataset);
             }
+            if (chart_type == "tree"){ // tree chart is implemented not with c3
+                return mount_tree_chart(chart_id, dataset);
+            }
 
             var columns = dataset.data;
             data = {
@@ -245,6 +248,21 @@ function mount_charts(){
 
 function mount_bubble_chart(chart_id, dataset){
 
+    if (d3.select("[data-chart-id='"+chart_id+"']").attr("mounted")){ // don't mount if already mounted
+        return;
+    }
+    console.log(d3.select("[data-chart-id='"+chart_id+"']").attr("mounted", "true")); // mark as mounted
+
+    var display_selected_name = d3.select("[data-chart-id='"+chart_id+"']")
+        .append("div")
+        .attr("class", "bubble-chart-selected-name")
+        .html("&nbsp;");
+
+    var display_selected_value = d3.select("[data-chart-id='"+chart_id+"']")
+        .append("div")
+        .attr("class", "bubble-chart-selected-value")
+        .html("&nbsp;");
+
     var diameter = 500, //max size of the bubbles
         color    = d3.scale.category20b(); //color category
 
@@ -261,7 +279,9 @@ function mount_bubble_chart(chart_id, dataset){
 
     var data = dataset.data;
     // convert list of lists to list of dicts
-    data = data.map(function(d){ return {name: d[0], value: d[1]}; });
+    data = data.map(function(d){
+        return {name: d[0], value: d[1]};
+    });
 
     // keep only leaf nodes
     var nodes = bubble.nodes({children:data}).filter(function(d) { return !d.children; });
@@ -275,14 +295,7 @@ function mount_bubble_chart(chart_id, dataset){
 
     var tooltip = d3.select("[data-chart-id='"+chart_id+"']")
         .append("div")
-        .style("position", "absolute")
-        .style("z-index", "10")
-        .style("visibility", "hidden")
-        .style("color", "white")
-        .style("padding", "8px")
-        .style("background-color", "rgba(0, 0, 0, 0.75)")
-        .style("border-radius", "6px")
-        .style("font", "12px sans-serif")
+        .attr("class", "bubbles-tooltip")
         .text("tooltip");
 
     //create the bubbles
@@ -298,7 +311,13 @@ function mount_bubble_chart(chart_id, dataset){
         .on("mousemove", function() {
             return tooltip.style("top", (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");
         })
-        .on("mouseout", function(){return tooltip.style("visibility", "hidden");});
+        .on("mouseout", function(){
+            return tooltip.style("visibility", "hidden");
+        })
+        .on("click", function(d){
+            display_selected_name.text(dataset.fields[0].name + ": " + d.name);
+            display_selected_value.text(dataset.fields[1].name + ": " + d.value);
+        });
 
     //format the text for each bubble
     bubbles.append("text")
@@ -317,3 +336,65 @@ function mount_bubble_chart(chart_id, dataset){
             "font-size": "12px"
         });
 }
+
+
+//function mount_tree_chart(chart_id, dataset){
+//
+//    // drawing
+//    var margin = {top: 40, right: 40, bottom: 40, left: 40},
+//        width = 960 - margin.left - margin.right,
+//        height = 500 - margin.top - margin.bottom;
+//
+//    var tree = d3.layout.tree()
+//        .size([height, width]);
+//
+//    var diagonal = d3.svg.diagonal()
+//        .projection(function(d) { return [d.y, d.x]; });
+//
+//    var svg = d3.select("[data-chart-id='"+chart_id+"']").append("svg")
+//        .attr("width", width + margin.left + margin.right)
+//        .attr("height", height + margin.top + margin.bottom)
+//      .append("g")
+//        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+//
+//    // data transformation
+//
+//    var data = dataset.data;
+//    // convert list of lists to list of dicts
+//    data = data.map(function(d){
+//        return {source: d[0], target: d[1], label: d[2]};
+//    });
+//
+//    var nodesByName = {};
+//
+//    data.forEach(function(link) {
+//        var parent = link.source = nodeByName(link.source),
+//            child = link.target = nodeByName(link.target);
+//        if (parent.children) parent.children.push(child);
+//        else parent.children = [child];
+//    });
+//
+//    var nodes = tree.nodes(data[0].source);
+//
+//
+//    // drawing again
+//  // Create the link lines.
+//  svg.selectAll(".link")
+//      .data(data)
+//    .enter().append("path")
+//      .attr("class", "link")
+//      .attr("d", diagonal);
+//
+//  // Create the node circles.
+//  svg.selectAll(".node")
+//      .data(nodes)
+//    .enter().append("circle")
+//      .attr("class", "node")
+//      .attr("r", 4.5)
+//      .attr("cx", function(d) { return d.y; })
+//      .attr("cy", function(d) { return d.x; });
+//
+//    function nodeByName(name) {
+//        return nodesByName[name] || (nodesByName[name] = {name: name});
+//    }
+//}
