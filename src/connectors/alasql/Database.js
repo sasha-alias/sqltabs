@@ -2,8 +2,8 @@ var alasql = require('alasql');
 var Words = require('./keywords.js');
 
 var Response = function(query){
-    this.query = query
-    //this.block = query
+    this.connector_type = "alasql";
+    this.query = query;
     this.datasets = [];
     this.start_time = performance.now();
     this.duration = null;
@@ -20,6 +20,7 @@ var Response = function(query){
                 return {
                     nrecords: null,
                     fields: null,
+                    explain: false,
                     data: null,
                     cmdStatus: "OK : "+data,
                     resultStatus: "PGRES_COMMAND_OK",
@@ -31,6 +32,7 @@ var Response = function(query){
                 return {
                     nrecords: 1,
                     fields: [{name: "", type: "string"}],
+                    explain: false,
                     data: [[data]],
                     cmdStatus: null,
                     resultStatus: null,
@@ -42,6 +44,7 @@ var Response = function(query){
                 return {
                     nrecords: null,
                     fields: [],
+                    explain: false,
                     data: [],
                     cmdStatus: null,
                     resultStatus: null,
@@ -53,6 +56,7 @@ var Response = function(query){
                 return {
                     nrecords: null,
                     fields: [{name: "Object", type: "Object"}],
+                    explain: false,
                     data: [[JSON.stringify(data)]],
                     cmdStatus: null,
                     resultStatus: null,
@@ -80,6 +84,7 @@ var Response = function(query){
             return {
                 nrecords: data.length,
                 fields: fields,
+                explain: false,
                 data: records,
                 cmdStatus: null,
                 resultStatus: null,

@@ -72,7 +72,8 @@ function formatDate(date, type) {
 
 var Response = function(query){
     self = this;
-    this.query = query
+    this.connector_type = "mssql";
+    this.query = query;
     //this.block = query
     this.datasets = [];
     this.start_time = performance.now();
@@ -86,6 +87,7 @@ var Response = function(query){
         self.datasets.push({
             nrecords: null,
             fields: null,
+            explain: false,
             data: null,
             cmdStatus: info.message,
             resultStatus: "PGRES_COMMAND_OK",
@@ -100,6 +102,7 @@ var Response = function(query){
             self.datasets.push({
                 nrecords: null,
                 fields: null,
+                explain: false,
                 data: null,
                 cmdStatus: "OK",
                 resultStatus: "PGRES_COMMAND_OK",
@@ -148,6 +151,7 @@ var Response = function(query){
             self.datasets.push({
                 nrecords: data.length,
                 fields: fields,
+                explain: false,
                 data: data,
                 cmdStatus: null,
                 resultStatus: null,

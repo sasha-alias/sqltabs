@@ -70,7 +70,8 @@ function formatDate(date, type) {
 }
 
 var Response = function(query){
-    this.query = query
+    this.connector_type = "mysql";
+    this.query = query;
     //this.block = query
     this.datasets = [];
     this.start_time = performance.now();
@@ -102,6 +103,7 @@ var Response = function(query){
                 self.datasets.push({
                     nrecords: 0,
                     fields: null,
+                    explain: false,
                     data: null,
                     cmdStatus: "Query OK, Affected rows: "+result[res].affectedRows+", Warnings: "+result[res].warningStatus,
                     resultStatus: "PGRES_COMMAND_OK",
@@ -139,6 +141,7 @@ var Response = function(query){
                 self.datasets.push({
                     nrecords: records.length,
                     fields: fields,
+                    explain: false,
                     data: records,
                     cmdStatus: null,
                     resultStatus: null,
