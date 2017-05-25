@@ -115,3 +115,33 @@
     color: white;
 }
 
+
+/* explain plan */
+
+.explain-plan-tree-circle{
+    stroke: #607d8b;
+    fill: #cbea8b;
+}
+
+.explain-plan-cte-record{
+    color: #da8814;
+}
+
+.explain-plan-tree-node-text{
+    fill: #607d8b;
+}
+
+.explain-plan-tree-link{
+    stroke: #607d8b;
+}
+
+.explain-plan-cte-link{
+    stroke: #c09853;
+}
+
+.explain-plan-tree-circle-never-executed{
+    fill: rgba(135, 175, 210, 1);
+}
+
+
+/* */

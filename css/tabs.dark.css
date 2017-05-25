@@ -187,3 +187,31 @@ table {
     color: white;
 }
 
+/* explain plan */
+
+.explain-plan-tree-circle{
+    stroke: aliceblue;
+    fill: yellowgreen;
+}
+
+.explain-plan-cte-record{
+    color: #da8814;
+}
+
+.explain-plan-tree-circle-never-executed{
+    fill: rgba(51, 122, 183, 1);
+}
+
+.explain-plan-tree-node-text{
+    fill: aliceblue;
+}
+
+.explain-plan-tree-link{
+    stroke: aliceblue;
+}
+
+.explain-plan-cte-link{
+    stroke: #f89406;
+}
+
+/* */

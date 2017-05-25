@@ -182,6 +182,28 @@ body{
     font-weight: bold;
 }
 
+/* table column */
+.table-column-header{
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.table-column-sorted-asc:after{
+    content: "\e094";
+    font-family: 'Glyphicons Halflings';
+}
+
+.table-column-sorted-desc:after{
+    content: "\e093";
+    font-family: 'Glyphicons Halflings';
+}
+
+.table-column-sorted-none:after{
+    padding-left: 1.8em;
+}
+
+/* */
+
 .table-resultset {
     width: auto;
     margin-left: 10px;
@@ -194,12 +216,20 @@ body{
 .duration-div {
     margin-left: 10px;
     margin-right: 20px;
+    min-height: 50px;
 }
 
 .duration-table{
     width: 100%;
     text-align: right;
 }
+
+
+/* share button */
+.duration-div .btn{
+}
+
+/* */
 
 .duration-table tr td:first-child{
     text-align: left;
@@ -550,5 +580,53 @@ background-color: rgba(0, 0, 0, 0.75);
 border-radius: 6px;
 font: 12px sans-serif;
 }
-/* */
 
+/* explain plan */
+.explain-plan-header-title{
+}
+
+.explain-plan-node-title{
+}
+
+.explain-plan-node-arrow{
+    cursor: pointer;
+}
+
+.explain-plan-node-arrow-hidden{
+    font-size: 0;
+    color: rgba(0,0,0,0);
+}
+
+.explain-plan-node-skipped-note{
+    font-size: 0;
+    color: rgba(0,0,0,0);
+}
+
+.explain-plan-details{
+    font-family: monospace;
+}
+
+.explain-plan-rownum-switch{
+    cursor: pointer;
+}
+
+.explain-plan-view-switcher{
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+.explain-plan-mount-div{
+    width: 100%;
+    height: 400px;
+    overflow: scroll;
+    border: solid 1px;
+}
+
+
+/* SVG */
+
+path.link{
+    fill: none;
+}
+
+/* */
