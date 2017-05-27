@@ -83,6 +83,8 @@ var Database = {
 
     testConnection: function(id, connstr, password, callback, ask_password_callback, err_callback){
 
+        delete Clients[id];
+
         var client = this.getClient(id, connstr, password);
 
         client.sendQuery("select 0 as connected where 1=0",
