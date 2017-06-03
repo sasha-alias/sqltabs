@@ -77,7 +77,7 @@ var _TabsStore = function(){
     this.selectedTab = 0;
     this.renderer = 'plain'; // plain or auto
     this.showQuery = false;
-    this.sharingServer = (Config.getSharingServer() || 'www.sqltabs.com');
+    this.sharingServer = (Config.getSharingServer() || 'share.sqltabs.com');
     this.auto_completion = (Config.getAutoCompletion() || true);
 
     this.connectionHistory = (Config.getConnHistory() || []);

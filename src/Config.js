@@ -103,7 +103,11 @@ var Conf = {
     },
 
     getSharingServer: function(){
-        return config.sharing_server;
+        if (config.sharing_server == "sqltabs.com" || config.sharing_server == "www.sqltabs.com"){
+            return "share.sqltabs.com";
+        } else {
+            return config.sharing_server;
+        };
     },
 
     saveSharingServer: function(server){

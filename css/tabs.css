@@ -186,6 +186,12 @@ body{
 .table-column-header{
     cursor: pointer;
     white-space: nowrap;
+    vertical-align: top !important;
+}
+
+.table-column-header-info{
+    margin-left: 5px;
+    margin-right: 2px;
 }
 
 .table-column-sorted-asc:after{
@@ -202,7 +208,11 @@ body{
     padding-left: 1.8em;
 }
 
-/* */
+.table-column-header-datatype{
+    font-size: 0.6em;
+}
+
+/* table */
 
 .table-resultset {
     width: auto;
@@ -211,6 +221,10 @@ body{
 
 .table-resultset td {
   white-space: pre-wrap;
+}
+
+.record-numeric-cell{
+    text-align: right;
 }
 
 .duration-div {

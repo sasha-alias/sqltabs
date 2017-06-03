@@ -35,7 +35,7 @@
     "react-dom": "^0.14.9",
     "request": "^2.60.0",
     "sql-formatter": "^1.2.0",
-    "sqldoc": "^0.8.4",
+    "sqldoc": "^0.9.5",
     "tunnel-ssh": "^4.0.0"
   },
   "devDependencies": {

@@ -79,7 +79,7 @@ var CloudMessage = React.createClass({
     open: function(){
         var docid = TabsStore.getCloudDoc();
         if (this.target_server.indexOf("http://") == -1 && this.target_server.indexOf('https://') == -1){
-            var target_server = "http://"+this.target_server;
+            var target_server = "https://"+this.target_server;
         } else {
             var target_server = this.target_server;
         }
@@ -138,7 +138,7 @@ var CloudMessage = React.createClass({
                     <td><img className="about-logo" src="logo.png"/></td>
                     <td>
                         <div>
-                            Share on <input ref="target_server" onChange={this.targetChangeHandler} className="target-server-input" type="text" placeholder="www.sqltabs.com" defaultValue={this.target_server}></input>
+                            Share on <input ref="target_server" onChange={this.targetChangeHandler} className="target-server-input" type="text" placeholder="share.sqltabs.com" defaultValue={this.target_server}></input>
                         </div>
                     </td>
                     </tr></table>

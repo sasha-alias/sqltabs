@@ -48,10 +48,6 @@ var OutputConsole = React.createClass({
         TabsStore.bind('object-info-received-'+this.props.eventKey, this.objectInfoReceived);
     },
 
-    componentDidUpdate: function(){
-        mount_charts();
-    },
-
     componentWillUnmount: function(){
         clearInterval(this.timer);
         TabsStore.unbind('query-started-'+this.props.eventKey, this.queryStarted);
