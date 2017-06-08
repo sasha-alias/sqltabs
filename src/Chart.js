@@ -30,7 +30,7 @@ var Chart = React.createClass({
 
         var data = {};
 
-        var column_charts = ['line', 'spline', 'area', 'step', 'area-spline', 'area-step'];
+        var column_charts = ['line', 'spline', 'area', 'step', 'area-spline', 'area-step', 'scatter'];
         var row_charts = ['bar', 'pie', 'donut'];
 
         if (column_charts.indexOf(this.props.type) != -1){
