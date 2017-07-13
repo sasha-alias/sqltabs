@@ -29,14 +29,23 @@ var parse_connstr = function(connstr){
         var password = '';
     }
 
-
     var config = {
         user: user,
         password: password,
         server: parsed.hostname,
         port: parsed.port,
-        options: {},
     };
+
+    // parse options
+    if (parsed.query != null) {
+      parsed.query.split('&').forEach(function(pair) {
+        kv = pair.split('=');
+        if (kv.length == 2) {
+          config[kv[0]] = kv[1];
+        }
+      });
+    }
+
     return config
 }
 
