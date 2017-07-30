@@ -175,13 +175,23 @@ var Editor = React.createClass({
     },
 
     execAllHandler: function(){
-        var meta = '^\s*---\s*.*';
+        var meta = /^\s*---\s*.*/;
+        var markdown_start = /^\s*\/\*\*/;
+        var markdown_end = /\*\*\/\s*$/;
         var current_line = 0;
         var blocks = [];
         var block = [];
+        var inside_markdown = false;
         while (current_line < this.editor.session.getLength()){
             current_line_text = this.editor.session.getLine(current_line).trim();
-            if (current_line > 0 && current_line_text.match(meta) != null){ // new block started
+
+            if (current_line_text.match(markdown_start) != null){
+                inside_markdown = true;
+            }
+            if (current_line_text.match(markdown_end) != null){
+                inside_markdown = false;
+            }
+            if (current_line > 0 && current_line_text.match(meta) != null && !inside_markdown){ // new block started
                 blocks.push(block.join('\n'));
                 block = [];
             }
@@ -228,14 +238,24 @@ var Editor = React.createClass({
 
     detectBlockLines: function(current_line, script){
         var meta = '^\s*---\s*.*';
+        var markdown_start = /^\s*\/\*\*/;
+        var markdown_end = /\*\*\/\s*$/;
+        var inside_markdown = false;
         var start = 0;
         var start_found = false;
         while (!start_found){
             current_line_text = this.editor.session.getLine(current_line).trim();
+            if (current_line_text.match(markdown_end) != null){
+                inside_markdown = true;
+            }
+            if (current_line_text.match(markdown_start) != null){
+                inside_markdown = false;
+            }
+
             if (current_line === 0) {
                 start = current_line;
                 start_found = true;
-            } else if (current_line_text.match(meta) != null){
+            } else if (current_line_text.match(meta) != null && !inside_markdown){
                 start = current_line;
                 start_found = true;
             }
@@ -247,7 +267,14 @@ var Editor = React.createClass({
         current_line = start;
         while (!end_found){
             current_line_text = this.editor.session.getLine(current_line).trim();
-            if (current_line_text.match(meta) != null && current_line > start){
+            if (current_line_text.match(markdown_start) != null){
+                inside_markdown = true;
+            }
+            if (current_line_text.match(markdown_end) != null){
+                inside_markdown = false;
+            }
+
+            if (current_line_text.match(meta) != null && current_line > start && !inside_markdown){
                 end = current_line - 1;
                 end_found = true;
             } else if (current_line >= this.editor.session.getLength()){
