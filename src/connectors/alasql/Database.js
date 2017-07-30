@@ -1,5 +1,6 @@
 var alasql = require('alasql');
 var Words = require('./keywords.js');
+var async = require('async');
 
 var Response = function(query){
     this.connector_type = "alasql";
@@ -69,7 +70,7 @@ var Response = function(query){
             for (var rn = 0; rn < data.length; rn++){
                 if (rn == 0){
                     for (k in data[rn]){
-                        fields.push({name: k});
+                        fields.push({name: k, type: typeof(data[rn][k])});
                     }
                 }
 
@@ -134,6 +135,34 @@ var Database = {
         } catch(err) {
             err_callback(id, err);
         }
+    },
+
+    runBlocks: function(id, connstr, password, blocks, callback, err_callback){
+        var self = this;
+        var current_block = 0;
+        var results = [];
+
+        var calls = [];
+        for (var i=0; i<blocks.length; i++){
+            var call = function(block){return function(done){
+                self.runQuery(id, connstr, password, block,
+                function(id, result){
+                    results.push(result[0]);
+                    done();
+                },
+                function(id, err){
+                    err_callback(err);
+                    done();
+                });
+
+            }}(blocks[i]);
+            calls.push(call);
+        }
+
+        async.series(calls, function(){
+            console.log(results);
+            callback(id, results);
+        });
     },
 
     getCompletionWords: function(callback){
