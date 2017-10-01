@@ -100,7 +100,11 @@ var Client = function(connstr, password, redshift){
                     self.query_cancelled = false;
                     err_callback("query cancelled by user's request");
                 } else {
-                    err_callback(err);
+                    ds = new Dataset({rows: [], fields: [], cmdStatus: ""});
+                    ds.resultStatus = "PGRES_BAD_RESPONSE";
+                    ds.resultErrorMessage = err;
+                    self.Response.datasets.push(ds);
+                    callback(self.Response);
                 }
             } else {
                 self.Response.finish()

@@ -68,7 +68,7 @@ var Database = {
                 },
                 function(err){
                     err_callback(err);
-                    done();
+                    done(-1);
                 });
 
             }}(blocks[i]);
