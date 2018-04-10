@@ -102,13 +102,18 @@ var Client = function(connstr, password, redshift){
                 } else {
                     ds = new Dataset({rows: [], fields: [], cmdStatus: ""});
                     ds.resultStatus = "PGRES_BAD_RESPONSE";
-                    ds.resultErrorMessage = err;
+                    ds.resultErrorMessage = err.message;
                     self.Response.datasets.push(ds);
                     callback(self.Response);
                 }
             } else {
-                self.Response.finish()
+                if (!Array.isArray(res)){ res = [res] }  // single dataset convert to multidataset
+
+
                 res.forEach(function(r){
+                    if (r.cmdStatus === null){
+                        r.cmdStatus = "SELECT"; // empty query
+                    }
                     ds = new Dataset(r);
                     self.Response.datasets.push(ds);
                 });
