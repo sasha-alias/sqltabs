@@ -321,17 +321,24 @@ var Editor = React.createClass({
     },
 
     fileOpenHandler: function(){
+        var self = this;
         filename = TabsStore.getEditorFile(this.props.eventKey);
-        self = this;
         var data = fs.readFileSync(filename, 'utf8');
         self.editor.session.setValue(data, -1);
     },
 
     fileSaveHandler: function(){
+        var self = this;
+        var position = self.editor.getCursorPosition();
         filename = TabsStore.getEditorFile(this.props.eventKey);
-        fs.writeFile(filename, this.editor.getValue(), function(err) {
+        var content = self.editor.getValue().replace(/[^\S\r\n]+$/gm, ""); // trim trailing spaces
+        fs.writeFile(filename, content, function(err) {
             if(err) {
                 return console.log(err);
+            } else {
+                self.editor.session.setValue(content);
+                self.editor.clearSelection();
+                self.editor.gotoLine(position.row+1, 0);
             }
         });
     },
