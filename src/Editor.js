@@ -73,6 +73,7 @@ var Editor = React.createClass({
         TabsStore.bind('show-project-'+this.props.eventKey, this.hideCompleter);
         TabsStore.bind('hide-project-'+this.props.eventKey, this.hideCompleter);
         TabsStore.bind('toggle-project-'+this.props.eventKey, this.hideCompleter);
+        TabsStore.bind('switch-view-'+this.props.eventKey, this.switchViewHandler);
         TabsStore.bind('completion-update', this.completionUpdateHandler);
 
         this.editor_input = $("#"+this.props.name).children(".ace_text-input").get()[0];
@@ -147,9 +148,14 @@ var Editor = React.createClass({
         TabsStore.unbind('show-project-'+this.props.eventKey, this.hideCompleter);
         TabsStore.unbind('hide-project-'+this.props.eventKey, this.hideCompleter);
         TabsStore.unbind('toggle-project-'+this.props.eventKey, this.hideCompleter);
+        TabsStore.unbind('switch-view-'+this.props.eventKey, this.switchViewHandler);
         TabsStore.unbind('completion-update', this.completionUpdateHandler);
 
         this.editor_input.removeEventListener("keydown", this.keyHandler);
+    },
+
+    switchViewHandler: function(){
+        this.editor.resize();
     },
 
     execHandler: function(editor) {
