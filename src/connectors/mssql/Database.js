@@ -1,44 +1,12 @@
 var async = require('async');
 var url = require('url');
 var Request = require('mssql').Request;
-var Connection = require('mssql').Connection;
+var Connection = require('mssql').ConnectionPool;
 var Words = require('./keywords.js');
+var ConnectionString = require('mssql/lib/connectionstring');
 
 var Clients = {};
 var InfoClients = {};
-
-var parse_connstr = function(connstr){
-
-    if (connstr.indexOf('---') > 0){
-        connstr = connstr.split('---')[0];
-    }
-
-    var parsed = url.parse(connstr);
-
-    if (parsed.pathname != 'undefined' && parsed.pathname != null){
-        var database = parsed.pathname.substring(1);
-    } else {
-        var database = '';
-    }
-
-    if (parsed.auth){
-        var user = parsed.auth.split(':')[0];
-        var password = parsed.auth.split(':')[1];
-    } else {
-        var user = '';
-        var password = '';
-    }
-
-
-    var config = {
-        user: user,
-        password: password,
-        server: parsed.hostname,
-        port: parsed.port,
-        options: {},
-    };
-    return config
-}
 
 function formatDate(date, type) {
     if (date == null){
@@ -95,7 +63,8 @@ var Response = function(query){
         });
     };
 
-    this.processResult = function(recordsets){
+    this.processResult = function(result){
+        let recordsets = result.recordsets;
 
         if (recordsets.length == 0){
 
@@ -131,20 +100,14 @@ var Response = function(query){
 
             for (rn in recordsets[rsn]){
                 var r = [];
-                for (fn in recordsets[rsn][rn]){
-                    if (typeof(recordsets[rsn].columns[fn].type) != 'undefined'){
-                        var type = recordsets[rsn].columns[fn].type.name;
+                for (fn in fields){
+                    if (['DateTime2', 'DateTime', 'Time', 'Date', 'SmallDateTime'].indexOf(fields[fn].type) > -1){
+                        var val = formatDate(recordsets[rsn][rn][fields[fn].name], type);
                     } else {
-                        var type = '';
-                    }
-                    if (['DateTime2', 'DateTime', 'Time', 'Date', 'SmallDateTime'].indexOf(type) > -1){
-                        var val = formatDate(recordsets[rsn][rn][fn], type);
-                    } else {
-                        var val = String(recordsets[rsn][rn][fn]);
+                        var val = String(recordsets[rsn][rn][fields[fn].name]);
                     }
                     r.push(val);
                 }
-
                 data.push(r);
             }
 
@@ -174,20 +137,25 @@ var Database = {
         if (id in cache && cache[id].connstr == connstr){
             return cache[id];
         } else {
-            var config = parse_connstr(connstr);
+            var config = ConnectionString.resolve(connstr);
 
             if (password){
                 config.password = password;
             }
 
-            var connection = new Connection(config, function(err){
-                if (err){
-                    err_callback(id, err);
-                }
-            });
+            var connection = new Connection(config);
             connection.connstr = connstr;
+            connection.on('error', function(err){
+                err_callback(id, err);
+            });
             cache[id] = connection;
             return cache[id];
+        }
+    },
+
+    disconnect(id, connstr){
+        if (id in Clients){
+            Clients[id].close();
         }
     },
 
@@ -200,25 +168,25 @@ var Database = {
         var request = new Request(client);
 
         var sendRequest = function(){
-            request.query(query, function(err, recordset) {
+            request.query(query, function(err, result) {
                 if (err) {
                     err_callback(id, err);
                 } else {
-                    callback(recordset);
+                    callback(result.recordset);
                 }
             });
         };
 
-        client.on('connect', function(err){
-            if (err){
-                err_callback(id, err);
-            } else {
-                sendRequest();
-            }
-        });
-
         if (client.connected){
             sendRequest();
+        } else {
+            client.connect(function(err){
+                if (err) {
+                    err_callback(id, err);
+                } else {
+                    sendRequest();
+                }
+            });
         }
     },
 
@@ -228,13 +196,21 @@ var Database = {
         var request = new Request(client);
         request.multiple = true;
 
+        request.on('error', function(err){
+            err_callback(id, err);
+        });
+
         var sendRequest = function(){
-            request.query(query, function(err, recordsets, rowCount ) {
+            console.log('executing');
+            console.log(client);
+            request.query(query, function(err, result) {
+                console.log('done');
+                console.log('err:', err);
                 response.finish();
                 if (err) {
                     err_callback(id, err);
                 } else {
-                    response.processResult(recordsets);
+                    response.processResult(result);
                     callback(id, [response]);
                 }
             });
@@ -250,16 +226,16 @@ var Database = {
             err_callback(id, err);
         });
 
-        client.on('connect', function(err){
-            if (err){
-                err_callback(id, err);
-            } else {
-                sendRequest();
-            }
-        });
-
         if (client.connected){
             sendRequest();
+        } else {
+            client.connect(function(err){
+                if (err) {
+                    err_callback(id, err);
+                } else {
+                    sendRequest();
+                }
+            });
         }
     },
 
@@ -271,12 +247,13 @@ var Database = {
 
     testConnection: function(id, connstr, password, callback, ask_password_callback, err_callback){
 
-        var config = parse_connstr(connstr);
+        var config = ConnectionString.resolve(connstr);
         if (password){
             config.password = password;
         }
 
-        var client = new Connection(config, function(err){
+        var client = new Connection(config)
+        client.connect(function(err){
             if(err){
                 if (err.code == "ELOGIN" && password == null){
                     ask_password_callback(id);
@@ -288,12 +265,12 @@ var Database = {
                 var query = "SELECT 'connected' WHERE 1=0";
                 var response = new Response(query);
                 var request = new Request(client);
-                request.query(query, function(err, rows, rowCount) {
+                request.query(query, function(err, result) {
                     response.finish();
                     if (err) {
                         err_callback(id, err);
                     } else {
-                        response.processResult([rows]);
+                        response.processResult(result);
                         response.datasets[0].fields = [{name: "connected"}];
 
                         client.connstr = connstr;
