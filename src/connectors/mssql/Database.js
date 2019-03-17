@@ -1,9 +1,8 @@
 var async = require('async');
 var url = require('url');
-var Request = require('mssql').Request;
-var Connection = require('mssql').ConnectionPool;
 var Words = require('./keywords.js');
 var ConnectionString = require('mssql/lib/connectionstring');
+var mssql = require('mssql');
 
 var Clients = {};
 var InfoClients = {};
@@ -124,6 +123,27 @@ var Response = function(query){
     }
 }
 
+var parse_connstr = function(connstr, callback){
+    if (connstr.indexOf ('---')> 0) {
+        connstr = connstr.split ('---') [0];
+    }
+
+    var parsed = url.parse (connstr, true);
+    if (parsed.query.driver == "msnodesqlv8"){
+        console.log("trying native driver");
+        try{
+            mssql = require("mssql/msnodesqlv8");
+            const config = ConnectionString.resolve(connstr);
+            callback(null, config);
+        } catch (err){
+            callback(err, null);
+        }
+    } else {
+        const config = ConnectionString.resolve(connstr);
+        callback(null, config);
+    }
+}
+
 
 var Database = {
 
@@ -137,19 +157,23 @@ var Database = {
         if (id in cache && cache[id].connstr == connstr){
             return cache[id];
         } else {
-            var config = ConnectionString.resolve(connstr);
+            parse_connstr(connstr, function(err, config){
+                if (err){
+                    err_callback(id, err);
+                } else {
+                    if (password){
+                        config.password = password;
+                    }
 
-            if (password){
-                config.password = password;
-            }
-
-            var connection = new Connection(config);
-            connection.connstr = connstr;
-            connection.on('error', function(err){
-                err_callback(id, err);
+                    var connection = new mssql.ConnectionPool(config);
+                    connection.connstr = connstr;
+                    connection.on('error', function(err){
+                        err_callback(id, err);
+                    });
+                    cache[id] = connection;
+                    return cache[id];
+                }
             });
-            cache[id] = connection;
-            return cache[id];
         }
     },
 
@@ -165,7 +189,10 @@ var Database = {
 
     _getData: function(id, connstr, password, query, callback, err_callback){
         var client = this.getInfoClient(id, connstr, password, err_callback);
-        var request = new Request(client);
+        if (typeof(client) == 'undefined'){
+            return err_callback(id, 'Failed to get client');
+        }
+        var request = new mssql.Request(client);
 
         var sendRequest = function(){
             request.query(query, function(err, result) {
@@ -193,7 +220,7 @@ var Database = {
     runQuery: function(id, connstr, password, query, callback, err_callback){
         var client = this.getClient(id, connstr, password, Clients, err_callback);
         var response = new Response(query);
-        var request = new Request(client);
+        var request = new mssql.Request(client);
         request.multiple = true;
 
         request.on('error', function(err){
@@ -201,11 +228,7 @@ var Database = {
         });
 
         var sendRequest = function(){
-            console.log('executing');
-            console.log(client);
             request.query(query, function(err, result) {
-                console.log('done');
-                console.log('err:', err);
                 response.finish();
                 if (err) {
                     err_callback(id, err);
@@ -252,7 +275,7 @@ var Database = {
             config.password = password;
         }
 
-        var client = new Connection(config)
+        var client = new mssql.ConnectionPool(config)
         client.connect(function(err){
             if(err){
                 if (err.code == "ELOGIN" && password == null){
@@ -264,7 +287,7 @@ var Database = {
 
                 var query = "SELECT 'connected' WHERE 1=0";
                 var response = new Response(query);
-                var request = new Request(client);
+                var request = new mssql.Request(client);
                 request.query(query, function(err, result) {
                     response.finish();
                     if (err) {
