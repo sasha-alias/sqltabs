@@ -46,6 +46,9 @@
     "electron-prebuilt": "^1.4.7",
     "uglifyjs": "^2.4.10"
   },
+  "optionalDependencies": {
+    "msnodesqlv8": "^0.6.12"
+  },
   "scripts": {
     "postinstall": "rm -r node_modules/c3/node_modules; babel --plugins transform-react-jsx --out-dir=build src/",
     "start": "electron ./",
