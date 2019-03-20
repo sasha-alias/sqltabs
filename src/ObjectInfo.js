@@ -390,6 +390,22 @@ var ObjectInfo = React.createClass({
             var check_constraints = null;
         }
 
+        // foreign keys
+        if (info.object.foreign_keys != null){
+            var foreign_keys = [];
+            for (var i=0; i < info.object.foreign_keys.length; i++){
+                var fk = info.object.foreign_keys[i];
+                var fk = <p key={"fk_" + fk.name}>
+                    <span className="ace_keyword">CONSTRAINT</span> {fk.name}
+                    <span className="ace_keyword"> FOREIGN KEY </span> {fk.columns}
+                    <span className="ace_keyword"> REFERENCES </span> {fk.references}
+                </p>;
+                foreign_keys.push(fk);
+            }
+        } else {
+            var foreign_keys = null;
+        }
+
         // indexes
         if (info.object.indexes != null){
             var indexes=[];
@@ -496,6 +512,7 @@ var ObjectInfo = React.createClass({
             {pk}
             {indexes}
             {check_constraints}
+            {foreign_keys}
             {triggers}
             {records}
             {size}

@@ -385,6 +385,27 @@ and n.oid = c.relnamespace;";
                     }
                 }
 
+                var get_foreign_keys = function(done){
+                    var query = "SELECT format('%s %s', conname, pg_catalog.pg_get_constraintdef(r.oid, true)) fk FROM pg_catalog.pg_constraint r WHERE r.conrelid = '"+object+"'::regclass AND r.contype = 'f' ORDER BY 1";
+                    self._getData(id, connstr, password, query,
+                    function(data){
+                        if (data.length > 0){
+                            relation.foreign_keys = [];
+                            for (var i=0; i < data.length; i++){
+                                fk = {};
+                                var splitted = data[i][0].split(' FOREIGN KEY ');
+                                fk.name = splitted[0];
+                                var splitted = splitted[1].split(' REFERENCES ');
+                                fk.columns = splitted[0];
+                                fk.references = splitted[1];
+                                relation.foreign_keys.push(fk);
+                            }
+                        }
+                        done();
+                    },
+                    err_callback);
+                }
+
                 var get_sequence_info = function(done){
                     if (relation.relkind == 'S'){
                         var query = "select last_value, start_value, increment_by, max_value, min_value, cache_value, log_cnt, is_cycled, is_called from "+object;
@@ -411,7 +432,7 @@ and n.oid = c.relnamespace;";
                     }
                 }
 
-                async.series([get_columns, get_pk, get_check_constraints, get_indexes, get_triggers, get_view_def, get_sequence_info],
+                async.series([get_columns, get_pk, get_check_constraints, get_indexes, get_triggers, get_view_def, get_foreign_keys, get_sequence_info],
                 function(){
                     callback(relation);
                 }
