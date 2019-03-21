@@ -95,6 +95,7 @@ var Client = function(connstr, password, redshift){
 
         self.client.query({text: query, rowMode: 'array', multiResult: true}, function(err, res){
             self.isBusy = false;
+            self.Response.finish();
             if (err) {
                 if (self.query_cancelled){
                     self.query_cancelled = false;
@@ -180,10 +181,9 @@ var Response = function(query){
     this.datasets = [];
     this.start_time = now();
     this.duration = null;
-    self = this;
     this.finish = function(){
-        self.duration = Math.round((now() - self.start_time)*1000)/1000;
-    };
+        this.duration = Math.round((now() - this.start_time)*1000)/1000;
+    }.bind(this);
 }
 
 // normalizes connect string: ensures protocol, and substitutes password, rewrite mistaken defaults etc
