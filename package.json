@@ -35,15 +35,15 @@
     "react-dom": "^0.14.9",
     "request": "^2.60.0",
     "sql-formatter": "^1.2.1",
-    "sqldoc": "*",
+    "sqldoc": "^v1.0.0",
     "tunnel-ssh": "^4.1.4"
   },
   "devDependencies": {
     "babel-cli": "^6.23.0",
     "babel-plugin-transform-react-jsx": "^6.23.0",
     "babel-preset-es2015": "^6.24.1",
-    "electron-packager": "^8.5.1",
-    "electron-prebuilt": "^1.4.7",
+    "electron": "^4.1.0",
+    "electron-packager": "^13.1.1",
     "uglifyjs": "^2.4.10"
   },
   "optionalDependencies": {
