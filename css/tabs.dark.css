@@ -13,6 +13,10 @@
     color: #dd8d8e;
 }
 
+.render-time{
+    font-family: monospace;
+}
+
 .input-connstr{
     background-color: rgba(94,94,94, 0.7);
 }

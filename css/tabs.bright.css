@@ -20,6 +20,10 @@
     background-color: lightgrey;
 }
 
+.render-time{
+    font-family: monospace;
+}
+
 .ace_comment {
     color: #236e24;
 }
