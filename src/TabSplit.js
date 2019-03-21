@@ -27,8 +27,8 @@ var Splitter = React.createClass({
             var classname = "hsplitter";
         } else if (this.props.type == "vertical" ) {
             var classname = "vsplitter";
-        } else {
-            return null;
+        } else  {
+            return <div/>;
         }
 
         return (
@@ -44,19 +44,11 @@ var Splitter = React.createClass({
 var Container = React.createClass({
 
     render: function(){
-        if (this.props.type == "horizontal"){
-            return (
-            <div className="tab-split-container" style={{width: '100%'}}>
-                {this.props.children}
-            </div>
-            );
-        } else {
-            return (
-            <div className="tab-split-container">
-                {this.props.children}
-            </div>
-            );
-        }
+        return (
+        <div className="tab-split-container" style={this.props.style}>
+            {this.props.children}
+        </div>
+        );
     },
 });
 
@@ -77,99 +69,55 @@ var TabSplit = React.createClass({
         };
     },
 
-    setInitialSize: function(){
-        var main_container = $(ReactDOM.findDOMNode(this));
-        var first_container = $(ReactDOM.findDOMNode(this.refs.first_container));
-        var second_container = $(ReactDOM.findDOMNode(this.refs.second_container));
-
-        main_container.height($(document).height() - main_container.offset().top);
-
-        if (typeof(this.props.type) == 'undefined' || this.props.type == 'horizontal'){
-        // horizontally split editor area
-            var h1 = $(document).height()/3;
-            first_container.height(h1);
-            first_container.width('100%');
-            var h2 = $(document).height() - second_container.offset().top;
-            second_container.height(h2);
-            second_container.width('100%');
-        } else {
-        // vertically split project area
-            first_container.width('0px');
-            first_container.height(main_container.height());
-            second_container.width('100%');
-            second_container.height(main_container.height());
-        }
-    },
+    main_container: null,
+    first_container: null,
+    second_container: null,
+    splitter: null,
 
     resizeContainers: function(){
-        var main_container = $(ReactDOM.findDOMNode(this));
-        var first_container = $(ReactDOM.findDOMNode(this.refs.first_container));
-        var second_container = $(ReactDOM.findDOMNode(this.refs.second_container));
-        var splitter = $(ReactDOM.findDOMNode(this.refs.splitter));
+        const main_size = this.main_container.getBoundingClientRect();
+        const splitter_size = this.splitter.getBoundingClientRect();
 
-        main_container.height($(document).height() - main_container.offset().top);
-
-        if (this.state.resize_type == 'show_project') {
-            first_container.width('20%');
-            second_container.width(main_container.width() - first_container.width() - 5);
-            splitter.height(main_container.height());
+        if (this.state.resize_type == 'hide_project' && this.props.project) {
+            // after project hides show the sql area full width
+            this.second_container.style.width = 'calc(100%)';
         }
 
-        if (this.state.resize_type == 'hide_project') {
-            first_container.width('0px');
-            second_container.width(main_container.width());
-        }
-
-        if (this.state.resize_type == 'switch_view') {
-            if (this.state.type == 'horizontal'){
-                var h1 = $(document).height()/3;
-                first_container.width('100%');
-                first_container.height(h1);
-                var h2 = $(document).height() - first_container.offset().top - first_container.height() - 8;
-                second_container.width('100%');
-                second_container.height(h2);
-            } else { // vertical
-                first_container.width(main_container.width()/2);
-                first_container.height($(document).height() - main_container.offset().top);
-                second_container.width(main_container.width()/2 - 5);
-                second_container.height($(document).height() - main_container.offset().top);
-            }
-        }
     },
 
     horizontalResize: function(e){
-        var main_container = $(ReactDOM.findDOMNode(this));
-        var first_container = $(ReactDOM.findDOMNode(this.refs.first_container));
-        var second_container = $(ReactDOM.findDOMNode(this.refs.second_container));
+        main_size = this.main_container.getBoundingClientRect();
+        var h1 = e.pageY - this.first_container.getBoundingClientRect().top;
+        var h_max = main_size.bottom - main_size.top - e.pageY;
+        var h2 = this.main_container.getBoundingClientRect().height - h1 - this.splitter.getBoundingClientRect().height;
 
-        var h1 = e.pageY - first_container.offset().top;
-        var h2 = main_container.height() - h1;
-        if (h1 > 15 && h2 > 15) {
-            first_container.height(h1);
-            second_container.height($(document).height() - first_container.offset().top - h1 - 8);
+        if (h1 > 15 && h_max > 15) {
+            this.first_container.style.width = "calc(100%)";
+            this.second_container.style.width = "calc(100%)";
+            this.first_container.style.height = h1/main_size.height*100+'%';
+            this.second_container.style.height = h2/main_size.height*100+'%';
             TabActions.resize(this.props.eventKey);
         }
     },
 
     verticalResize: function(e){
-        var main_container = $(ReactDOM.findDOMNode(this));
-        var first_container = $(ReactDOM.findDOMNode(this.refs.first_container));
-        var second_container = $(ReactDOM.findDOMNode(this.refs.second_container));
+        main_size = this.main_container.getBoundingClientRect();
+        var w1 = e.pageX - this.first_container.getBoundingClientRect().left;
+        var w_max = main_size.right - e.pageX;
+        var w_main = this.main_container.getBoundingClientRect().width;
+        var w_splitter = this.splitter.getBoundingClientRect().width;
+        var w2 = w_main - w1 - w_splitter;
 
-        var w1 = e.pageX - first_container.offset().left;
-        var w2 = main_container.width() - w1;
-        if (w1 > 15 && w2 > 15) {
-            if (this.state.project_visible && w1 > main_container.width()/2){
-                return; // project window max width 50%
-            }
-            first_container.width(w1);
-            second_container.width($(document).width() - first_container.offset().left - w1 - 5);
+        if (w1 > 15 && w_max > 15) {
+            this.first_container.style.height = "calc(100%)";
+            this.second_container.style.height = "calc(100%)";
+            this.first_container.style.width = w1/main_size.width*100+'%';
+            this.second_container.style.width = w2/main_size.width*100+'%';
             TabActions.resize(this.props.eventKey);
         }
     },
 
     componentDidMount: function(){
-        var self = this;
 
         if (this.props.project){
             TabsStore.bind('show-project-'+this.props.eventKey, this.showProjectHandler);
@@ -180,18 +128,6 @@ var TabSplit = React.createClass({
             TabsStore.bind('editor-resize', this.resizeHandler);
         }
 
-        // timeout needed because of some race conditions during window initialization
-        // without timeout on linux areas created with wrong size
-        if (process.platform == 'darwin' || process.platform == 'win32'){
-            self.setInitialSize();
-        } else {
-            setTimeout(function(){
-                self.setInitialSize();
-            }, 10);
-        }
-
-        // resize areas after window size changed
-        window.addEventListener("resize", self.setInitialSize);
     },
 
     componentDidUpdate: function(){
@@ -209,24 +145,13 @@ var TabSplit = React.createClass({
         } else {
             TabsStore.unbind('switch-view-'+this.props.eventKey, this.switchViewHandler);
         }
-        window.removeEventListener("resize", self.resizeContainers);
     },
 
     resizeHandler: function(){
         // handle risize of outer container for vertical view
         if (this.state.type == 'vertical' && !this.state.project_visible){
-            var first_container = $(ReactDOM.findDOMNode(this.refs.first_container));
-            var second_container = $(ReactDOM.findDOMNode(this.refs.second_container));
-            var second_overflow = (first_container.offset().left + first_container.width() + second_container.width() + 5) - $(document).width();
-            if ( second_overflow > 0) {
-                // reduce second container width
-                var w2 = second_container.width() - second_overflow;
-                second_container.width(w2);
-            } else if (second_overflow < 0) {
-                // expand second container width
-                var w2 = second_container.width() + second_overflow*-1;
-                second_container.width(w2);
-            }
+            //this.main_container.style.flexDirection = 'row';
+            //this.first_container.style.width = '50%';
         }
     },
 
@@ -279,16 +204,11 @@ var TabSplit = React.createClass({
     },
 
     mouseMoveHandler: function(e){
-
         if (!this.state.drag){
             return;
         }
-        var first_container = $(ReactDOM.findDOMNode(this.refs.first_container));
-        var second_container = $(ReactDOM.findDOMNode(this.refs.second_container));
-
         if (this.state.type == 'horizontal'){
             this.horizontalResize(e);
-
         } else { // vertical
             this.verticalResize(e);
         }
@@ -308,27 +228,91 @@ var TabSplit = React.createClass({
 
     render: function(){
 
-        if (this.props.project && !this.state.project_visible){
-            var splitter_type = "invisible";
-        } else {
+        if (this.props.project){ // for project window
+            var flex_direction = 'row';
+
+            if (this.state.project_visible){
+                var splitter_type = "vertical";
+                var first_style = {
+                    width: "calc(20%)",
+                    height: "calc(100%)",
+                    minHeight: "calc(100%)",
+                };
+                var second_style = {
+                    width: "calc(100%)",
+                    height: "calc(100%)",
+                    minHeight: "calc(100%)",
+                };
+            } else {
+                var splitter_type = "invisible";
+                var first_style = {
+                    width: "0%",
+                    height: "calc(100%)",
+                    minHeight: "calc(100%)",
+                };
+                var second_style = {
+                    width: "calc(100%)",
+                    height: "calc(100%)",
+                    minHeight: "calc(100%)",
+                };
+            }
+
+        } else { // for sql area
+
+            if (this.state.type == 'vertical'){
+                var flex_direction = 'row';
+                var first_style = {
+                    width: "calc(50%)",
+                    height: "calc(100%)",
+                };
+                var second_style = {
+                    width: "calc(50%)",
+                    height: "calc(100%)",
+                };
+            } else {
+                var flex_direction = 'column';
+                var first_style = {
+                    width: "calc(100%)",
+                    height: "calc(50%)",
+                };
+                var second_style = {
+                    width: "calc(100%)",
+                    height: "calc(50%)",
+                };
+            }
             var splitter_type = this.state.type;
         }
 
+
+        main_style = {
+            width: "calc(100%)",
+            height: "calc(100%)",
+            minHeight: "calc(100%)",
+            flexDirection: flex_direction,
+        }
+
+
         return (
         <div className="tab-split"
+          ref={ item => { this.main_container = ReactDOM.findDOMNode(item); } }
+          style={ main_style }
           onMouseMove={this.mouseMoveHandler}
           onMouseUp={this.mouseUpHandler}
           onMouseLeave={this.mouseLeaveHandler}
         >
-          <Container ref="first_container" type={this.state.type} h={this.state.h1}>
+
+          <Container ref={ item => { this.first_container = ReactDOM.findDOMNode(item); } } type={this.state.type} style={first_style}>
             {this.props.children[0]}
           </Container>
-          <Splitter ref="splitter" type={splitter_type}
+
+          <Splitter ref={ item => { this.splitter = ReactDOM.findDOMNode(item); } } type={splitter_type}
               mouseDownHandler={this.mouseDownHandler}
           />
-          <Container ref="second_container" type={this.state.type} h={this.state.h2}>
+
+          <Container ref={ item => { this.second_container = ReactDOM.findDOMNode(item); } } type={this.state.type} style={second_style}>
             {this.props.children[1]}
           </Container>
+
         </div>
         );
 
