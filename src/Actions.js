@@ -16,6 +16,7 @@
 */
 
 
+var Dialog = require('electron').remote.dialog;
 var dispatcher = require('./Dispatcher');
 var AppDispatcher = dispatcher.AppDispatcher;
 var SignalsDispatcher = dispatcher.SignalsDispatcher;
@@ -93,7 +94,13 @@ var Actions = {
     },
 
     close: function(id){
-        if (typeof id !== 'undefined' || window.confirm('Are you sure you want to close the current tab?')) {
+        close = () => Dialog.showMessageBox({
+            buttons: ["No", "Yes"],
+            defaultId: 1,
+            message: "Do you really want to close the tab?"
+        });
+
+        if (typeof id !== 'undefined' || close()) {
             AppDispatcher.dispatch({
                 eventName: 'close-tab',
                 key: id,
