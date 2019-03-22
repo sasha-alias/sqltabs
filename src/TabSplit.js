@@ -119,20 +119,16 @@ var TabSplit = React.createClass({
         // the following is important, we reset outer container height from percents to pixels
         // this way it becomes fixed and inner containers are not overflowing it in case of long content
         this.main_container.style.height = this.main_container.getBoundingClientRect().height+'px';
-        window.addEventListener('resize', this.windowResizeHandler);
-
     },
 
-    windowResizeHandler: function(e){
-        // after window resize make outer container height 100% and then recalculate it to pixels
-        this.main_container.style.height = '100%';
-        this.main_container.style.height = this.main_container.getBoundingClientRect().height+'px';
-    },
 
     componentDidUpdate: function(){
         if (this.make_resize){
             this.make_resize = false;
         }
+        // the following is important, we reset outer container height from percents to pixels
+        // this way it becomes fixed and inner containers are not overflowing it in case of long content
+        this.main_container.style.height = this.main_container.getBoundingClientRect().height+'px';
     },
 
     componentWillUnmount: function(){

@@ -35,7 +35,7 @@
     "react-dom": "^0.14.9",
     "request": "^2.60.0",
     "sql-formatter": "^1.2.1",
-    "sqldoc": "^v1.0.0",
+    "sqldoc": "^1.0.1",
     "tunnel-ssh": "^4.1.4"
   },
   "devDependencies": {
@@ -44,7 +44,7 @@
     "babel-preset-es2015": "^6.24.1",
     "electron": "^4.1.0",
     "electron-packager": "^13.1.1",
-    "uglifyjs": "^2.4.10"
+    "uglify-es": "^3.3.9"
   },
   "optionalDependencies": {
     "msnodesqlv8": "^0.6.12"
