@@ -24,10 +24,6 @@ var dialog = remote.dialog;
 var app = remote.app;
 var fs = require('fs');
 
-if (typeof(DEVMODE) == 'undefined'){
-    DEVMODE = true;
-}
-
 var openFile = function(){
     dialog.showOpenDialog({ properties: ['openFile', 'multiSelections']},
     function(filenames){
@@ -245,14 +241,12 @@ if (process.platform == 'darwin'){
         },
     ];
 
-    if (DEVMODE) {
-        template[template.length-1].submenu.unshift(
-            {label: "Toggle DevTools",
-            accelerator: "Alt+Command+I",
-            click: function() { BrowserWindow.getFocusedWindow().toggleDevTools(); }
-            }
-        );
-    }
+    template[template.length-1].submenu.unshift(
+        {label: "Toggle DevTools",
+        accelerator: "Alt+Command+I",
+        click: function() { BrowserWindow.getFocusedWindow().toggleDevTools(); }
+        }
+    );
 
 } else {
 
@@ -383,14 +377,12 @@ if (process.platform == 'darwin'){
 
     ];
 
-    if (DEVMODE) {
-        template[template.length-2].submenu.unshift(
-            {label: "Toggle DevTools",
-            accelerator: "Alt+Ctrl+I",
-            click: function() { BrowserWindow.getFocusedWindow().toggleDevTools(); }
-            }
-        );
-    }
+    template[template.length-2].submenu.unshift(
+        {label: "Toggle DevTools",
+        accelerator: "Alt+Ctrl+I",
+        click: function() { BrowserWindow.getFocusedWindow().toggleDevTools(); }
+        }
+    );
 }
 
 menu = Menu.buildFromTemplate(template);
