@@ -135,6 +135,17 @@ var ConnInput = React.createClass({
             });
             e.preventDefault();
             e.stopPropagation();
+        } else if (e.keyCode == 13) { // enter
+            if (this.state.hilight > -1){
+                var connstr = TabsStore.connectionHistory[this.state.hilight]
+            } else {
+                var connstr = this.state.connstr;
+            }
+                this.setState({
+                    active: false,
+                    hilight: this.state.hilight,
+                    connstr: connstr,
+                });
         }
     },
 
