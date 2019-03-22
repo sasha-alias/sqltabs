@@ -28,7 +28,7 @@ var Splitter = React.createClass({
         } else if (this.props.type == "vertical" ) {
             var classname = "vsplitter";
         } else  {
-            return <div/>;
+            return <div style={{widht: '0%', height: '0%'}}/>;
         }
 
         return (
@@ -127,6 +127,8 @@ var TabSplit = React.createClass({
             TabsStore.bind('switch-view-'+this.props.eventKey, this.switchViewHandler);
             TabsStore.bind('editor-resize', this.resizeHandler);
         }
+
+        this.main_container.style.height = this.main_container.getBoundingClientRect().height+'px';
 
     },
 
@@ -239,9 +241,10 @@ var TabSplit = React.createClass({
                     minHeight: "calc(100%)",
                 };
                 var second_style = {
-                    width: "calc(100%)",
-                    height: "calc(100%)",
-                    minHeight: "calc(100%)",
+                    //width: "calc(100%)",
+                    //height: "calc(100%)",
+                    //minHeight: "calc(100%)",
+                    flex: 1,
                 };
             } else {
                 var splitter_type = "invisible";
@@ -251,9 +254,10 @@ var TabSplit = React.createClass({
                     minHeight: "calc(100%)",
                 };
                 var second_style = {
-                    width: "calc(100%)",
-                    height: "calc(100%)",
-                    minHeight: "calc(100%)",
+                    //width: "calc(100%)",
+                    //height: "calc(100%)",
+                    //minHeight: "calc(100%)",
+                    flex: 1,
                 };
             }
 
@@ -262,22 +266,22 @@ var TabSplit = React.createClass({
             if (this.state.type == 'vertical'){
                 var flex_direction = 'row';
                 var first_style = {
-                    width: "calc(50%)",
-                    height: "calc(100%)",
+                    width: "50%",
+                    height: "100%",
                 };
                 var second_style = {
-                    width: "calc(50%)",
-                    height: "calc(100%)",
+                    width: "50%",
+                    height: "100%",
                 };
             } else {
                 var flex_direction = 'column';
                 var first_style = {
-                    width: "calc(100%)",
-                    height: "calc(50%)",
+                    width: "100%",
+                    height: "50%",
                 };
                 var second_style = {
-                    width: "calc(100%)",
-                    height: "calc(50%)",
+                    width: "100%",
+                    flex: "1",
                 };
             }
             var splitter_type = this.state.type;
@@ -285,7 +289,7 @@ var TabSplit = React.createClass({
 
 
         main_style = {
-            width: "calc(100%)",
+            width: "100%",
             height: "calc(100%)",
             minHeight: "calc(100%)",
             flexDirection: flex_direction,
