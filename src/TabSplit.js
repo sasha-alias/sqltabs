@@ -74,17 +74,6 @@ var TabSplit = React.createClass({
     second_container: null,
     splitter: null,
 
-    resizeContainers: function(){
-        const main_size = this.main_container.getBoundingClientRect();
-        const splitter_size = this.splitter.getBoundingClientRect();
-
-        if (this.state.resize_type == 'hide_project' && this.props.project) {
-            // after project hides show the sql area full width
-            this.second_container.style.width = 'calc(100%)';
-        }
-
-    },
-
     horizontalResize: function(e){
         main_size = this.main_container.getBoundingClientRect();
         var h1 = e.pageY - this.first_container.getBoundingClientRect().top;
@@ -92,8 +81,8 @@ var TabSplit = React.createClass({
         var h2 = this.main_container.getBoundingClientRect().height - h1 - this.splitter.getBoundingClientRect().height;
 
         if (h1 > 15 && h_max > 15) {
-            this.first_container.style.width = "calc(100%)";
-            this.second_container.style.width = "calc(100%)";
+            this.first_container.style.width = "100%";
+            this.second_container.style.width = "100%";
             this.first_container.style.height = h1/main_size.height*100+'%';
             this.second_container.style.height = h2/main_size.height*100+'%';
             TabActions.resize(this.props.eventKey);
@@ -109,8 +98,8 @@ var TabSplit = React.createClass({
         var w2 = w_main - w1 - w_splitter;
 
         if (w1 > 15 && w_max > 15) {
-            this.first_container.style.height = "calc(100%)";
-            this.second_container.style.height = "calc(100%)";
+            this.first_container.style.height = "100%";
+            this.second_container.style.height = "100%";
             this.first_container.style.width = w1/main_size.width*100+'%';
             this.second_container.style.width = w2/main_size.width*100+'%';
             TabActions.resize(this.props.eventKey);
@@ -125,17 +114,24 @@ var TabSplit = React.createClass({
             TabsStore.bind('toggle-project-'+this.props.eventKey, this.toggleProjectHandler);
         } else {
             TabsStore.bind('switch-view-'+this.props.eventKey, this.switchViewHandler);
-            TabsStore.bind('editor-resize', this.resizeHandler);
         }
 
+        // the following is important, we reset outer container height from percents to pixels
+        // this way it becomes fixed and inner containers are not overflowing it in case of long content
         this.main_container.style.height = this.main_container.getBoundingClientRect().height+'px';
+        window.addEventListener('resize', this.windowResizeHandler);
 
+    },
+
+    windowResizeHandler: function(e){
+        // after window resize make outer container height 100% and then recalculate it to pixels
+        this.main_container.style.height = '100%';
+        this.main_container.style.height = this.main_container.getBoundingClientRect().height+'px';
     },
 
     componentDidUpdate: function(){
         if (this.make_resize){
             this.make_resize = false;
-            this.resizeContainers();
         }
     },
 
@@ -147,14 +143,7 @@ var TabSplit = React.createClass({
         } else {
             TabsStore.unbind('switch-view-'+this.props.eventKey, this.switchViewHandler);
         }
-    },
-
-    resizeHandler: function(){
-        // handle risize of outer container for vertical view
-        if (this.state.type == 'vertical' && !this.state.project_visible){
-            //this.main_container.style.flexDirection = 'row';
-            //this.first_container.style.width = '50%';
-        }
+        window.removeEventListener('resize', this.windowResizeHandler);
     },
 
     switchViewHandler: function(){
@@ -236,27 +225,21 @@ var TabSplit = React.createClass({
             if (this.state.project_visible){
                 var splitter_type = "vertical";
                 var first_style = {
-                    width: "calc(20%)",
-                    height: "calc(100%)",
-                    minHeight: "calc(100%)",
+                    width: "20%",
+                    height: "100%",
+                    minHeight: "100%",
                 };
                 var second_style = {
-                    //width: "calc(100%)",
-                    //height: "calc(100%)",
-                    //minHeight: "calc(100%)",
                     flex: 1,
                 };
             } else {
                 var splitter_type = "invisible";
                 var first_style = {
                     width: "0%",
-                    height: "calc(100%)",
-                    minHeight: "calc(100%)",
+                    height: "100%",
+                    minHeight: "100%",
                 };
                 var second_style = {
-                    //width: "calc(100%)",
-                    //height: "calc(100%)",
-                    //minHeight: "calc(100%)",
                     flex: 1,
                 };
             }
@@ -270,8 +253,8 @@ var TabSplit = React.createClass({
                     height: "100%",
                 };
                 var second_style = {
-                    width: "50%",
                     height: "100%",
+                    flex: "1",
                 };
             } else {
                 var flex_direction = 'column';
@@ -290,8 +273,8 @@ var TabSplit = React.createClass({
 
         main_style = {
             width: "100%",
-            height: "calc(100%)",
-            minHeight: "calc(100%)",
+            height: "100%",
+            minHeight: "100%",
             flexDirection: flex_direction,
         }
 
