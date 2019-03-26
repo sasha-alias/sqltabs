@@ -25,6 +25,8 @@ if (process.platform == 'linux'){
 var electron = require('electron');
 var config = require('./build/Config');
 
+require('electron-reload')(__dirname);
+
 var app = electron.app;
 var BrowserWindow = electron.BrowserWindow;
 
