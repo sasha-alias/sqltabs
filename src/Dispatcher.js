@@ -210,9 +210,9 @@ AppDispatcher.register( function(payload) {
         case 'run-query':
             connstr = TabsStore.getConnstr(payload.key);
             password = TabsStore.getPassword(payload.key);
-            Executor.runQuery(payload.key, connstr, password, payload.query, payload.callback, payload.err_callback);
             History.push(payload.query);
             TabsStore.trigger('query-started-'+payload.key);
+            Executor.runQuery(payload.key, connstr, password, payload.query, payload.callback, payload.err_callback);
             break;
 
         case 'run-all-blocks':
