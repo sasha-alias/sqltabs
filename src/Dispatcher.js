@@ -176,7 +176,7 @@ AppDispatcher.register( function(payload) {
 
         case 'set-connection':
             TabsStore.setConnection(payload.key, payload.value);
-            TabsStore.setPassword(payload.key, null);
+            TabsStore.resetPassword(payload.key);
             Config.saveConnHistory(TabsStore.connectionHistory);
             TabsStore.trigger('change');
             Executor.testConnection(
@@ -195,7 +195,7 @@ AppDispatcher.register( function(payload) {
             break;
 
         case 'set-password':
-            TabsStore.setPassword(TabsStore.selectedTab, payload.password);
+            TabsStore.setPassword(TabsStore.selectedTab, payload.password, payload.savePassword);
             Executor.testConnection(
                 TabsStore.selectedTab,
                 TabsStore.getConnstr(TabsStore.selectedTab),

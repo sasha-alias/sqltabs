@@ -43,7 +43,7 @@
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-plugin-transform-react-jsx": "^6.24.1",
-    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-env": "^1.7.0",
     "electron": "^4.1.0",
     "electron-packager": "^13.1.1",
     "electron-reload": "^1.4.0",

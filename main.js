@@ -39,6 +39,9 @@ var createWindow = function(){
         width: 800,
         height: 600,
         title: 'SQL Tabs',
+        webPreferences: {
+            nodeIntegration: true,
+        },
     });
     mainWindow.maximize();
     mainWindow.loadURL('file://' + __dirname + '/index.html');

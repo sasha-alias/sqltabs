@@ -16,8 +16,6 @@
 */
 
 const admin = require("firebase-admin");
-const firebase = require("firebase");
-
 
 var Response = function(query){
     this.connector_type = 'firebase';
@@ -25,36 +23,73 @@ var Response = function(query){
     this.selectPromises = [];
     this.datasets = [];
     this.duration = null;
+    this.start_time = performance.now();
+    this.finish = function(){
+        this.duration = Math.round((performance.now() - this.start_time)*1000)/1000;
+        return this;
+    };
 
-    this.addDataset = function(select_fields, result){
+    this.resolveReference = async function(val){
+        return val.get();
+    };
+
+    this.resolveDocumentReferences = async docdata => {
+        // recorsively scans document and replaces the references with their actual values
+        var resolved = {};
+        for (const key of Object.keys(docdata)){
+            const original_value = docdata[key];
+            var value = null;
+            if (original_value.constructor.name == 'DocumentReference'){
+                const valdoc = await original_value.get();
+                value = await this.resolveDocumentReferences(valdoc.data());
+            } else {
+                value = original_value;
+            }
+            resolved[key] = value;
+        }
+        return resolved;
+    };
+
+    this.addDataset = async function(select_fields, result){
 
         var records = [];
 
-        var found_fields = [];
-        var fields = [];
+        var fields = [{name: "id", type: ""}];
 
-        const addField = function(field){
-            if (!found_fields.includes(field)){
-                found_fields.push(field);
-                fields.push({"name": field, "type": ""});
-            }
-        }
+        if (select_fields.length > 0){ // when defined fields to select
 
-        if (select_fields){
-            result.docs.forEach( doc => {
+            select_fields.forEach( item =>{
+                fields.push({name: item, type: ""});
+            });
+
+            for (const doc of result.docs) {
                 var record = [doc.id];
-                select_fields.map( field => {
-                    record.push(doc.get(field));
-                    addField(field);
-                })
+                for (const [fi, item] of select_fields.entries()){
+
+                    var v = doc.get(item);
+                    const valtype = typeof v;
+
+                    if (valtype  == 'object'){
+                        if (v.constructor.name == 'DocumentReference'){
+                            v = await v.get();
+                            v = await this.resolveDocumentReferences(v.data());
+                        }
+                        var val = JSON.stringify(v, null, 2);
+                    } else {
+                        var val = String(v);
+                    }
+                    record.push(val);
+                }
                 records.push(record);
-            });
-        } else {
-            result.docs.forEach( doc => {
-                var record = [doc.id, JSON.stringify(doc.data())];
-                fields = [{"name": "id", "type": "text"}, {"name": "doc", "type": "json"}];
+            };
+        } else { // when select with no fields argument
+
+            for (const doc of result.docs){
+                var resolved_doc = await this.resolveDocumentReferences(doc.data());
+                var record = [doc.id, JSON.stringify(resolved_doc)];
+                fields = [{name: "id", type: ""}, {name: "doc", type: "json"}];
                 records.push(record);
-            });
+            };
         }
 
         this.datasets.push({
@@ -74,10 +109,11 @@ var Response = function(query){
             resultStatus: "PGRES_COMMAND_OK",
             resultErrorMessage: null,
         });
-    }
+    };
 
     this.addSelectPromise = function(promise){
         this.selectPromises.push(promise);
+        return promise
     };
 };
 
@@ -85,31 +121,46 @@ var Response = function(query){
 
 const Database = {
 
+    connector_type: 'firebase',
+
     Clients: {},
 
     connect: function(id, connstr, password){
 
-            if (id in this.Clients){
-                return this.Clients[id];
-            } else {
+        if (connstr.indexOf ('---')> 0) {
+            connstr = connstr.split ('---') [0];
+        }
 
-                const serviceAccount = require("/Users/sasha/test/firestore/key.json");
-                const app = admin.initializeApp({
-                  credential: admin.credential.cert(serviceAccount),
-                  databaseURL: "https://asymmetric-moon-235317.firebaseio.com"
-                });
-                this.Clients[id] = app;
-            }
+        if (password == null){
+            throw "Service Account file can't be empty";
+        }
+
+        if (id in this.Clients){
+            return this.Clients[id];
+        } else {
+            const serviceAccount = require(password);
+            const app = admin.initializeApp({
+              credential: admin.credential.cert(serviceAccount),
+              databaseURL: connstr,
+            }, "sqltabs"+id);
+
+            this.Clients[id] = app;
+            return this.Clients[id];
+        }
     },
 
 
 
     runQuery: function(id, connstr, password, query, callback, err_callback){
-        this.connect(id, connstr, password);
+        try {
+            var app = this.connect(id, connstr, password);
+        } catch(err) {
+            return err_callback(id, "Failed to connect: "+err);
+        }
 
         const Collection = (collection_name) => {
 
-            this.db = admin.firestore();
+            this.db = app.firestore();
 
             this.collectionRef = this.db.collection(collection_name);
 
@@ -162,13 +213,17 @@ const Database = {
             }
 
             // select method for displaying collection in SQL console
-            this.select = (fields) => {
-                var selectPromise = this.query.get();
-                response.addSelectPromise(selectPromise);
-                selectPromise
-                    .then( res => {
-                        response.addDataset(fields, res);
-                    });
+            // it must be defined as synced function since we can't wait for dynamic promises within user's scripts
+            this.select = (...select_fields) => {
+                response.addSelectPromise(
+                    this.query.get()
+                        .then( async res => {
+                            await response.addDataset(select_fields, res);
+                        })
+                        .catch( err => {
+                            console.log(err);
+                        })
+                )
                 return this;
             }
 
@@ -187,25 +242,33 @@ const Database = {
         try {
             var response = new Response(query);
             var run = new Function('collection', 'response', 'console', '"use strict";\n'+query);
+
             run(Collection, response, sqlConsole);
-            console.log(response.selectPromises.length);
+
             Promise.all(response.selectPromises)
-                .then( () => {callback(id, [response])} )
-                .catch( err => {err_callback(id, err)} );
+                .then( () => {
+                    callback(id, [response.finish()])
+                })
+                .catch( err => { err_callback(id, err)} );
         } catch (err){
             return err_callback(id, err);
         }
 
         if (response.selectPromises.length == 0){
-            callback(id, [response]);
+            callback(id, [response.finish()]);
         }
 
     },
 
     testConnection: function(id, connstr, password, callback, ask_password_callback, err_callback){
-        var response = new Response();
-        response.consoleMessage('OK');
-        callback(id, response);
+        try{
+            this.connect(id, connstr, password);
+        } catch(err){
+            return ask_password_callback(id, err);
+        }
+        var response = new Response('');
+        response.consoleMessage('Connection set with service file '+password);
+        callback(id, [response.finish()]);
     },
 
     getCompletionWords: function(callback){

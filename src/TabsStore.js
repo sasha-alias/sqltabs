@@ -19,6 +19,7 @@ var MicroEvent = require('microevent');
 var Config = require('./Config');
 var fs = require('fs');
 var EOL = require('os').EOL;
+var Executor = require('./Executor');
 
 var Sequence = function(start){
     this.curval = start;
@@ -33,7 +34,8 @@ var TabSequence = new Sequence(0);
 var Tab = function(id, connstr){
     this.id = id;
     this.connstr = connstr;
-    this.password = password;
+    this.connector_type = Executor.getConnector(connstr).connector_type;
+    this.password = Config.getSecret(connstr);
     this.result = null;
     this.error = null;
     this.filename = null;
@@ -220,8 +222,13 @@ var _TabsStore = function(){
         };
     };
 
+    this.getSecret = function(connstr){
+        return Config.getSecret(connstr);
+    }
+
     this.setConnection = function(id, connstr){
         this.tabs[id].connstr = connstr;
+        this.tabs[id].connector_type = Executor.getConnector(connstr).connector_type;
 
         if (connstr == null || connstr == ""){ // don't track empty connstr
             return;
@@ -247,15 +254,28 @@ var _TabsStore = function(){
         }
     };
 
-    this.setPassword = function(id, password){
+    this.setPassword = function(id, password, savePassword){
         this.tabs[id].password = password;
         connstr = this.getConnstr(id);
+
+        console.log(connstr, password, savePassword);
+
+        if (savePassword){
+            Config.saveSecret(connstr, password);
+        } else {
+            Config.saveSecret(connstr, null);
+        }
+
         for (var key in this.tabs){ // update password in all tabs with the same connstr
             if (this.tabs[key].connstr == connstr){
                 this.tabs[key].password = password;
             }
         }
     };
+
+    this.resetPassword = function(id){
+        this.tabs[id].password = null;
+    }
 
     this.setResult = function(id, result){
         if (typeof(this.tabs[id]) != 'undefined'){

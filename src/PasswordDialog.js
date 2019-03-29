@@ -22,11 +22,14 @@ var Button = require('react-bootstrap').Button;
 var OverlayMixin = require('react-bootstrap').OverlayMixin;
 var TabsStore = require('./TabsStore');
 var Actions = require('./Actions');
+var dialog = require('electron').remote.dialog;
 
 var PasswordDialog = React.createClass({
 
     getInitialState: function(){
-        return {hidden: true}
+        return {
+            hidden: true,
+        }
     },
 
     componentDidMount: function(){
@@ -42,22 +45,130 @@ var PasswordDialog = React.createClass({
             hidden: false,
         });
 
-        var passwordInput = ReactDOM.findDOMNode(this.refs.passwordInput);
-        passwordInput.focus();
+    },
+
+    componentDidUpdate: function(){
+        if (!this.state.hidden){
+            // editor takes over a focus for some reason
+            // so focus it with a timeout
+            setTimeout( ()=>{
+                this.secretInput.focus();
+                this.secretInput.select();
+            }, 100);
+        }
     },
 
     hide: function(){
         this.setState({hidden: true});
     },
 
-    enter: function(e){
+    enterPassword: function(e){
         if (typeof(e) != 'indefined'){
             e.preventDefault();
             e.stopPropagation();
         }
         this.setState({hidden: true});
-        var passwordInput = ReactDOM.findDOMNode(this.refs.passwordInput);
-        Actions.setPassword(encodeURIComponent(passwordInput.value));
+        Actions.setPassword(encodeURIComponent(this.secretInput.value), this.savePassword.checked );
+    },
+
+    enterAuthFile: function(e){
+        if (typeof(e) != 'indefined'){
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        this.setState({hidden: true});
+        Actions.setPassword(this.secretInput.value, true);
+    },
+
+    chooseServiceFile: function(){
+        dialog.showOpenDialog({ properties: ['openFile']},
+            filenames => {
+                console.log(filenames);
+                if (filenames.length > 0){
+                    this.secretInput.value = filenames[0];
+                    this.secretInput.select();
+                }
+            }
+        );
+    },
+
+    renderPasswordInput: function(secret){
+        return (
+            <Modal.Dialog
+              bsStyle='primary'
+              backdrop={false}
+              animation={false}
+              container={document.body}
+              onRequestHide={this.hide}
+              onRequestEnter={this.enterPassword}
+              >
+
+              <Modal.Body>
+                <div className="form-group">
+                    <form onSubmit={this.enterPassword}>
+                        <label className="control-label"><span>Password</span></label>
+                        <input
+                            ref={ item => { this.secretInput = ReactDOM.findDOMNode(item); } }
+                            type='password'
+                            label='Password'
+                            className="form-control"
+                            defaultValue={secret}
+                        />
+                        <label>
+                        <input
+                            ref={ item => { this.savePassword = ReactDOM.findDOMNode(item); } }
+                            type='checkbox'
+                            defaultChecked={ secret != null }
+                        /> save password
+                        </label>
+                    </form>
+                </div>
+              </Modal.Body>
+
+              <Modal.Footer>
+                <Button onClick={this.enterPassword}>Enter</Button>
+                <Button onClick={this.hide}>Cancel</Button>
+              </Modal.Footer>
+            </Modal.Dialog>
+        );
+    },
+
+    renderAuthFileInput: function(secret){
+        return (
+            <Modal.Dialog
+              bsStyle='primary'
+              backdrop={false}
+              animation={false}
+              container={document.body}
+              onRequestHide={this.hide}
+              onRequestEnter={this.enterAuthFile}
+              >
+
+              <Modal.Body>
+                <div className="form-group">
+                    <form onSubmit={this.enterAuthFile}>
+                        <label className="control-label"><span>Service Account File</span></label>
+                        <div style={{display: "flex"}}>
+                        <input
+                            ref={ item => { this.secretInput = ReactDOM.findDOMNode(item); } }
+                            type="text"
+                            label='Authentication File'
+                            className="form-control"
+                            defaultValue={secret}
+                        />
+                        <Button onClick={this.chooseServiceFile}>...</Button>
+                        </div>
+                    </form>
+                </div>
+              </Modal.Body>
+
+              <Modal.Footer>
+                <Button onClick={this.enterAuthFile}>Enter</Button>
+                <Button onClick={this.hide}>Cancel</Button>
+              </Modal.Footer>
+            </Modal.Dialog>
+        )
     },
 
     render: function(){
@@ -66,32 +177,19 @@ var PasswordDialog = React.createClass({
             return <span refs=""/>;
         } else {
 
+            const selected_tab = TabsStore.tabs[TabsStore.selectedTab];
+            const connector_type = selected_tab.connector_type;
+            const connstr = selected_tab.connstr;
+            const secret = TabsStore.getSecret(connstr);
+
+            var inputForm = this.renderPasswordInput(secret);
+            if (connector_type == 'firebase'){
+                inputForm = this.renderAuthFileInput(secret);
+            }
+
             return (
               <div className='static-modal'>
-
-                <Modal.Dialog
-                  bsStyle='primary'
-                  backdrop={false}
-                  animation={false}
-                  container={document.body}
-                  onRequestHide={this.hide}
-                  onRequestEnter={this.enter}
-                  >
-
-                  <Modal.Body>
-                    <div className="form-group">
-                        <label className="control-label"><span>Password</span></label>
-                        <form onSubmit={this.enter}>
-                            <input ref="passwordInput" type='password' label='Password' className="form-control"/>
-                        </form>
-                    </div>
-                  </Modal.Body>
-
-                  <Modal.Footer>
-                    <Button onClick={this.enter}>Enter</Button>
-                    <Button onClick={this.hide}>Cancel</Button>
-                  </Modal.Footer>
-                </Modal.Dialog>
+                        { inputForm }
               </div>
             );
         }

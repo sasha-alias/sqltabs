@@ -102,6 +102,24 @@ var Conf = {
         return config.auto_completion;
     },
 
+    saveSecret: function(connstr, secret){
+        if (typeof config.secrets == 'undefined'){
+            config.secrets = {};
+        }
+        if (secret != null){
+            config.secrets[connstr] = secret;
+        } else {
+            delete config.secrets[connstr];
+        }
+        this.saveSync();
+    },
+
+    getSecret: function(connstr){
+        if (typeof config.secrets != undefined){
+            return config.secrets[connstr];
+        }
+    },
+
     getSharingServer: function(){
         if (config.sharing_server == "sqltabs.com" || config.sharing_server == "www.sqltabs.com"){
             return "share.sqltabs.com";
