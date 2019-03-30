@@ -25,7 +25,7 @@ if (process.platform == 'linux'){
 var electron = require('electron');
 var config = require('./build/Config');
 
-require('electron-reload')(__dirname);
+//require('electron-reload')(__dirname);
 
 var app = electron.app;
 var BrowserWindow = electron.BrowserWindow;
@@ -44,6 +44,7 @@ var createWindow = function(){
         },
     });
     mainWindow.maximize();
+    //mainWindow.toggleDevTools();
     mainWindow.loadURL('file://' + __dirname + '/index.html');
     mainWindow.on('closed', function() {
         mainWindow = null;
@@ -108,3 +109,5 @@ app.on('open-url', function (ev, url) {
         urlToOpen = url;
     }
 });
+
+console.log('init done');

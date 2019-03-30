@@ -115,7 +115,7 @@ var Conf = {
     },
 
     getSecret: function(connstr){
-        if (typeof config.secrets != undefined){
+        if (typeof config.secrets != 'undefined'){
             return config.secrets[connstr];
         }
     },

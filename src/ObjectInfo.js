@@ -27,7 +27,7 @@ require('brace/keybinding/vim');
 var Cassandra = require('./connectors/cassandra/Renderer.js');
 var Mysql = require('./connectors/mysql/Renderer.js');
 var MSsql = require('./connectors/mssql/Renderer.js');
-var Firebase = require('./connectors/Firebase/Renderer.js');
+var Firebase = require('./connectors/firebase/Renderer.js');
 
 var ObjectInfo = React.createClass({
 
