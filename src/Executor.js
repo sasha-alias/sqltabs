@@ -20,6 +20,7 @@ var cassandra = require('./connectors/cassandra/Database.js');
 var mysql = require('./connectors/mysql/Database.js');
 var mssql = require('./connectors/mssql/Database.js');
 var alasql = require('./connectors/alasql/Database.js');
+var firebase = require('./connectors/firebase/Database.js');
 var url = require('url');
 var path = require('path');
 var tunnel = require('tunnel-ssh');
@@ -48,12 +49,12 @@ var Executor = {
         if (connstr_list.length > 1 && connstr_list[0].startsWith('ssh://')){
             this.createTunnel(id, connstr, connstr_list, callback, err_callback);
         } else {
-            callback(this._getConnector(connstr));
+            callback(this.getConnector(connstr));
         }
 
     },
 
-    _getConnector: function(connstr){
+    getConnector: function(connstr){
         if  (connstr == '' || connstr == null || connstr.indexOf('alasql://') == 0){
             var db = alasql;
         } else if (connstr.indexOf('cassandra://') == 0){
@@ -62,6 +63,8 @@ var Executor = {
             var db = mysql;
         } else if (connstr.indexOf('mssql://') == 0){
             var db = mssql;
+        } else if (connstr.indexOf('https://') == 0){
+            var db = firebase;
         } else if (connstr.indexOf('redshift://') == 0){
             var db = postgres;
             db.redshift = true;
@@ -89,7 +92,7 @@ var Executor = {
         var db_url = url.parse(connstr_list[1]);
 
         if (db_url.port == null){
-            db_url.port = self._getConnector(connstr_list[1]).DEFAULT_PORT;
+            db_url.port = self.getConnector(connstr_list[1]).DEFAULT_PORT;
         }
 
         if (db_url.auth == null){
@@ -125,7 +128,7 @@ var Executor = {
             console.log('reuse tunnel: '+id);
             var port = TunnelPorts[id];
             var mapped_db_url = db_url.protocol+'//'+auth+'localhost:'+port+url_path;
-            return callback(self._getConnector(mapped_db_url));
+            return callback(self.getConnector(mapped_db_url));
         } else {
             console.log('create tunnel: '+id);
             PortSequence = PortSequence + 1;
@@ -163,7 +166,7 @@ var Executor = {
                 TunnelPorts[id] = PortSequence;
 
                 self.testSSH(id, ssh_config, function(){
-                    return callback(self._getConnector(mapped_db_url));
+                    return callback(self.getConnector(mapped_db_url));
                 }, function(err){
                     console.log(err);
                     err_callback(id, "ssh tunnel error: "+err);

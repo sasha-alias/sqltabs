@@ -25,6 +25,8 @@ if (process.platform == 'linux'){
 var electron = require('electron');
 var config = require('./build/Config');
 
+require('electron-reload')(__dirname);
+
 var app = electron.app;
 var BrowserWindow = electron.BrowserWindow;
 
@@ -37,6 +39,9 @@ var createWindow = function(){
         width: 800,
         height: 600,
         title: 'SQL Tabs',
+        webPreferences: {
+            nodeIntegration: true,
+        },
     });
     mainWindow.maximize();
     mainWindow.loadURL('file://' + __dirname + '/index.html');

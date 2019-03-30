@@ -27,6 +27,7 @@ require('brace/keybinding/vim');
 var Cassandra = require('./connectors/cassandra/Renderer.js');
 var Mysql = require('./connectors/mysql/Renderer.js');
 var MSsql = require('./connectors/mssql/Renderer.js');
+var Firebase = require('./connectors/Firebase/Renderer.js');
 
 var ObjectInfo = React.createClass({
 
@@ -308,6 +309,11 @@ var ObjectInfo = React.createClass({
         else {relkind = ""}
 
         var edit = null;
+        var script = `SELECT *
+FROM `+info.object_name+`
+WHERE true
+LIMIT 100;`;
+        var view = <a href="#" onClick={function(){Actions.newTab(script);}}><span className="glyphicon glyphicon-new-window" title="view"/></a>
         columns = [];
         columns.push(
                 <tr key="object_info_column_header">
@@ -501,7 +507,7 @@ var ObjectInfo = React.createClass({
             <div>{relkind}&nbsp;
             <span className="object-info-name">
                 <a href="#" onClick={function(){self.getInfo(info.object.schema+'.');}}>{info.object.schema}</a>.{info.object.relname}
-                &nbsp; {edit}
+                &nbsp; {edit} &nbsp; {view}
             </span>
             <hr/>
             </div>
@@ -529,6 +535,8 @@ var ObjectInfo = React.createClass({
             return Mysql.info(this.props.eventKey, info, this.getInfo);
         } else if (info.connector == 'mssql'){
             return MSsql.info(this.props.eventKey, info, this.getInfo);
+        } else if (info.connector == 'firebase'){
+            return Firebase.info(this.props.eventKey, info, this.getInfo);
         } else {
 
             if (info.object_type == 'function'){

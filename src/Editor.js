@@ -26,6 +26,7 @@ var History = require('./History');
 var fs = require('fs');
 
 require('brace/mode/pgsql');
+require('brace/mode/javascript');
 require('brace/theme/chrome');
 require('brace/theme/idle_fingers');
 require('brace/keybinding/vim');
@@ -51,9 +52,15 @@ var Editor = React.createClass({
 
     componentDidMount: function(){
         this.editor = Ace.edit(this.props.name);
-        this.editor.getSession().setMode('ace/mode/pgsql');
         this.editor.setTheme('ace/theme/' + this.state.theme);
         this.editor.setKeyboardHandler(this.state.mode);
+
+        if (TabsStore.tabs[TabsStore.selectedTab].connector_type == 'firebase'){
+            this.editor.getSession().setMode('ace/mode/javascript');
+        } else {
+            this.editor.getSession().setMode('ace/mode/pgsql');
+        }
+
         TabsStore.bind('change', this.changeHandler);
         TabsStore.bind('editor-resize', this.resize);
         TabsStore.bind('change-theme', this.changeHandler);

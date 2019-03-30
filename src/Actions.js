@@ -251,10 +251,11 @@ var Actions = {
         });
     },
 
-    setPassword: function(password){
+    setPassword: function(password, savePassword){
         AppDispatcher.dispatch({
             eventName: 'set-password',
             password: password,
+            savePassword: savePassword,
             callback: QueryCallback,
             err_callback: ErrorCallback,
         });
