@@ -16,6 +16,7 @@
 */
 
 const admin = require("firebase-admin");
+const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
 
 var Response = function(query){
     this.connector_type = 'firebase';
@@ -151,7 +152,7 @@ const Database = {
 
 
 
-    runQuery: function(id, connstr, password, query, callback, err_callback){
+    runQuery: async function(id, connstr, password, query, callback, err_callback){
         try {
             var app = this.connect(id, connstr, password);
         } catch(err) {
@@ -241,9 +242,9 @@ const Database = {
 
         try {
             var response = new Response(query);
-            var run = new Function('collection', 'response', 'console', '"use strict";\n'+query);
+            var run = new AsyncFunction('collection', 'response', 'console', '"use strict";\n'+query);
 
-            run(Collection, response, sqlConsole);
+            await run(Collection, response, sqlConsole);
 
             Promise.all(response.selectPromises)
                 .then( () => {
@@ -275,6 +276,27 @@ const Database = {
         callback([]);
     },
 
+    getObjectInfo: function(id, connstr, password, object, callback, err_callback){
+        app = this.connect(id, connstr, password);
+        db = app.firestore();
+
+        db.getCollections()
+        .then( collections => {
+            var collections = collections.map( item => { return item.id });
+            var info = {
+                connector: 'firebase',
+                object_type: 'database',
+                object: {
+                    collections: collections,
+                },
+                object_name: null,
+            };
+            callback(id, info);
+        })
+        .catch( err => {
+            err_callback(id, err);
+        });
+    }
 };
 
 module.exports = Database;

@@ -19,7 +19,7 @@ var Renderer = {
         });
 
         return(
-            <div id={"schemas-"+tabid}> Schemas:
+            <div className="object-info-div" id={"schemas-"+tabid}> Schemas:
                 <ul>
                     {schemas}
                 </ul>
