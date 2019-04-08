@@ -40,7 +40,7 @@ var Response = function(query){
         for (const key of Object.keys(docdata)){
             const original_value = docdata[key];
             var value = null;
-            if (original_value.constructor.name == 'DocumentReference'){
+            if (original_value != null && original_value.constructor.name == 'DocumentReference'){
                 const valdoc = await original_value.get();
                 value = await this.resolveDocumentReferences(valdoc.data());
             } else {
@@ -71,7 +71,7 @@ var Response = function(query){
                     const valtype = typeof v;
 
                     if (valtype  == 'object'){
-                        if (v.constructor.name == 'DocumentReference'){
+                        if (v != null && v.constructor.name == 'DocumentReference'){
                             v = await v.get();
                             v = await this.resolveDocumentReferences(v.data());
                         }
