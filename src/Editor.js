@@ -343,6 +343,7 @@ var Editor = React.createClass({
     fileSaveHandler: function(){
         var self = this;
         var position = self.editor.getCursorPosition();
+        var scrollRow = self.editor.renderer.getScrollTopRow();
         filename = TabsStore.getEditorFile(this.props.eventKey);
         var content = self.editor.getValue().replace(/[^\S\r\n]+$/gm, ""); // trim trailing spaces
         fs.writeFile(filename, content, function(err) {
@@ -352,6 +353,7 @@ var Editor = React.createClass({
                 self.editor.session.setValue(content);
                 self.editor.clearSelection();
                 self.editor.gotoLine(position.row+1, 0);
+                self.editor.renderer.scrollToRow(scrollRow);
             }
         });
     },
