@@ -18,6 +18,7 @@
     "c3": "^0.4.0",
     "cassandra-driver": "^3.1.1",
     "cassandra-map": "~0.1.7",
+    "crypto-js": "^3.1.9-1",
     "firebase": "^5.9.1",
     "firebase-admin": "^7.1.1",
     "flux": "2.0.1",
@@ -38,7 +39,7 @@
     "react-dom": "^0.14.9",
     "request": "^2.60.0",
     "sql-formatter": "^1.2.1",
-    "sqldoc": "^1.0.1",
+    "sqldoc": "^1.1.0",
     "tunnel-ssh": "^4.1.4"
   },
   "devDependencies": {

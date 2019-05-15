@@ -17,18 +17,26 @@
 
 
 var React = require('react');
+var ReactDOM = require('react-dom');
 var Modal = require('react-bootstrap').Modal;
 var Button = require('react-bootstrap').Button;
 var OverlayMixin = require('react-bootstrap').OverlayMixin;
 var TabsStore = require('./TabsStore');
 var Actions = require('./Actions');
 var Shell = require('electron').shell;
+var Crypto = require("crypto");
 
 var CloudMessage = React.createClass({
 
     getInitialState: function(){
         this.target_server = TabsStore.sharingServer;
-        return {hidden: true}
+
+        const rnd = Crypto.randomBytes(16).toString('hex');
+        return {
+            hidden: true,
+            encrypt: false,
+            encryptionKey: rnd,
+        }
     },
 
     componentDidMount: function(){
@@ -55,7 +63,12 @@ var CloudMessage = React.createClass({
     },
 
     share: function(){
-        Actions.share(this.target_server);
+        var encryptionKey = null;
+        if (this.state.encrypt){
+            encryptionKey = this.encryptionKeyField.value;
+            this.setState({encryptionKey});
+        }
+        Actions.share(this.target_server, this.state.encrypt, encryptionKey);
     },
 
     sentHandler: function(){
@@ -120,6 +133,19 @@ var CloudMessage = React.createClass({
     },
 
     renderDialog: function(){
+
+        var encryptionKeyField = null;
+        if (this.state.encrypt){
+            encryptionKeyField = <div>
+                Encryption key
+                <input
+                    ref={ item => { this.encryptionKeyField = ReactDOM.findDOMNode(item); } }
+                    className="target-server-input"
+                    type="text"
+                    defaultValue={ this.state.encryptionKey }/>
+                </div>
+        }
+
         return(
             <div className='static-modal'>
 
@@ -138,7 +164,24 @@ var CloudMessage = React.createClass({
                     <td><img className="about-logo" src="logo.png"/></td>
                     <td>
                         <div>
-                            Share on <input ref="target_server" onChange={this.targetChangeHandler} className="target-server-input" type="text" placeholder="share.sqltabs.com" defaultValue={this.target_server}></input>
+                            Share on
+                            <input ref="target_server"
+                                onChange={this.targetChangeHandler}
+                                className="target-server-input"
+                                type="text"
+                                placeholder="share.sqltabs.com"
+                                defaultValue={this.target_server}>
+                            </input>
+
+                            <label>
+                            <input
+                                defaultChecked={this.state.encrypt}
+                                onChange={ ()=>{ this.setState({encrypt: !this.state.encrypt}) }}
+                                type="checkbox"/>
+                            Encrypt
+                            </label>
+
+                            { encryptionKeyField }
                         </div>
                     </td>
                     </tr></table>

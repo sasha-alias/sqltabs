@@ -16,6 +16,7 @@
 */
 
 var request = require('request');
+var CryptoJS = require("crypto-js");
 
 if (typeof(DEVMODE) == 'undefined'){
     DEVMODE = true;
@@ -23,12 +24,25 @@ if (typeof(DEVMODE) == 'undefined'){
 
 Cloud = {
 
-    share: function(target_server, data, callback, err_callback){
+    share: function(target_server, encrypt, encryptionKey, data, callback, err_callback){
         if (target_server.indexOf('http://') == -1 && target_server.indexOf('https://') == -1){
             target_server = 'http://'+target_server;
         }
 
         var uri = target_server+'/api/1.0/docs';
+
+        if (encrypt){
+            data = JSON.parse(JSON.stringify(data)); // cloning data so we don't rewrite the existing instance of data
+            try{
+                data.forEach( response => {
+                    response.datasets = CryptoJS.AES.encrypt(JSON.stringify(response.datasets), encryptionKey).toString();
+                    response.query = CryptoJS.AES.encrypt(response.query, encryptionKey).toString();
+                    response.encrypted = true;
+                });
+            } catch (e){
+                return err_callback(e.message);
+            }
+        }
 
         request({
             method: 'POST',

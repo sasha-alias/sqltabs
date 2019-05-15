@@ -310,7 +310,7 @@ AppDispatcher.register( function(payload) {
             var result = TabsStore.getResult(TabsStore.selectedTab);
             TabsStore.trigger('cloud-sent');
             Config.saveSharingServer(payload.targetServer);
-            Cloud.share(payload.targetServer, result, payload.callback, payload.err_callback);
+            Cloud.share(payload.targetServer, payload.encrypt, payload.encryptionKey, result, payload.callback, payload.err_callback);
             break;
 
         case 'upgrade-check':

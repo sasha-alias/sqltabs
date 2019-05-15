@@ -341,10 +341,12 @@ var Actions = {
         });
     },
 
-    share: function(target_server){
+    share: function(target_server, encrypt, encryptionKey){
         AppDispatcher.dispatch({
             eventName: 'share',
             targetServer: target_server,
+            encrypt,
+            encryptionKey,
             callback: ShareCallback,
             err_callback: ShareErrorCallback,
         });
