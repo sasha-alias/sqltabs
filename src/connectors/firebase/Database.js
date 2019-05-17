@@ -57,6 +57,7 @@ var Response = function(query){
 
         var fields = [{name: "id", type: ""}];
 
+        var record;
         if (select_fields.length > 0){ // when defined fields to select
 
             select_fields.forEach( item =>{
@@ -64,33 +65,32 @@ var Response = function(query){
             });
 
             for (const doc of result.docs) {
-                var record = [doc.id];
-                for (const [fi, item] of select_fields.entries()){
+                record = [doc.id];
+                for (const [fi, item] of select_fields.entries()){ // eslint-disable-line no-unused-vars
 
                     var v = doc.get(item);
                     const valtype = typeof v;
 
+                    var val = String(v);
                     if (valtype  == 'object'){
                         if (v != null && v.constructor.name == 'DocumentReference'){
                             v = await v.get();
                             v = await this.resolveDocumentReferences(v.data());
                         }
-                        var val = JSON.stringify(v, null, 2);
-                    } else {
-                        var val = String(v);
+                        val = JSON.stringify(v, null, 2);
                     }
                     record.push(val);
                 }
                 records.push(record);
-            };
+            }
         } else { // when select with no fields argument
 
             for (const doc of result.docs){
                 var resolved_doc = await this.resolveDocumentReferences(doc.data());
-                var record = [doc.id, JSON.stringify(resolved_doc)];
+                record = [doc.id, JSON.stringify(resolved_doc)];
                 fields = [{name: "id", type: ""}, {name: "doc", type: "json"}];
                 records.push(record);
-            };
+            }
         }
 
         this.datasets.push({
@@ -261,7 +261,7 @@ const Database = {
 
     },
 
-    testConnection: function(id, connstr, password, callback, ask_password_callback, err_callback){
+    testConnection: function(id, connstr, password, callback, ask_password_callback, err_callback){ // eslint-disable-line no-unused-vars
         try{
             this.connect(id, connstr, password);
         } catch(err){
@@ -277,12 +277,12 @@ const Database = {
     },
 
     getObjectInfo: function(id, connstr, password, object, callback, err_callback){
-        app = this.connect(id, connstr, password);
-        db = app.firestore();
+        var app = this.connect(id, connstr, password);
+        var db = app.firestore();
 
         db.getCollections()
         .then( collections => {
-            var collections = collections.map( item => { return item.id });
+            collections = collections.map( item => { return item.id });
             var info = {
                 connector: 'firebase',
                 object_type: 'database',

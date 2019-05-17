@@ -73,7 +73,7 @@ var TabsNav = React.createClass({
 
     getColors: function(){
         var colors = {};
-        for (item in TabsStore.order){
+        for (var item in TabsStore.order){
             var connstr = TabsStore.getConnstr(item);
             var connectionColor = TabsStore.getConnectionColor(connstr);
             colors[connstr] = connectionColor;

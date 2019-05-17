@@ -17,7 +17,6 @@
 
 var React = require('react');
 var TabsStore = require('./TabsStore');
-var TabActions = require('./Actions');
 var OutputConsole = require('./OutputConsole');
 var TabSplit = require('./TabSplit');
 var Editor = require('./Editor');

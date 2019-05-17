@@ -23,10 +23,11 @@ var TabsStore = require('./TabsStore');
 var Splitter = React.createClass({
 
     render: function(){
+        var classname;
         if (this.props.type == 'horizontal'){
-            var classname = "hsplitter";
+            classname = "hsplitter";
         } else if (this.props.type == "vertical" ) {
-            var classname = "vsplitter";
+            classname = "vsplitter";
         } else  {
             return <div style={{widht: '0%', height: '0%'}}/>;
         }
@@ -56,10 +57,9 @@ var TabSplit = React.createClass({
 
     getInitialState: function(){
 
+        var type = this.props.type;
         if (typeof(this.props.type) == 'undefined'){
-            var type = "horizontal";
-        } else {
-            var type = this.props.type;
+            type = "horizontal";
         }
 
         return {
@@ -75,7 +75,7 @@ var TabSplit = React.createClass({
     splitter: null,
 
     horizontalResize: function(e){
-        main_size = this.main_container.getBoundingClientRect();
+        var main_size = this.main_container.getBoundingClientRect();
         var h1 = e.pageY - this.first_container.getBoundingClientRect().top;
         var h_max = main_size.bottom - main_size.top - e.pageY;
         var h2 = this.main_container.getBoundingClientRect().height - h1 - this.splitter.getBoundingClientRect().height;
@@ -90,7 +90,7 @@ var TabSplit = React.createClass({
     },
 
     verticalResize: function(e){
-        main_size = this.main_container.getBoundingClientRect();
+        var main_size = this.main_container.getBoundingClientRect();
         var w1 = e.pageX - this.first_container.getBoundingClientRect().left;
         var w_max = main_size.right - e.pageX;
         var w_main = this.main_container.getBoundingClientRect().width;
@@ -215,27 +215,32 @@ var TabSplit = React.createClass({
 
     render: function(){
 
+        var splitter_type;
+        var first_style;
+        var second_style;
+        var flex_direction;
+
         if (this.props.project){ // for project window
-            var flex_direction = 'row';
+            flex_direction = 'row';
 
             if (this.state.project_visible){
-                var splitter_type = "vertical";
-                var first_style = {
+                splitter_type = "vertical";
+                first_style = {
                     width: "20%",
                     height: "100%",
                     minHeight: "100%",
                 };
-                var second_style = {
+                second_style = {
                     flex: 1,
                 };
             } else {
-                var splitter_type = "invisible";
-                var first_style = {
+                splitter_type = "invisible";
+                first_style = {
                     width: "0%",
                     height: "100%",
                     minHeight: "100%",
                 };
-                var second_style = {
+                second_style = {
                     flex: 1,
                 };
             }
@@ -243,31 +248,30 @@ var TabSplit = React.createClass({
         } else { // for sql area
 
             if (this.state.type == 'vertical'){
-                var flex_direction = 'row';
-                var first_style = {
+                flex_direction = 'row';
+                first_style = {
                     width: "50%",
                     height: "100%",
                 };
-                var second_style = {
+                second_style = {
                     height: "100%",
                     flex: "1",
                 };
             } else {
-                var flex_direction = 'column';
-                var first_style = {
+                flex_direction = 'column';
+                first_style = {
                     width: "100%",
                     height: "50%",
                 };
-                var second_style = {
+                second_style = {
                     width: "100%",
                     flex: "1",
                 };
             }
-            var splitter_type = this.state.type;
+            splitter_type = this.state.type;
         }
 
-
-        main_style = {
+        var main_style = {
             width: "100%",
             height: "100%",
             minHeight: "100%",

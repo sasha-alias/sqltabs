@@ -22,7 +22,6 @@ var Menu = remote.Menu;
 var BrowserWindow = remote.BrowserWindow;
 var dialog = remote.dialog;
 var app = remote.app;
-var fs = require('fs');
 
 var openFile = function(){
     dialog.showOpenDialog({ properties: ['openFile', 'multiSelections']},
@@ -67,10 +66,11 @@ var exportResult = function(format){
     })
 }
 
+var template;
 
 if (process.platform == 'darwin'){
 
-    var template = [
+    template = [
         {label: "SQL Tabs",
         submenu: [
           { label: "About SQL Tabs",
@@ -250,7 +250,7 @@ if (process.platform == 'darwin'){
 
 } else {
 
-    var template = [
+    template = [
 
         {label: "File",
         submenu: [
@@ -359,7 +359,6 @@ if (process.platform == 'darwin'){
              accelerator: "Alt+Shift+P",
              click: function(){Actions.hideProject();}
             },
-,
         ]
         },
 
@@ -385,6 +384,6 @@ if (process.platform == 'darwin'){
     );
 }
 
-menu = Menu.buildFromTemplate(template);
+var menu = Menu.buildFromTemplate(template);
 Menu.setApplicationMenu(menu);
 

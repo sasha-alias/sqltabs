@@ -69,11 +69,11 @@ var ConnInput = React.createClass({
         this.setState({connstr: e.target.value});
     },
 
-    focusHandler: function(e){
+    focusHandler: function(){
         this.setState({active: true});
     },
 
-    unfocusHandler: function(e){
+    unfocusHandler: function(){
         this.setState({
             active: false,
             hilight: -1,
@@ -110,8 +110,11 @@ var ConnInput = React.createClass({
         if (TabsStore.connectionHistory.length == 0 || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey){
             return;
         }
+
+        var hilight;
+        var connstr;
         if (e.keyCode == 40){ // down
-            var hilight = (this.state.hilight < history_length - 1 ) ? this.state.hilight+1 : 0;
+            hilight = (this.state.hilight < history_length - 1 ) ? this.state.hilight+1 : 0;
             this.setState({
                 active: true,
                 hilight: hilight,
@@ -120,7 +123,7 @@ var ConnInput = React.createClass({
             e.preventDefault();
             e.stopPropagation();
         } else if (e.keyCode == 38) { // up
-            var hilight = (this.state.hilight == 0 ) ? history_length-1 : this.state.hilight-1;
+            hilight = (this.state.hilight == 0 ) ? history_length-1 : this.state.hilight-1;
             this.setState({
                 active: true,
                 hilight: hilight,
@@ -137,9 +140,9 @@ var ConnInput = React.createClass({
             e.stopPropagation();
         } else if (e.keyCode == 13) { // enter
             if (this.state.hilight > -1){
-                var connstr = TabsStore.connectionHistory[this.state.hilight]
+                connstr = TabsStore.connectionHistory[this.state.hilight]
             } else {
-                var connstr = this.state.connstr;
+                connstr = this.state.connstr;
             }
                 this.setState({
                     active: false,
@@ -160,35 +163,33 @@ var ConnInput = React.createClass({
 
         var history = this.state.history.map(function(item, i){
 
+            var meta_start = -1;
             if (item != null){
-                var meta_start = item.indexOf('---'); // extension of connect string: user:port@db --- alias of connect string
-            } else {
-                var meta_start = -1;
+                meta_start = item.indexOf('---'); // extension of connect string: user:port@db --- alias of connect string
             }
 
+            var conn_str = item;
+            var alias = null;
             if (meta_start != -1){
-                var conn_str = item.substr(0, meta_start);
-                var alias = item.match(/---\s*(.*)/)[1]+':';
-            } else {
-                var conn_str = item;
-                var alias = null;
+                conn_str = item.substr(0, meta_start);
+                alias = item.match(/---\s*(.*)/)[1]+':';
             }
+
+            var highlighted = '';
+            var remove_item = '';
             if (i == self.state.hilight) {
-                var highlighted = ' conn_history_item_active'
-                var remove_item = <span
+                highlighted = ' conn_history_item_active'
+                remove_item = <span
                     data-idx={i}
                     key={"remove_connstr_"+i}
                     onClick={self.removeHandler}
                     className="conn_item_remove glyphicon glyphicon-minus-sign"></span>
-            } else {
-                var highlighted = '';
-                var remove_item = '';
             }
 
             if (alias){
-                var alias = <span data-idx={i} className="conn_item_alias">{alias}</span>
+                alias = <span data-idx={i} className="conn_item_alias">{alias}</span>
             } else {
-                var alias = '';
+                alias = '';
             }
 
             var connectionColor = TabsStore.getConnectionColor(item);
@@ -206,10 +207,9 @@ var ConnInput = React.createClass({
                 </li>;
         });
 
+        var visibility = "conn_history_hidden"
         if (this.state.active && TabsStore.connectionHistory.length > 0){
-            var visibility = "conn_history_visisble"
-        } else {
-            var visibility = "conn_history_hidden"
+            visibility = "conn_history_visisble"
         }
 
         var history_div =

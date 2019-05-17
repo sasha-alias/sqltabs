@@ -18,7 +18,6 @@
 var React = require('react');
 var Modal = require('react-bootstrap').Modal;
 var Button = require('react-bootstrap').Button;
-var OverlayMixin = require('react-bootstrap').OverlayMixin;
 var TabsStore = require('./TabsStore');
 var Shell = require('electron').shell;
 

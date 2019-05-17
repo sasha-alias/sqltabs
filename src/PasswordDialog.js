@@ -19,7 +19,6 @@ var React = require('react');
 var ReactDOM = require('react-dom');
 var Modal = require('react-bootstrap').Modal;
 var Button = require('react-bootstrap').Button;
-var OverlayMixin = require('react-bootstrap').OverlayMixin;
 var TabsStore = require('./TabsStore');
 var Actions = require('./Actions');
 var dialog = require('electron').remote.dialog;
@@ -63,7 +62,7 @@ var PasswordDialog = React.createClass({
     },
 
     enterPassword: function(e){
-        if (typeof(e) != 'indefined'){
+        if (typeof(e) != 'undefined'){
             e.preventDefault();
             e.stopPropagation();
         }
@@ -72,7 +71,7 @@ var PasswordDialog = React.createClass({
     },
 
     enterAuthFile: function(e){
-        if (typeof(e) != 'indefined'){
+        if (typeof(e) != 'undefined'){
             e.preventDefault();
             e.stopPropagation();
         }

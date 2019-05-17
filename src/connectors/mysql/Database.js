@@ -19,18 +19,16 @@ var parse_connstr = function(connstr){
 
     var parsed = url.parse(connstr);
 
+    var database = '';
     if (parsed.pathname != 'undefined' && parsed.pathname != null){
-        var database = parsed.pathname.substring(1);
-    } else {
-        var database = '';
+        database = parsed.pathname.substring(1);
     }
 
+    var user = '';
+    var password = '';
     if (parsed.auth){
-        var user = parsed.auth.split(':')[0];
-        var password = parsed.auth.split(':')[1];
-    } else {
-        var user = '';
-        var password = '';
+        user = parsed.auth.split(':')[0];
+        password = parsed.auth.split(':')[1];
     }
 
     return {
@@ -60,10 +58,11 @@ function formatDate(date, type) {
     min = (min < 10 ? "0" : "") + min;
     sec = (sec < 10 ? "0" : "") + sec;
 
+    var str;
     if (type == 'DATE'){
-        var str = date.getFullYear() + "-" + month + "-" + day;
+        str = date.getFullYear() + "-" + month + "-" + day;
     } else {
-        var str = date.getFullYear() + "-" + month + "-" + day + " " +  hour + ":" + min + ":" + sec + "." + msec;
+        str = date.getFullYear() + "-" + month + "-" + day + " " +  hour + ":" + min + ":" + sec + "." + msec;
     }
 
     return str;
@@ -76,29 +75,29 @@ var Response = function(query){
     this.datasets = [];
     this.start_time = performance.now();
     this.duration = null;
-    self = this;
+    var self = this;
     this.finish = function(){
         self.duration = Math.round((performance.now() - self.start_time)*1000)/1000;
     };
     this.processResult = function(result, fielddata){
 
         if (result.constructor.name == "ResultSetHeader"){ // no fields, command execution
-            var result = [result];
-            var fielddata = [0];
+            result = [result];
+            fielddata = [0];
         }
 
         // if single dataset convert it to multiple datasets
         if (fielddata.length > 0 && typeof(fielddata[0]) != "undefined" && fielddata[0].constructor.name == "ColumnDefinition"){
-            var result = [result];
-            var fielddata = [fielddata];
+            result = [result];
+            fielddata = [fielddata];
         }
         // if dataset is empty but there are fields means no records but dataset should be created anyway
         if (result.length == 0 && fielddata){
-            var result = [0];
-            var fielddata = [fielddata];
+            result = [0];
+            fielddata = [fielddata];
         }
 
-        for (res in fielddata){
+        for (var res in fielddata){
             if (result[res].constructor.name == "ResultSetHeader"){ // command
                 self.datasets.push({
                     nrecords: 0,
@@ -112,7 +111,7 @@ var Response = function(query){
 
             } else { // dataset
                 var fields = [];
-                for (fn in fielddata[res]){
+                for (var fn in fielddata[res]){
                     if (typeof(fielddata[res][fn]) != 'undefined'){
                         fields.push({
                             name: fielddata[res][fn].name,
@@ -122,9 +121,9 @@ var Response = function(query){
                 }
 
                 var records = [];
-                for (rn in result[res]){
+                for (var rn in result[res]){
                     var rec = [];
-                    for (column in fields) {
+                    for (var column in fields) {
                         var value = result[res][rn][fields[column].name];
                         var type = fields[column].type;
                         if(['TEXT', 'VARCHAR', 'ASCII', 'STRING', 'VAR_STRING'].indexOf(type) > -1){
@@ -164,7 +163,7 @@ var Database = {
         if (id in cache && cache[id].connstr == connstr && cache[id].config.password == password){
             return cache[id];
         } else {
-            parsed_connstr = parse_connstr(connstr);
+            var parsed_connstr = parse_connstr(connstr);
             if (parsed_connstr.password == null){
                 parsed_connstr.password = password;
             }
@@ -198,7 +197,7 @@ var Database = {
     cancelQuery: function(id){
         var client = Clients[id];
         var extraClient = this.getClient(id, client.connstr, client.config.password, {});
-        extraClient.query("KILL QUERY "+client.connectionId, function(err, result){
+        extraClient.query("KILL QUERY "+client.connectionId, function(err){
             if (err){
                 console.log(err);
             }
@@ -208,13 +207,13 @@ var Database = {
     _getData: function(id, connstr, password, query, callback, err_callback){
         var client = this.getInfoClient(id, connstr, password);
         client.query(query.replace(/^\s*---.*/mg,''),
-        	function(err, result, fielddata){
+            function(err, result){
                 if (err){
                     err_callback(err);
                 } else {
                     callback(result);
                 }
-        	}
+            }
         );
 
     },
@@ -224,7 +223,7 @@ var Database = {
         var query = "SELECT 'connected' FROM dual WHERE 1=0";
         var response = new Response(query);
         client.query(query,
-        	function(err, result, fielddata){
+            function(err, result, fielddata){
                 if (err){
                     if (err.code == "ER_ACCESS_DENIED_ERROR"){
                             ask_password_callback(id, err);
@@ -236,7 +235,7 @@ var Database = {
                     response.processResult(result, fielddata);
                     callback(id, [response]);
                 }
-        	}
+            }
         );
     },
 
@@ -260,7 +259,7 @@ select table_name from information_schema.views) a order by word";
             for (var tab in Clients){
                 this._getData(0, Clients[tab].connstr, Clients[tab].config.password, query,
                 function(data){
-                    for (rn in data){
+                    for (var rn in data){
                         var word = data[rn]["word"];
                         if (Words.indexOf(word) == -1){
                             Words.push(word);
@@ -269,7 +268,7 @@ select table_name from information_schema.views) a order by word";
                     Words.sort();
                     callback(Words);
                 },
-                function(err){
+                function(){
                     callback(Words);
                 })
             }
@@ -279,8 +278,9 @@ select table_name from information_schema.views) a order by word";
     getObjectInfo: function(id, connstr, password, object, callback, err_callback){
 
         // if no object selected then get info about database
+        var ret;
         if (typeof(object) == 'undefined' || object == '' || object == null){
-            var ret = {
+            ret = {
                 connector: 'mysql',
                 object_type: 'database',
                 object: null,
@@ -298,7 +298,7 @@ select table_name from information_schema.views) a order by word";
             return;
         } else if (object.slice(-1) == '.'){ // get schema info
             var schema = object.slice(0, object.length-1);
-            var ret = {
+            ret = {
                 connector: 'mysql',
                 object_type: 'schema',
                 object: null,
@@ -315,7 +315,7 @@ select table_name from information_schema.views) a order by word";
                 })
             return;
         } else { // get object info
-            var ret = {
+            ret = {
                 connector: 'mysql',
                 object_type: "relation",
                 object: null,
@@ -341,26 +341,24 @@ select table_name from information_schema.views) a order by word";
     },
 
     runBlocks: function(id, connstr, password, blocks, callback, err_callback){
-        var self = this;
-        var current_block = 0;
         var results = [];
         var client = this.getClient(id, connstr, password);
 
         var calls = [];
         for (var i=0; i<blocks.length; i++){
             var call = function(block){return function(done){
-        	var response = new Response(block);
-        	client.query(block.replace(/^\s*---.*/mg,''),
-        	function(err, result, fielddata){
-            		if (err) {
-                		err_callback(id, err);
-                    		done();
-            		} else {
-                		response.finish();
-                		response.processResult(result, fielddata);
-                    		results.push(response);
-                    		done();
-            		}
+            var response = new Response(block);
+            client.query(block.replace(/^\s*---.*/mg,''),
+            function(err, result, fielddata){
+                    if (err) {
+                        err_callback(id, err);
+                            done();
+                    } else {
+                        response.finish();
+                        response.processResult(result, fielddata);
+                            results.push(response);
+                            done();
+                    }
 		});
             }}(blocks[i]);
             calls.push(call);
@@ -480,7 +478,7 @@ WHERE SV0.Variable_Name = 'Hostname'";
     _getTableInfo: function(id, connstr, password, object, callback, err_callback){
         var self = this;
 
-        query = "SELECT table_schema, table_name, table_type, COALESCE(data_length, 0) data_length, COALESCE(round(((data_length + index_length) / 1024 / 1024), 2), 0) total_size, COALESCE(table_rows,0) table_rows FROM information_schema.TABLES WHERE UPPER(CONCAT(table_schema,'.',table_name)) = UPPER('" + object + "') ORDER BY 3 DESC;";
+        var query = "SELECT table_schema, table_name, table_type, COALESCE(data_length, 0) data_length, COALESCE(round(((data_length + index_length) / 1024 / 1024), 2), 0) total_size, COALESCE(table_rows,0) table_rows FROM information_schema.TABLES WHERE UPPER(CONCAT(table_schema,'.',table_name)) = UPPER('" + object + "') ORDER BY 3 DESC;";
         this._getData(id, connstr, password, query,
         function(data){
             if (data.length > 0){
@@ -595,7 +593,7 @@ WHERE SV0.Variable_Name = 'Hostname'";
                 callback(null);
             }
         },
-        function(err){
+        function(){
             callback(null); // ignore error, behave like relation not found
         });
     },
@@ -605,7 +603,7 @@ WHERE SV0.Variable_Name = 'Hostname'";
         var query = "SELECT COLUMN_NAME, DATA_TYPE, COALESCE(CHARACTER_MAXIMUM_LENGTH, NUMERIC_PRECISION) MAXIMUM_LENGTH, IS_NULLABLE, 'YES' HAS_DEFAULT, COLUMN_DEFAULT, COLUMN_COMMENT FROM information_schema.COLUMNS WHERE UPPER(CONCAT(table_schema,'.',table_name)) = UPPER('" + object  + "') ORDER BY ORDINAL_POSITION;";
         this._getData(id, connstr, password, query,
         function(data){
-            columns = [];
+            var columns = [];
             for (var i=0; i<data.length; i++){
                 var row = data[i];
 		var notnull = "t";
@@ -630,7 +628,7 @@ WHERE SV0.Variable_Name = 'Hostname'";
 	var query = "SELECT INDEX_NAME, INDEX_TYPE, NON_UNIQUE, GROUP_CONCAT(column_name ORDER BY seq_in_index) AS INDEX_COLUMNS FROM information_schema.statistics WHERE UPPER(CONCAT(table_schema,'.',table_name)) = UPPER('" + object  + "') GROUP BY 1, 2, 3;"
         this._getData(id, connstr, password, query,
         function(data){
-            indexes = [];
+            var indexes = [];
             for (var i=0; i<data.length; i++){
                 var row = data[i];
                 var index = {
@@ -651,7 +649,7 @@ WHERE SV0.Variable_Name = 'Hostname'";
 	var query = "SELECT CONSTRAINT_NAME, GROUP_CONCAT(COALESCE(NULLIF(CONCAT_WS('.',REFERENCED_TABLE_SCHEMA,REFERENCED_TABLE_NAME,REFERENCED_COLUMN_NAME),''),COLUMN_NAME) ORDER BY ORDINAL_POSITION) AS CONSTRAINT_COLUMNS FROM information_schema.key_column_usage WHERE UPPER(CONCAT(table_schema,'.',table_name)) = UPPER('" + object  + "') AND CONSTRAINT_NAME != 'PRIMARY' AND POSITION_IN_UNIQUE_CONSTRAINT IS NOT NULL GROUP BY 1;";
         this._getData(id, connstr, password, query,
         function(data){
-            checks = [];
+            var checks = [];
             for (var i=0; i<data.length; i++){
                 var row = data[i];
                 var check = {
@@ -669,7 +667,7 @@ WHERE SV0.Variable_Name = 'Hostname'";
 	var query = "SELECT CONSTRAINT_NAME PK_NAME, GROUP_CONCAT(COALESCE(NULLIF(CONCAT_WS('.',REFERENCED_TABLE_SCHEMA,REFERENCED_TABLE_NAME,REFERENCED_COLUMN_NAME),''),COLUMN_NAME) ORDER BY ORDINAL_POSITION) AS PK_COLUMNS FROM information_schema.key_column_usage WHERE UPPER(CONCAT(table_schema,'.',table_name)) = UPPER('" + object  + "') AND CONSTRAINT_NAME = 'PRIMARY' AND POSITION_IN_UNIQUE_CONSTRAINT IS NULL GROUP BY 1;";
         this._getData(id, connstr, password, query,
         function(data){
-            pks = [];
+            var pks = [];
             for (var i=0; i<data.length; i++){
                 var row = data[i];
                 var pk = {
@@ -687,7 +685,7 @@ WHERE SV0.Variable_Name = 'Hostname'";
 	var query = "SELECT * FROM information_schema.triggers WHERE UPPER(CONCAT(EVENT_OBJECT_SCHEMA,'.',EVENT_OBJECT_TABLE)) = UPPER('" + object  + "');";
         this._getData(id, connstr, password, query,
         function(data){
-            triggers = [];
+            var triggers = [];
             for (var i=0; i<data.length; i++){
                 var row = data[i];
                 var trigger = {

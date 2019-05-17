@@ -8,7 +8,7 @@ var Response = function(query){
     this.datasets = [];
     this.start_time = performance.now();
     this.duration = null;
-    self = this;
+    var self = this;
     this.finish = function(){
         self.duration = Math.round((performance.now() - self.start_time)*1000)/1000;
     };
@@ -65,17 +65,17 @@ var Response = function(query){
                 };
             }
 
-            records = [];
-            fields = [];
+            var records = [];
+            var fields = [];
             for (var rn = 0; rn < data.length; rn++){
                 if (rn == 0){
-                    for (k in data[rn]){
+                    for (var k in data[rn]){
                         fields.push({name: k, type: typeof(data[rn][k])});
                     }
                 }
 
                 var rec = [];
-                for (fn in fields){
+                for (var fn in fields){
                     var field = fields[fn].name;
                     rec.push(String(data[rn][field]));
                 }
@@ -103,7 +103,7 @@ var Response = function(query){
             self.datasets.push(getDataset(data));
         } else {
 
-            for (dn in data){
+            for (var dn in data){
                 self.datasets.push(getDataset(data[dn]));
             }
 
@@ -114,7 +114,7 @@ var Response = function(query){
 
 var Database = {
 
-    testConnection: function(id, connstr, password, callback, ask_password_callback, err_callback){
+    testConnection: function(id, connstr, password, callback, ask_password_callback, err_callback){ // eslint-disable-line no-unused-vars
         callback(id, new Response());
     },
 
@@ -139,7 +139,6 @@ var Database = {
 
     runBlocks: function(id, connstr, password, blocks, callback, err_callback){
         var self = this;
-        var current_block = 0;
         var results = [];
 
         var calls = [];

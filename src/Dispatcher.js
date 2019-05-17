@@ -15,7 +15,6 @@
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-var React = require('react');
 var Dispatcher = require('flux').Dispatcher;
 var TabsStore = require('./TabsStore');
 var Executor = require('./Executor');
@@ -69,11 +68,14 @@ SignalsDispatcher.register(function(payload){
             TabsStore.setCloudError(payload.error);
             TabsStore.trigger('cloud-message');
             break;
-    };
+    }
     return true;
 });
 
 AppDispatcher.register( function(payload) {
+    var tab;
+    var connstr;
+    var password;
     switch( payload.eventName ) {
         case 'show-settings':
             // Only one settings tab open at the time, so firstly search the open one
@@ -131,7 +133,7 @@ AppDispatcher.register( function(payload) {
                     document.getElementById("theme_stylesheet").href = "css/bootstrap.dark.css";
                     document.getElementById("theme_tabs_stylesheet").href = "css/tabs.dark.css";
                 }
-            };
+            }
 
             TabsStore.setTheme(payload.key);
             Config.saveTheme(TabsStore.theme);
@@ -247,6 +249,7 @@ AppDispatcher.register( function(payload) {
             TabsStore.closeFile();
             TabsStore.trigger('close-file-'+TabsStore.selectedTab);
             TabsStore.trigger('change');
+            break;
 
         case 'goto-connstr':
             TabsStore.trigger('goto-connstr-'+TabsStore.selectedTab);
@@ -377,7 +380,7 @@ var wordsUpdateInProgress = false;
 var updateCompletionWords = function(){
     if (!wordsUpdateInProgress){
         wordsUpdateInProgress = true;
-        for (tab in TabsStore.tabs){
+        for (var tab in TabsStore.tabs){
             var connstr = TabsStore.getConnstr(tab);
             Executor.getCompletionWords(connstr, function(words){
                 TabsStore.updateCompletionWords(words);

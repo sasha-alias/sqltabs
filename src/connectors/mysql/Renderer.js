@@ -1,4 +1,5 @@
-var React = require('react');
+
+var Actions = require('../../Actions');
 
 var Renderer = {
 
@@ -28,18 +29,18 @@ var Renderer = {
             var id = "role_"+tabid+"_"+idx;
             return <li key={id}>{item}</li>
         });
-        var databases = info.object.databases.map(function(item, idx){
-            var id = "database_"+tabid+"_"+idx;
-            return <li key={id}>{item}</li>
-        });
-        var tablespaces = info.object.tablespaces.map(function(item, idx){
-            var id = "tablespace_"+tabid+"_"+idx;
-            return <li key={id}>{item}</li>
-        });
-        var event_triggers = info.object.event_triggers.map(function(item, idx){
-            var id = "event_trigger_"+tabid+"_"+idx;
-            return <li key={id}>{item}</li>
-        });
+        //var databases = info.object.databases.map(function(item, idx){
+        //    var id = "database_"+tabid+"_"+idx;
+        //    return <li key={id}>{item}</li>
+        //});
+        //var tablespaces = info.object.tablespaces.map(function(item, idx){
+        //    var id = "tablespace_"+tabid+"_"+idx;
+        //    return <li key={id}>{item}</li>
+        //});
+        //var event_triggers = info.object.event_triggers.map(function(item, idx){
+        //    var id = "event_trigger_"+tabid+"_"+idx;
+        //    return <li key={id}>{item}</li>
+        //});
 
         return (<div className="object-info-div">Database host <span className="object-info-name">{info.object_name}</span> <br/>
             {info.object.version}
@@ -153,6 +154,7 @@ var Renderer = {
             return <div className="alert alert-danger"> Object "{info.object_name}" not found </div>
         }
 
+        var relkind;
         if (info.object.relkind == 'r'){relkind = "Table"}
         else if (info.object.relkind == 'i'){relkind = 'Index'}
         else if (info.object.relkind == 'S'){relkind = 'Sequence'}
@@ -177,37 +179,33 @@ var Renderer = {
         );
         for (var i=0; i<info.object.columns.length; i++){
             // not null
+            var not_null = '';
             if (info.object.columns[i].not_null == 't'){
-                var not_null = <span className="ace_keyword">NOT NULL</span>;
-            } else {
-                var not_null = '';
+                not_null = <span className="ace_keyword">NOT NULL</span>;
             }
             // type
+            var type = <span className="ace_keyword">{info.object.columns[i].type}</span>;
             if (info.object.columns[i].max_length != '-1'){
-                var type = <span><span className="ace_keyword">{info.object.columns[i].type} </span>
+                type = <span><span className="ace_keyword">{info.object.columns[i].type} </span>
                 <span className="ace_paren ace_lparen">(</span>
                 <span className="ace_constant">{info.object.columns[i].max_length}</span>
                 <span className="ace_paren ace_rparen">)</span>
                 </span>;
-            } else {
-                var type = <span className="ace_keyword">{info.object.columns[i].type}</span>;
             }
             // default
+            default_value = "";
             if (info.object.columns[i].default_value != null){
                 var default_value = <span>
                     <span className="ace_keyword">DEFAULT </span>
                     <span className="">{info.object.columns[i].default_value}</span>
                 </span>;
-            } else {
-                var default_value = "";
             }
             // description
+            var descr_suffix = "";
+            var description = "";
             if (info.object.columns[i].description != null){
-                var descr_suffix = <span className="ace_comment">--</span>;
-                var description = <span className="ace_comment">{info.object.columns[i].description}</span>;
-            } else {
-                var descr_suffix = "";
-                var description = "";
+                descr_suffix = <span className="ace_comment">--</span>;
+                description = <span className="ace_comment">{info.object.columns[i].description}</span>;
             }
 
             var column = (<tr key={info.object_name+"_"+i}>
@@ -223,50 +221,47 @@ var Renderer = {
         }
 
         // pk
+        var pk = null;
         if (info.object.pk != null){
-            var pk = [];
-            for (var i=0; i < info.object.pk.length; i++){
+            pk = [];
+            for (i=0; i < info.object.pk.length; i++){
                 var pkd = <p key={"pk_" + info.object.pk[i].name}>
                     <span className="ace_keyword">CONSTRAINT</span> {info.object.pk[i].name}
                     <span className="ace_keyword"> </span> ({info.object.pk[i].columns})
                 </p>;
                 pk.push(pkd);
             }
-        } else {
-            var pk = null;
         }
 
 
         // check constraints
+        var check_constraints = null;
         if (info.object.check_constraints != null){
-            var check_constraints = [];
-            for (var i=0; i < info.object.check_constraints.length; i++){
+            check_constraints = [];
+            for (i=0; i < info.object.check_constraints.length; i++){
                 var check = <p key={"check_" + info.object.check_constraints[i].name}>
                     <span className="ace_keyword">CONSTRAINT</span> {info.object.check_constraints[i].name}
                     <span className="ace_keyword"> CHECK </span> ({info.object.check_constraints[i].columns})
                 </p>;
                 check_constraints.push(check);
             }
-        } else {
-            var check_constraints = null;
         }
 
         // indexes
+        var indexes = null;
         if (info.object.indexes != null){
-            var indexes=[];
-            for (var i=0; i < info.object.indexes.length; i++){
+            indexes=[];
+            for (i=0; i < info.object.indexes.length; i++){
 
                 var idx = info.object.indexes[i];
 
+                var unique = "";
                 if (idx.non_unique == '0'){
-                    var unique = "UNIQUE ";
-                } else {
-                    var unique = "";
+                    unique = "UNIQUE ";
                 }
+                var comment = null;
                 if (idx.comment){
-                    var comment = "-- {comment}";
-                } else {
-                    var comment = null;
+                    comment = "-- {comment}";
                 }
                 var index = <p key={"idx_" + idx.name}>
                 <span className="ace_keyword">{unique}INDEX </span>{idx.name}
@@ -275,14 +270,12 @@ var Renderer = {
 
                 indexes.push(index);
             }
-
-        } else {
-            var indexes = null;
         }
 
         // triggers
+        var triggers = null;
         if (info.object.triggers != null){
-            var triggers = info.object.triggers.map(function(item, idx){
+            triggers = info.object.triggers.map(function(item, idx){
                 var id = 'trigger_'+tabid+'+'+idx;
                 return <li key={id}><a href="#" onClick={function(){getFunction('trigger:'+item.oid);}}>{item.name}</a></li>;
             });
@@ -290,9 +283,6 @@ var Renderer = {
             triggers = <div>Triggers:<ul>
                 {triggers}
             </ul></div>;
-
-        } else {
-            var triggers = null;
         }
 
         var records = <p> Records: <span className="ace_constant">{info.object.records}</span></p>;
@@ -300,10 +290,11 @@ var Renderer = {
         var total_size = <p> Total Size: <span className="ace_constant">{info.object.total_size}</span></p>;
 
         // view script
+        var view_script = null;
         if (info.object.relkind == 'v'){
             this.scripts = [info.object.script];
             var div_id = "script_"+self.props.eventKey;
-            var view_script = <div>
+            view_script = <div>
                 <hr/>
                 Script:
                 <div key={div_id} id={div_id}></div>
@@ -313,9 +304,6 @@ var Renderer = {
             records = null;
             size = null;
             total_size = null;
-
-        } else {
-            var view_script = null;
         }
 
         // sequence params

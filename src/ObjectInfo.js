@@ -298,6 +298,7 @@ var ObjectInfo = React.createClass({
             return <div className="alert alert-danger"> Object "{info.object_name}" not found </div>
         }
 
+        var relkind;
         if (info.object.relkind == 'r'){relkind = "Table"}
         else if (info.object.relkind == 'i'){relkind = 'Index'}
         else if (info.object.relkind == 'S'){relkind = 'Sequence'}
@@ -327,37 +328,33 @@ LIMIT 100;`;
         );
         for (var i=0; i<info.object.columns.length; i++){
             // not null
+            var not_null = '';
             if (info.object.columns[i].not_null == 't'){
-                var not_null = <span className="ace_keyword">NOT NULL</span>;
-            } else {
-                var not_null = '';
+                not_null = <span className="ace_keyword">NOT NULL</span>;
             }
             // type
+            var type = <span className="ace_keyword">{info.object.columns[i].type}</span>;
             if (info.object.columns[i].max_length != '-1'){
-                var type = <span><span className="ace_keyword">{info.object.columns[i].type} </span>
+                type = <span><span className="ace_keyword">{info.object.columns[i].type} </span>
                 <span className="ace_paren ace_lparen">(</span>
                 <span className="ace_constant">{info.object.columns[i].max_length}</span>
                 <span className="ace_paren ace_rparen">)</span>
                 </span>;
-            } else {
-                var type = <span className="ace_keyword">{info.object.columns[i].type}</span>;
             }
             // default
+            var default_value = "";
             if (info.object.columns[i].default_value != null){
-                var default_value = <span>
+                default_value = <span>
                     <span className="ace_keyword">DEFAULT </span>
                     <span className="">{info.object.columns[i].default_value}</span>
                 </span>;
-            } else {
-                var default_value = "";
             }
             // description
+            var descr_suffix = "";
+            var description = "";
             if (info.object.columns[i].description != null){
-                var descr_suffix = <span className="ace_comment">--</span>;
-                var description = <span className="ace_comment">{info.object.columns[i].description}</span>;
-            } else {
-                var descr_suffix = "";
-                var description = "";
+                descr_suffix = <span className="ace_comment">--</span>;
+                description = <span className="ace_comment">{info.object.columns[i].description}</span>;
             }
 
             var column = (<tr key={info.object_name+"_"+i}>
@@ -373,63 +370,59 @@ LIMIT 100;`;
         }
 
         // pk
+        var pk = null;
         if (info.object.pk != null){
             var pk_cols = info.object.pk.columns.replace(/^\{/, '');
-            var pk_cols = pk_cols.replace(/\}$/, '');
+            pk_cols = pk_cols.replace(/\}$/, '');
             pk = <p><span className="ace_keyword">CONSTRAINT</span> {info.object.pk.pk_name}
             <span className="ace_keyword"> PRIMARY KEY</span> ({pk_cols})</p>;
-        } else {
-            pk = null;
         }
 
         // check constraints
+        var check_constraints = null;
         if (info.object.check_constraints != null){
-            var check_constraints = [];
-            for (var i=0; i < info.object.check_constraints.length; i++){
+            check_constraints = [];
+            for (i=0; i < info.object.check_constraints.length; i++){
                 var check = <p key={"check_" + info.object.check_constraints[i].name}>
                     <span className="ace_keyword">CONSTRAINT</span> {info.object.check_constraints[i].name}
                     <span className="ace_keyword"> CHECK </span> {info.object.check_constraints[i].src}
                 </p>;
                 check_constraints.push(check);
             }
-        } else {
-            var check_constraints = null;
         }
 
         // foreign keys
+        var foreign_keys = null;
         if (info.object.foreign_keys != null){
-            var foreign_keys = [];
-            for (var i=0; i < info.object.foreign_keys.length; i++){
+            foreign_keys = [];
+            for (i=0; i < info.object.foreign_keys.length; i++){
                 var fk = info.object.foreign_keys[i];
-                var fk = <p key={"fk_" + fk.name}>
+                fk = <p key={"fk_" + fk.name}>
                     <span className="ace_keyword">CONSTRAINT</span> {fk.name}
                     <span className="ace_keyword"> FOREIGN KEY </span> {fk.columns}
                     <span className="ace_keyword"> REFERENCES </span> {fk.references}
                 </p>;
                 foreign_keys.push(fk);
             }
-        } else {
-            var foreign_keys = null;
         }
 
         // indexes
+        var indexes = null;
         if (info.object.indexes != null){
-            var indexes=[];
-            for (var i=0; i < info.object.indexes.length; i++){
+            indexes=[];
+            for (i=0; i < info.object.indexes.length; i++){
 
                 var idx = info.object.indexes[i];
                 var idx_cols = idx.columns.replace(/^\{/, '');
-                var idx_cols = idx_cols.replace(/\}$/, '');
+                idx_cols = idx_cols.replace(/\}$/, '');
 
+                var unique = "";
                 if (idx.unique == 't'){
-                    var unique = "UNIQUE ";
-                } else {
-                    var unique = "";
+                    unique = "UNIQUE ";
                 }
+                var predicate = null;
                 if (idx.predicate){
-                    var predicate = <span><span className="ace_keyword">WHERE </span>{idx.predicate}</span>
-                } else {
-                    var predicate = null;
+                    predicate = <span><span className="ace_keyword">WHERE </span>{idx.predicate}</span>
                 }
                 var index = <p key={"idx_" + idx.name}>
                 <span className="ace_keyword">{unique}INDEX </span>{idx.name}
@@ -438,14 +431,12 @@ LIMIT 100;`;
 
                 indexes.push(index);
             }
-
-        } else {
-            var indexes = null;
         }
 
         // triggers
+        var triggers = null;
         if (info.object.triggers != null){
-            var triggers = info.object.triggers.map(function(item, idx){
+            triggers = info.object.triggers.map(function(item, idx){
                 var id = 'trigger_'+self.eventKey+'+'+idx;
                 return <li key={id}><a href="#" onClick={function(){self.getInfo('trigger:'+item.oid);}}>{item.trigger_name}</a></li>;
             });
@@ -453,9 +444,6 @@ LIMIT 100;`;
             triggers = <div>Triggers:<ul>
                 {triggers}
             </ul></div>;
-
-        } else {
-            var triggers = null;
         }
 
         var records = <p> Records: <span className="ace_constant">{info.object.records}</span></p>;
@@ -463,10 +451,11 @@ LIMIT 100;`;
         var total_size = <p> Total Size: <span className="ace_constant">{info.object.total_size}</span></p>;
 
         // view script
+        var view_script = null;
         if (info.object.relkind == 'v'){
             this.scripts = [info.object.script];
             var div_id = "script_"+self.props.eventKey;
-            var view_script = <div>
+            view_script = <div>
                 <hr/>
                 Script:
                 <div key={div_id} id={div_id}></div>
@@ -476,9 +465,6 @@ LIMIT 100;`;
             records = null;
             size = null;
             total_size = null;
-
-        } else {
-            var view_script = null;
         }
 
         // sequence params

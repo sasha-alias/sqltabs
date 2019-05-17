@@ -125,7 +125,7 @@ var Conf = {
             return "share.sqltabs.com";
         } else {
             return config.sharing_server;
-        };
+        }
     },
 
     saveSharingServer: function(server){

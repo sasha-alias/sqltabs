@@ -1,4 +1,3 @@
-var React = require('react');
 var CassandraMAP = require("cassandra-map");
 
 var Renderer = {
@@ -24,7 +23,7 @@ var Renderer = {
             }
         }
 
-        for (k in info.object.keyspaces){
+        for (var k in info.object.keyspaces){
             keyspaces.push(
                 <div> <a href="#" onClick={getKeyspaceHandler(k)}>{k}</a> </div>
             );
@@ -132,19 +131,20 @@ var Renderer = {
         info.object.clusteringKeys.forEach(function(item){
             clustering_key_cols.push(item.name);
         });
+
+        var primary_key;
         if (clustering_key_cols.length > 0){
-            var primary_key = 'PRIMARY KEY (('+partition_key_cols.join(',')+'),'+clustering_key_cols.join(',')+')';
+            primary_key = 'PRIMARY KEY (('+partition_key_cols.join(',')+'),'+clustering_key_cols.join(',')+')';
         } else {
-            var primary_key = 'PRIMARY KEY (('+partition_key_cols.join(',')+'))';
+            primary_key = 'PRIMARY KEY (('+partition_key_cols.join(',')+'))';
         }
 
+        var compaction_options = '';
         if (Object.keys(info.object.compactionOptions).length > 0 ){
-            var compaction_options = '';
+            compaction_options = '';
             for (var opt in info.object.compactionOptions){
                 compaction_options += ", "+"'"+opt+"': '"+info.object.compactionOptions[opt]+"'"
             }
-        } else {
-            var compaction_options = '';
         }
 
         var compaction = "{'class': '"+info.object.compactionClass +"'" + compaction_options + "}";

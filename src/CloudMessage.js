@@ -20,7 +20,6 @@ var React = require('react');
 var ReactDOM = require('react-dom');
 var Modal = require('react-bootstrap').Modal;
 var Button = require('react-bootstrap').Button;
-var OverlayMixin = require('react-bootstrap').OverlayMixin;
 var TabsStore = require('./TabsStore');
 var Actions = require('./Actions');
 var Shell = require('electron').shell;
@@ -91,10 +90,9 @@ var CloudMessage = React.createClass({
 
     open: function(){
         var docid = TabsStore.getCloudDoc();
+        var target_server = this.target_server;
         if (this.target_server.indexOf("http://") == -1 && this.target_server.indexOf('https://') == -1){
-            var target_server = "https://"+this.target_server;
-        } else {
-            var target_server = this.target_server;
+            target_server = "https://"+this.target_server;
         }
         Shell.openExternal(target_server+'/api/1.0/docs/'+docid);
         this.hide();

@@ -18,12 +18,13 @@
 var React = require('react');
 var ReactDOM = require('react-dom');
 var c3 = require('c3');
+var $ = require('jquery');
 
 var Chart = React.createClass({
 
     componentDidMount: function(){
 
-        var fields = this.props.dataset.fields.map(function(field, i){
+        var fields = this.props.dataset.fields.map(function(field){
             return field.name;
         });
         this.props.dataset.data.unshift(fields);
@@ -58,7 +59,7 @@ var Chart = React.createClass({
             return;
         }
 
-        var chart = c3.generate({
+        c3.generate({
             bindto: ReactDOM.findDOMNode(this),
             data: data,
         });

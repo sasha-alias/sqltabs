@@ -1,6 +1,6 @@
 
 if (process.platform == 'linux'){
-    mkdirp = require('mkdirp');
+    var mkdirp = require('mkdirp');
     mkdirp(process.env.HOME+'/.local/share/icons', function(err){console.log(err)});
     mkdirp(process.env.HOME+'/.local/share/applications');
     var fs = require('fs');
@@ -69,7 +69,7 @@ app.on('ready', function() {
     createWindow();
     if (files2open.length != 0){
         var contents = mainWindow.webContents;
-        for (i in files2open){
+        for (var i in files2open){
             var path = files2open[i];
             var getEmitter = function(contents, path){
                 return function(){

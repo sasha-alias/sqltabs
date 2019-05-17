@@ -1,10 +1,9 @@
 
-var React = require('react');
 var Actions = require('./../../Actions');
 
 var Renderer = {
 
-    info: function(tabid, info, getFunction){
+    info: function(tabid, info, getFunction){ // eslint-disable-line no-unused-vars
         if (info.object_type == "database"){
             const collections = info.object.collections.map( (item, i) => {
                 const script = `collection("`+item+`")

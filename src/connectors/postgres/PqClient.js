@@ -63,7 +63,7 @@ var Client = function(connstr, password, redshift){
                 console.log("failed to connect to cancel query: "+err);
             } else {
                 console.log(self.client.processID);
-                xclient.query("SELECT pg_cancel_backend($1)", [self.client.processID], function(err, res){
+                xclient.query("SELECT pg_cancel_backend($1)", [self.client.processID], function(err){
                     if (err){
                         console.log("failed to cancel query: "+err);
                     }
@@ -101,7 +101,7 @@ var Client = function(connstr, password, redshift){
                     self.query_cancelled = false;
                     err_callback("query cancelled by user's request");
                 } else {
-                    ds = new Dataset({rows: [], fields: [], cmdStatus: ""});
+                    var ds = new Dataset({rows: [], fields: [], cmdStatus: ""});
                     ds.resultStatus = "PGRES_BAD_RESPONSE";
                     ds.resultErrorMessage = err.message;
                     self.Response.datasets.push(ds);
@@ -196,15 +196,13 @@ var normalizeConnstr = function(connstr, password, redshift){
         if (connstr.lastIndexOf('postgresql://', 0) !== 0 && connstr.lastIndexOf('postgres://', 0) !== 0 && connstr.lastIndexOf('redshift://', 0) !== 0) {
             connstr = 'postgres://'+connstr;
         }
-        parsed = url.parse(connstr);
+        var parsed = url.parse(connstr);
+        var params = parsed.query;
         if (parsed.query == null){
+            params = "";
             if (!redshift){ // redhsift doesn't support this
-                var params = "application_name=sqltabs";
-            } else {
-                var params = "";
+                params = "application_name=sqltabs";
             }
-        } else {
-            var params = parsed.query;
         }
         connstr = util.format('%s//%s%s%s%s?%s',
             parsed.protocol,

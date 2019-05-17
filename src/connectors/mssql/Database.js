@@ -24,21 +24,22 @@ function formatDate(date, type) {
     min = (min < 10 ? "0" : "") + min;
     sec = (sec < 10 ? "0" : "") + sec;
 
+    var str;
     if (type == 'Date'){
-        var str =  date.getFullYear() + "-" + month + "-" + day;
+        str =  date.getFullYear() + "-" + month + "-" + day;
     } else if(type == 'SmallDateTime') {
-        var str = date.getFullYear() + "-" + month + "-" + day + " " +  hour + ":" + min + ":" + sec;
+        str = date.getFullYear() + "-" + month + "-" + day + " " +  hour + ":" + min + ":" + sec;
     } else if (type == 'Time'){
-        var str = hour + ":" + min + ":" + sec + "." + msec;
+        str = hour + ":" + min + ":" + sec + "." + msec;
     } else {
-        var str = date.getFullYear() + "-" + month + "-" + day + " " +  hour + ":" + min + ":" + sec + "." + msec;
+        str = date.getFullYear() + "-" + month + "-" + day + " " +  hour + ":" + min + ":" + sec + "." + msec;
     }
 
     return str;
 }
 
 var Response = function(query){
-    self = this;
+    var self = this;
     this.connector_type = "mssql";
     this.query = query;
     //this.block = query
@@ -79,11 +80,11 @@ var Response = function(query){
             return;
         }
 
-        for (rsn in recordsets){
+        for (var rsn in recordsets){
             var data = [];
             var fields = [];
 
-            for (cn in recordsets[rsn].columns){
+            for (var cn in recordsets[rsn].columns){
                 if (typeof(recordsets[rsn].columns[cn].type) != 'undefined'){
                     fields.push({
                         name: recordsets[rsn].columns[cn].name,
@@ -97,13 +98,14 @@ var Response = function(query){
                 }
             }
 
-            for (rn in recordsets[rsn]){
+            for (var rn in recordsets[rsn]){
                 var r = [];
-                for (fn in fields){
+                for (var fn in fields){
+                    var val;
                     if (['DateTime2', 'DateTime', 'Time', 'Date', 'SmallDateTime'].indexOf(fields[fn].type) > -1){
-                        var val = formatDate(recordsets[rsn][rn][fields[fn].name], type);
+                        val = formatDate(recordsets[rsn][rn][fields[fn].name], fields[fn].type);
                     } else {
-                        var val = String(recordsets[rsn][rn][fields[fn].name]);
+                        val = String(recordsets[rsn][rn][fields[fn].name]);
                     }
                     r.push(val);
                 }
@@ -177,7 +179,7 @@ var Database = {
         }
     },
 
-    disconnect(id, connstr){
+    disconnect(id, connstr){ // eslint-disable-line no-unused-vars
         if (id in Clients){
             Clients[id].close();
         }
@@ -320,46 +322,46 @@ var Database = {
         }
     },
 
-    getCompletionWords: function(callback){
+    getCompletionWords: function(callback){ // eslint-disable-line no-unused-vars
 
-        var query = "select name from (\
-    select name from sys.objects \
-    union \
-    select name from sys.columns \
-    union \
-    select name from sys.schemas \
-) a \
-order by name"
-
-        this._getData(0, connstr, password, query,
-        function(data){
-            for (rn in data){
-                var word = data[rn].name;
-                if (Words.indexOf(word) == -1){
-                    Words.push(word);
-                }
-                Words.sort();
-            }
+//        var query = "select name from (\
+//    select name from sys.objects \
+//    union \
+//    select name from sys.columns \
+//    union \
+//    select name from sys.schemas \
+//) a \
+//order by name";
+//
+//        this._getData(0, connstr, password, query,
+//        function(data){
+//            for (rn in data){
+//                var word = data[rn].name;
+//                if (Words.indexOf(word) == -1){
+//                    Words.push(word);
+//                }
+//                Words.sort();
+//            }
+//            callback(Words);
+//        },
+//        function(err){
             callback(Words);
-        },
-        function(err){
-            callback(Words);
-        });
+//        });
 
     },
 
-    getDatabaseInfo: function(id, connstr, password, callback, err_callback){
+    getDatabaseInfo: function(id, connstr, password, callback, err_callback){ // eslint-disable-line no-unused-vars
         var self = this;
         var schemas = [];
         var getSchemas = function(done){
             self._getData(0, connstr, password, "SELECT name FROM sys.schemas ORDER BY name",
             function(data){
-                for (rn in data){
+                for (var rn in data){
                     schemas.push(data[rn].name);
                 }
                 done();
             },
-            function(err){done();})
+            function(){done();})
         }
 
         async.series([getSchemas], function(){

@@ -24,6 +24,8 @@ var dialog = remote.dialog;
 var fs = require('fs');
 var path = require('path');
 var async = require('async');
+var $ = require
+var scrollUtils = require('./ScrollUtils');
 
 var Project = React.createClass({
 
@@ -40,7 +42,6 @@ var Project = React.createClass({
     componentDidMount: function(){
         TabsStore.bind('show-project-'+this.props.eventKey, this.showProjectHandler);
         TabsStore.bind('hide-project-'+this.props.eventKey, this.hideProjectHandler);
-        TabsStore.bind('font-size-changed', this.resize);
         ReactDOM.findDOMNode(this.refs.project_div).addEventListener("keydown", this.keyPressHandler);
 
     },
@@ -48,7 +49,6 @@ var Project = React.createClass({
     componentWillUnmount: function(){
         TabsStore.unbind('show-project-'+this.props.eventKey, this.showProjectHandler);
         TabsStore.unbind('hide-project-'+this.props.eventKey, this.hideProjectHandler);
-        TabsStore.unbind('font-size-changed', this.resize);
         ReactDOM.findDOMNode(this.refs.project_div).removeEventListener("keydown", this.keyPressHandler);
     },
 
@@ -60,19 +60,6 @@ var Project = React.createClass({
 
     hideProjectHandler: function(){
         Actions.focusEditor();
-    },
-
-    componentDidUpdate: function(){
-
-        this.resize();
-    },
-
-    resize: function(){
-        var project_list = ReactDOM.findDOMNode(this.refs.project_list);
-        var files_list = ReactDOM.findDOMNode(this.refs.project_files_list);
-        $(files_list).height(
-            $(project_list).parent().height() - $(project_list).height() - $(".tab-navigator").height()
-        );
     },
 
     update: function(){
@@ -113,7 +100,6 @@ var Project = React.createClass({
 
     goDirUp: function(){
         if (this.state.active.type == "file" && this.state.active.idx >= 0 && this.state.active.idx < this.state.files.length){
-            var item = this.state.files[this.state.active.idx];
             var p = path.dirname(this.state.current_path);
             this.clickFolderHandler(p);
         }
@@ -129,7 +115,7 @@ var Project = React.createClass({
         if (this.state.active.type == "file" && this.state.active.idx > 0){
             return this.setState({active: {type: "file", idx: this.state.active.idx-1}},
             function(){
-                scrollToUp("#project-files-list-"+this.props.eventKey, '#project_file_'+this.props.eventKey+'_'+this.state.active.idx);
+                scrollUtils.scrollToUp("#project-files-list-"+this.props.eventKey, '#project_file_'+this.props.eventKey+'_'+this.state.active.idx);
             }
             );
         }
@@ -150,7 +136,7 @@ var Project = React.createClass({
         if (this.state.active.type == "file" && this.state.active.idx < this.state.files.length-1){
             return this.setState({active: {type: "file", idx: this.state.active.idx+1}},
             function(){
-                scrollToDown("#project-files-list-"+this.props.eventKey, '#project_file_'+this.props.eventKey+'_'+this.state.active.idx);
+                scrollUtils.scrollToDown("#project-files-list-"+this.props.eventKey, '#project_file_'+this.props.eventKey+'_'+this.state.active.idx);
             }
             );
         }
@@ -162,11 +148,11 @@ var Project = React.createClass({
 
     },
 
-    enterHandler: function(e){
-        var self = this;
+    enterHandler: function(){
         // load project
+        var p;
         if (this.state.active.type == "project" && this.state.active.idx >= 0 && this.state.active.idx < this.state.projects.length){
-            var p = TabsStore.projects[this.state.active.idx].path;
+            p = TabsStore.projects[this.state.active.idx].path;
             var files = this.loadPath(p);
             this.setState({
                 current_path: p,
@@ -180,7 +166,7 @@ var Project = React.createClass({
         if (this.state.active.type == "file" && this.state.active.idx >= 0 && this.state.active.idx < this.state.files.length){
             var item = this.state.files[this.state.active.idx];
             if (item.path == ".."){
-                var p = path.dirname(this.state.current_path);
+                p = path.dirname(this.state.current_path);
                 this.clickFolderHandler(p);
             } else if (item.dir) {
                 this.clickFolderHandler(item.path);
@@ -207,10 +193,9 @@ var Project = React.createClass({
     },
 
     toolbar: function(){
+        var path = null;
         if (this.state.current_path != null){
-            var path = <div><span className="project-current-path">{this.state.current_path}</span></div>
-        } else {
-            var path = null;
+            path = <div><span className="project-current-path">{this.state.current_path}</span></div>
         }
 
         return (
@@ -239,7 +224,7 @@ var Project = React.createClass({
 
     clickFolderHandler: function(p){
         if (p == '..'){
-            var p = path.dirname(this.state.current_path);
+            p = path.dirname(this.state.current_path);
         }
         var files = this.loadPath(p);
         this.setState({
@@ -254,7 +239,7 @@ var Project = React.createClass({
         var files = [];
 
         var ls = fs.readdirSync(p);
-        ls.forEach(function(file_name, idx){
+        ls.forEach(function(file_name){
             var file_path = path.join(p, file_name);
             var isdir = fs.lstatSync(file_path).isDirectory();
             if (isdir){
@@ -274,7 +259,7 @@ var Project = React.createClass({
                 Actions.select(existing_tab);
             } else {
 
-                chain = [
+                var chain = [
                     function(done){Actions.newTab(); done();},
                     function(done){Actions.openFile(file_path); done();},
                 ];
@@ -298,24 +283,24 @@ var Project = React.createClass({
                 var isdir = item.dir;
                 var key = "project_file_"+self.props.eventKey+"_"+idx;
 
+                var active_cls = "";
                 if (self.state.active.type == 'file' && self.state.active.idx == idx){
-                    var active_cls = " project-button-active";
-                } else {
-                    var active_cls = "";
+                    active_cls = " project-button-active";
                 }
 
+                var fitem;
                 if (isdir){
-                    var item = <div id={key} className={"project-folder"+active_cls} key={key} onClick={
+                    fitem = <div id={key} className={"project-folder"+active_cls} key={key} onClick={
                         function(){
                             self.clickFolderHandler(file_path);
                         }}>
                         <span className="project-folder-icon glyphicon glyphicon-folder-close"/> {file_name}
                     </div>;
-                    ret.push(item);
+                    ret.push(fitem);
                 } else {
-                    var item = <div id={key} className={"project-file"+active_cls} key={key} onClick={function(event){self.openFileHandler(event, file_path)}}
+                    fitem = <div id={key} className={"project-file"+active_cls} key={key} onClick={function(event){self.openFileHandler(event, file_path)}}
                     > {file_name} </div>
-                    ret.push(item);
+                    ret.push(fitem);
                 }
 
             });

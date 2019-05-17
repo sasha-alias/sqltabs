@@ -9,10 +9,9 @@ var parse_connstr = function(connstr){
 
     var parsed = url.parse(connstr);
 
+    var keyspace = '';
     if (parsed.pathname != 'undefined' && parsed.pathname != null){
-        var keyspace = parsed.pathname.substring(1);
-    } else {
-        var keyspace = '';
+        keyspace = parsed.pathname.substring(1);
     }
 
     return {
@@ -44,7 +43,7 @@ var Response = function(query){
     this.datasets = [];
     this.start_time = performance.now(); //new Date().getTime();
     this.duration = null;
-    self = this;
+    var self = this;
     this.finish = function(){
         self.duration = Math.round((performance.now() - self.start_time)*1000)/1000;
     };
@@ -64,8 +63,8 @@ var Response = function(query){
             });
         }
 
-        fields = []
-        for (i in result.columns){
+        var fields = []
+        for (var i in result.columns){
             var col = result.columns[i];
             fields.push({
                 name: col.name,
@@ -74,7 +73,7 @@ var Response = function(query){
         }
 
         var records = [];
-        for (r = 0; r < result.rowLength; r++){
+        for (var r = 0; r < result.rowLength; r++){
             var rec = [];
             for (i in fields){
                 var value = result.rows[r][fields[i].name];
@@ -149,7 +148,7 @@ var Database = {
             callback, err_callback2);
     },
 
-    getCompletionWords: function(callback){
+    getCompletionWords: function(){
         return null;
     },
 
@@ -173,9 +172,7 @@ var Database = {
 
     runBlocks: function(id, connstr, password, blocks, callback, err_callback){
         var self = this;
-        var current_block = 0;
         var results = [];
-        var client = this.getClient(id, connstr, password);
 
         var calls = [];
         for (var i=0; i<blocks.length; i++){
@@ -211,7 +208,7 @@ var Database = {
                 err_callback(id, JSON.stringify(err, null, 2));
         }
 
-        getConnection = function(done){
+        var getConnection = function(done){
             self.testConnection(id, connstr, password,
             function(){
                 var client = self.getClient(id, connstr);
@@ -335,7 +332,7 @@ var Database = {
                 if (err) {
                     err_callback(id, err);
                 } else {
-                    info = {
+                    var info = {
                         object_type: 'cassandra_table',
                         object_name: table,
                         object: table_info,

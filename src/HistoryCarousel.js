@@ -22,6 +22,7 @@ var History = require('./History');
 var Ace = require('brace');
 var TabsStore = require('./TabsStore');
 var Actions = require('./Actions');
+var $ = require('jquery');
 
 require('brace/mode/pgsql');
 require('brace/theme/chrome');
@@ -121,10 +122,11 @@ var HistoryCarousel = React.createClass({
             }
         } else { // go to next item matching a filter
             if (this.state.idx < History.length()){
+                var idx;
                 if (next){ // start from next item
-                    var idx = this.state.idx+1;
+                    idx = this.state.idx+1;
                 } else { // start from current item
-                    var idx = this.state.idx;
+                    idx = this.state.idx;
                 }
 
                 var found = false;
@@ -256,10 +258,9 @@ var HistoryCarousel = React.createClass({
                 var date = d.toLocaleDateString();
             } else {
 
+                var filter = null;
                 if (this.state.filter != ""){
-                    var filter = <p>Filter: <b>{this.state.filter}</b></p>
-                } else {
-                    var filter = null;
+                    filter = <p>Filter: <b>{this.state.filter}</b></p>
                 }
 
                 return (
@@ -284,23 +285,25 @@ var HistoryCarousel = React.createClass({
             }
 
 
+            var arrows;
             if (History.length() == 1){
-                var arrows = <span/> ;
+                arrows = <span/> ;
             } else if (this.state.idx == 0){
-                var arrows = <span className="glyphicon glyphicon-arrow-up" aria-hidden="true"></span>;
+                arrows = <span className="glyphicon glyphicon-arrow-up" aria-hidden="true"></span>;
             } else if (this.state.idx == History.length()-1){
-                var arrows = <span className="glyphicon glyphicon-arrow-down" aria-hidden="true"></span>;
+                arrows = <span className="glyphicon glyphicon-arrow-down" aria-hidden="true"></span>;
             } else {
-                var arrows = <span>
+                arrows = <span>
                     <span className="glyphicon glyphicon-arrow-up" aria-hidden="true"></span>
                     <span className="glyphicon glyphicon-arrow-down" aria-hidden="true"></span>
                     </span>;
             }
 
+            var found;
             if (this.state.found){
-                var found = null;
+                found = null;
             } else {
-                var found = <div className="alert alert-info">no more results found</div>;
+                found = <div className="alert alert-info">no more results found</div>;
             }
 
             return (

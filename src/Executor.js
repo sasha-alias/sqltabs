@@ -55,27 +55,26 @@ var Executor = {
     },
 
     getConnector: function(connstr){
+        var db = postgres;
         if  (connstr == '' || connstr == null || connstr.indexOf('alasql://') == 0){
-            var db = alasql;
+            db = alasql;
         } else if (connstr.indexOf('cassandra://') == 0){
-            var db = cassandra;
+            db = cassandra;
         } else if (connstr.indexOf('mysql://') == 0){
-            var db = mysql;
+            db = mysql;
         } else if (connstr.indexOf('mssql://') == 0){
-            var db = mssql;
+            db = mssql;
         } else if (connstr.indexOf('https://') == 0){
-            var db = firebase;
+            db = firebase;
         } else if (connstr.indexOf('redshift://') == 0){
-            var db = postgres;
+            db = postgres;
             db.redshift = true;
-        } else {
-            var db = postgres;
         }
         db.connstr = connstr;
         return db;
     },
 
-    testSSH: function(id, config, callback, err_callback){
+    testSSH: function(id, config, callback, err_callback){ // eslint-disable-line no-unused-vars
         var client = net.connect({host: config.localHost, port: config.localPort},
             function(){callback();}
         );
@@ -95,28 +94,29 @@ var Executor = {
             db_url.port = self.getConnector(connstr_list[1]).DEFAULT_PORT;
         }
 
+        var auth = db_url.auth+'@'
         if (db_url.auth == null){
-            var auth = '';
-        } else {
-            var auth = db_url.auth+'@'
+            auth = '';
         }
 
+        var url_path;
         if (db_url.path == null){
-            var url_path= '';
+            url_path= '';
         } else {
             if (db_url.path.indexOf('---') > 0){ // trim connection alias
-                var url_path = db_url.path.split('---')[0];
+                url_path = db_url.path.split('---')[0];
                 url_path = decodeURI(url_path); // convert possible %20 etc
             } else {
-                var url_path = decodeURI(db_url.path);
+                url_path = decodeURI(db_url.path);
             }
         }
 
         try{
+            var identity_file;
             if (ssh_url.query.identity_file){
-                var identity_file = require('fs').readFileSync(resolveHome(ssh_url.query.identity_file));
+                identity_file = require('fs').readFileSync(resolveHome(ssh_url.query.identity_file));
             } else {
-                var identity_file = require('fs').readFileSync(resolveHome('~/.ssh/id_rsa'));
+                identity_file = require('fs').readFileSync(resolveHome('~/.ssh/id_rsa'));
             }
         }
         catch(e){
@@ -124,15 +124,16 @@ var Executor = {
             identity_file = null;
         }
 
+        var mapped_db_url;
         if (id in Tunnels){
             console.log('reuse tunnel: '+id);
             var port = TunnelPorts[id];
-            var mapped_db_url = db_url.protocol+'//'+auth+'localhost:'+port+url_path;
+            mapped_db_url = db_url.protocol+'//'+auth+'localhost:'+port+url_path;
             return callback(self.getConnector(mapped_db_url));
         } else {
             console.log('create tunnel: '+id);
             PortSequence = PortSequence + 1;
-            var mapped_db_url = db_url.protocol+'//'+auth+'localhost:'+PortSequence+url_path;
+            mapped_db_url = db_url.protocol+'//'+auth+'localhost:'+PortSequence+url_path;
             var ssh_config = {
                 username: ssh_url.auth,
                 host: ssh_url.hostname,
@@ -173,7 +174,7 @@ var Executor = {
                 });
             });
 
-            ssh_server.on('error', function(err, srv){
+            ssh_server.on('error', function(err){
                 console.log(ssh_server.config);
                 err_callback(id, err);
             });
@@ -183,7 +184,7 @@ var Executor = {
     },
 
     releaseTunnel: function(id){
-        srv = Tunnels[id];
+        var srv = Tunnels[id];
         if (typeof(srv) != 'undefined'){
             srv.close();
             srv.removeAllListeners();

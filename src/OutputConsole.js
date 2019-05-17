@@ -16,11 +16,10 @@
 */
 
 var React = require('react');
-var Chart = require('./Chart');
 var ObjectInfo = require('./ObjectInfo');
-var Marked = require('marked');
 var Actions = require('./Actions');
 var SqlDoc = require('sqldoc');
+var TabsStore = require('./TabsStore');
 
 var OutputConsole = React.createClass({
 
@@ -115,7 +114,7 @@ var OutputConsole = React.createClass({
 
     getRenderer: function(query){
         if (TabsStore.getRenderer() == 'auto'){
-            if (query.match('^\\s*---\\s+chart\s*.*') != null){
+            if (query.match(/^\\s*---\\s+chart\s*.*/) != null){
                 return this.renderChart;
             } else {
                 return this.renderDataset;
@@ -155,10 +154,9 @@ var OutputConsole = React.createClass({
 
     renderResult: function(){
 
+        var output = 'script';
         if (TabsStore.getRenderer() == 'auto'){
-            var output = 'document';
-        } else {
-            var output = 'script';
+            output = 'document';
         }
         var sqldoc = React.createElement(SqlDoc, {
             data: this.state.result,
@@ -172,12 +170,10 @@ var OutputConsole = React.createClass({
         return sqldoc;
     },
 
-
     renderInfo: function(){
+        var id = this.state.info.object_name;
         if (this.state.info.object != null){ //???????
-            var id = this.state.info.object_name;//+'_'+this.state.info.object.columns.length;
-        } else {
-            var id = this.state.info.object_name;
+            id = this.state.info.object_name;//+'_'+this.state.info.object.columns.length;
         }
         return (
             <div id={"output-console-"+this.props.eventKey} className="output-console">

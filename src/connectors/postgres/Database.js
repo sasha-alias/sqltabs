@@ -14,16 +14,17 @@ var Database = {
 
     _getClient: function(id, connstr, password, cache){
 
+        var client;
         if (id in cache && cache[id].connstr == connstr && cache[id].connected){
-            var client = cache[id];
+            client = cache[id];
             if (client.isBusy){ // when previous query is running
                 client.silentCancel(); // just drop it
-                var client = new PqClient(connstr, password, this.redshift); // and get new client, so async errors won't come in
+                client = new PqClient(connstr, password, this.redshift); // and get new client, so async errors won't come in
                 cache[id] = client;
             }
             client.setPassword(password);
         } else {
-            var client = new PqClient(connstr, password, this.redshift);
+            client = new PqClient(connstr, password, this.redshift);
             cache[id] = client;
         }
         return client;
@@ -53,8 +54,6 @@ var Database = {
     },
 
     runBlocks: function(id, connstr, password, blocks, callback, err_callback){
-        var self = this;
-        var current_block = 0;
         var results = [];
         var client = this.getClient(id, connstr, password);
 
@@ -105,10 +104,11 @@ var Database = {
     getObjectInfo: function(id, connstr, password, object, callback, err_callback){
 
         var self = this;
+        var ret;
 
         // if no object selected then get info about database
         if (typeof(object) == 'undefined' || object == '' || object == null){
-            var ret = {object_type: 'database', object: null, object_name: null};
+            ret = {object_type: 'database', object: null, object_name: null};
             this._get_db_info(id, connstr, password,
             function(db_info){
                 ret.object = db_info;
@@ -124,7 +124,7 @@ var Database = {
         // if dot placed in the end then get information about schema (example: "myschema." )
         if (object.slice(-1) == '.'){
             var schema_name = object.slice(0, object.length-1);
-            var ret = {object_type: 'schema', object: null, object_name: schema_name};
+            ret = {object_type: 'schema', object: null, object_name: schema_name};
             this._get_schema_info(id, connstr, password, schema_name,
             function(schema_info){
                 ret.object = schema_info;
@@ -139,7 +139,7 @@ var Database = {
         // if starts with "trigger:" find trigger
         if (object.indexOf('trigger:') == 0){
 
-            var ret = {object_type: 'trigger', object: null, object_name: null}
+            ret = {object_type: 'trigger', object: null, object_name: null}
             var oid = object.split(':')[1];
 
             this._getTrigger(id, connstr, password, oid,
@@ -226,7 +226,7 @@ var Database = {
     _getCurrentUser: function(id, connstr, password, callback, err_callback){
 
         var client = this.getInfoClient(id, connstr, password);
-        query = "SELECT current_user;";
+        var query = "SELECT current_user;";
         client.sendQuery(query,
         function(result){
             var user = result.datasets[0].data[0][0];
@@ -242,7 +242,7 @@ var Database = {
         if (spath.indexOf('"$user"') > -1){
             this._getCurrentUser(id, connstr, password,
             function(user){
-                idx = spath.indexOf('"$user"');
+                var idx = spath.indexOf('"$user"');
                 spath[idx]=user;
                 if (spath.indexOf('pg_catalog') > -1){
                     callback(spath);
@@ -267,7 +267,7 @@ var Database = {
     _getSearchPath: function(id, connstr, password, callback, err_callback){
         var self = this;
         var client = this.getInfoClient(id, connstr, password);
-        query = "SHOW search_path";
+        var query = "SHOW search_path";
         client.sendQuery(query,
         function(result){
             var search_path = result.datasets[0].data[0][0];
@@ -288,8 +288,9 @@ var Database = {
     _findRelation: function(id, connstr, password, object, callback, err_callback){
         var self = this;
 
+        var query;
         if (self.redshift){
-            var query = "select n.nspname, c.relname, c.relkind, \
+            query = "select n.nspname, c.relname, c.relkind, \
 '<not supported>' size, \
 '<not supported>' total_size, \
 reltuples::bigint \
@@ -300,7 +301,7 @@ where c.oid = '"+object+"'::regclass \
 and n.oid = c.relnamespace;";
         }
         else {
-            var query = "select n.nspname, c.relname, c.relkind, \
+            query = "select n.nspname, c.relname, c.relkind, \
 pg_size_pretty(pg_relation_size(c.oid)) size, \
 pg_size_pretty(pg_total_relation_size(c.oid)) total_size, \
 reltuples::bigint \
@@ -392,10 +393,10 @@ and n.oid = c.relnamespace;";
                         if (data.length > 0){
                             relation.foreign_keys = [];
                             for (var i=0; i < data.length; i++){
-                                fk = {};
+                                var fk = {};
                                 var splitted = data[i][0].split(' FOREIGN KEY ');
                                 fk.name = splitted[0];
-                                var splitted = splitted[1].split(' REFERENCES ');
+                                splitted = splitted[1].split(' REFERENCES ');
                                 fk.columns = splitted[0];
                                 fk.references = splitted[1];
                                 relation.foreign_keys.push(fk);
@@ -543,14 +544,14 @@ and p.proname = '"+proc_name+"'";
 
         var client = this.getInfoClient(id, connstr, password);
 
-        query = "SELECT description \
+        var query = "SELECT description \
 FROM pg_description \
 WHERE objoid = '"+object+"'::regclass \
 AND objsubid = 0";
 
         client.sendQuery(query,
         function(result){
-            description = result.datasets[0].data[0][0];
+            var description = result.datasets[0].data[0][0];
             callback(description);
         },
         function(err){
@@ -559,7 +560,7 @@ AND objsubid = 0";
 
     },
 
-    _getRelationColumns: function(id, connstr, password, object, callback, err_callback){
+    _getRelationColumns: function(id, connstr, password, object, callback, err_callback){ // eslint-disable-line no-unused-vars
 
         var query = 'SELECT \
     a.attname "name", \
@@ -580,7 +581,7 @@ ORDER BY a.attnum';
 
         this._getData(id, connstr, password, query,
         function(data){
-            columns = [];
+            var columns = [];
             for (var i=0; i<data.length; i++){
                 var row = data[i];
                 var column = {
@@ -598,11 +599,11 @@ ORDER BY a.attnum';
         },
         function(err){ // ignore error
             console.log(err);
-            callback(columns);
+            callback([]);
         });
     },
 
-    _getRelationPK: function(id, connstr, password, object, callback, err_callback){
+    _getRelationPK: function(id, connstr, password, object, callback, err_callback){ // eslint-disable-line no-unused-vars
 
         var query = " \
 SELECT conname, conindid::regclass, array_agg(b.attname ORDER BY attnum) \
@@ -633,7 +634,7 @@ GROUP BY conname, conindid;";
 
     },
 
-    _getCheckConstraints: function(id, connstr, password, object, callback, err_callback){
+    _getCheckConstraints: function(id, connstr, password, object, callback, err_callback){ // eslint-disable-line no-unused-vars
 
         var query = " \
 SELECT conname, consrc \
@@ -664,7 +665,7 @@ AND contype = 'c'";
 
     },
 
-    _getRelationIndexes: function(id, connstr, password, object, callback, err_callback){
+    _getRelationIndexes: function(id, connstr, password, object, callback, err_callback){ // eslint-disable-line no-unused-vars
 
         var query = " \
 SELECT \
@@ -713,7 +714,7 @@ GROUP BY a.indexrelid, a.indisunique, d.amname, a.indrelid, a.indpred";
         });
     },
 
-    _getTriggers: function(id, connstr, password, object, callback, err_callback){
+    _getTriggers: function(id, connstr, password, object, callback, err_callback){ // eslint-disable-line no-unused-vars
             var query = " \
 select t.tgname, t.oid \
 from pg_trigger t, \
@@ -1054,8 +1055,6 @@ SELECT DISTINCT word FROM ( \
 
             needUpdate[tab] = false;
 
-            var hash = null;
-
             var get_words_hash = function(tab){return function(done){
                 var tabClient = Clients[tab];
                 var client = new PqClient(tabClient.connstr, tabClient.password, tabClient.redshift);
@@ -1095,7 +1094,7 @@ SELECT DISTINCT word FROM ( \
                         if (result.datasets.length > 0 && result.datasets[0].resultStatus == 'PGRES_FATAL_ERROR'){ // error
                             // error ignore
                         } else {
-                            data = result.datasets[0].data;
+                            var data = result.datasets[0].data;
                             async.eachSeries(data, function(item, callback){
                                 var word = item[0];
                                 if (Words.indexOf(word) == -1){

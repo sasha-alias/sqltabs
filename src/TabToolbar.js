@@ -16,7 +16,6 @@
 */
 
 var React = require('react');
-var ReactDOM = require('react-dom');
 var Actions = require('./Actions');
 var TabsStore = require('./TabsStore');
 var ConnInput = require('./ConnInput');
@@ -35,7 +34,6 @@ var TabToolbar = React.createClass({
 
     componentDidMount: function(){
         TabsStore.bind('change', this.storeChangedHandler);
-        var color = TabsStore.getConnectionColor();
         window.addEventListener('click', this.globalClickHandler);
     },
 
@@ -84,7 +82,7 @@ var TabToolbar = React.createClass({
         Actions.connectionColorChange();
     },
 
-    globalClickHandler: function(item){
+    globalClickHandler: function(){
         // hide color picker when clicked outside
         if (this.state.displayColorPicker){
             this.setState({displayColorPicker: false});
@@ -93,13 +91,12 @@ var TabToolbar = React.createClass({
 
     render: function(){
 
+        var color_picker = null;
         if (this.state.displayColorPicker){
-            var color_picker = <div className="color-picker" id="color-picker">
+            color_picker = <div className="color-picker" id="color-picker">
               <ColorPicker color={ this.state.background } onChange={ this.colorChangeHandler} />
               <div className="clear-color" onClick={this.clearColor}> Clear </div>
             </div>;
-        } else {
-            var color_picker = null;
         }
 
         return (

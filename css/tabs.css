@@ -454,7 +454,6 @@ body{
     border-bottom-style: solid;
     border-bottom-color: black;
     border-bottom-width: 1px;
-    padding-bottom: 5px;
 }
 
 .project-toolbar{
@@ -462,8 +461,10 @@ body{
     padding-top: 10px;
     width: 100%;
     text-align: left;
-    margin-left: 20px;
+    padding-left: 20px;
     line-height: 200%;
+    border-top: solid 1px;
+    margin-top: 5px;
 }
 
 .project-button{

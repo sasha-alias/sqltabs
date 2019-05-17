@@ -19,11 +19,13 @@ var React = require('react');
 var ReactDOM = require('react-dom');
 var Ace = require('brace');
 var FormatSQL = require('sql-formatter');
-var Range = ace.acequire('ace/range').Range;
+var Range = Ace.acequire('ace/range').Range;
 var TabsStore = require('./TabsStore');
 var Actions = require('./Actions');
 var History = require('./History');
 var fs = require('fs');
+var $ = require('jquery');
+var scrollUtils = require('./ScrollUtils');
 
 require('brace/mode/pgsql');
 require('brace/mode/javascript');
@@ -34,11 +36,10 @@ require('brace/keybinding/vim');
 var Editor = React.createClass({
 
     getInitialState: function(){
+        var script = null;
         if (TabsStore.tmpScript != null){
-            var script = TabsStore.tmpScript;
+            script = TabsStore.tmpScript;
             TabsStore.tmpScript = null;
-        } else {
-            var script = null;
         }
 
         this.completion_words = TabsStore.getCompletionWords();
@@ -52,6 +53,7 @@ var Editor = React.createClass({
 
     componentDidMount: function(){
         this.editor = Ace.edit(this.props.name);
+        this.editor.$blockScrolling = Infinity;
         this.editor.setTheme('ace/theme/' + this.state.theme);
         this.editor.setKeyboardHandler(this.state.mode);
 
@@ -92,7 +94,7 @@ var Editor = React.createClass({
                 win: "Ctrl-F",
                 mac: "Command-F"
             },
-            exec: function(editor, line) {
+            exec: function() {
                 Actions.toggleFindBox();
             },
             readOnly: true
@@ -104,7 +106,7 @@ var Editor = React.createClass({
                 win: "Ctrl-H",
                 mac: "Command-Y"
             },
-            exec: function(editor, line) {
+            exec: function() {
                 Actions.toggleHistory();
             },
             readOnly: true
@@ -116,7 +118,7 @@ var Editor = React.createClass({
                 win: "Ctrl-Shift-E",
                 mac: "Command-Shift-E"
             },
-            exec: function(editor, line) {
+            exec: function() {
                 Actions.execAll();
             },
             readOnly: true
@@ -165,23 +167,25 @@ var Editor = React.createClass({
         this.editor.resize();
     },
 
-    execHandler: function(editor) {
+    execHandler: function() {
         var selected = this.editor.getSelectedText();
+        var script;
         if (selected) {
-            var script = selected;
+            script = selected;
         } else {
-            var script = this.editor.getValue();
+            script = this.editor.getValue();
         }
         Actions.runQuery(this.props.eventKey, script);
     },
 
     execBlockHandler: function(){
-        var selected = this.editor.getSelectedText()
+        var selected = this.editor.getSelectedText();
+        var script;
         if (selected) {
-            var script = selected;
+            script = selected;
         } else {
             var current_line = this.editor.selection.getCursor().row;
-            var script = this.detectBlock(current_line, this.editor.getValue);
+            script = this.detectBlock(current_line, this.editor.getValue);
         }
         Actions.runQuery(this.props.eventKey, script);
 
@@ -196,7 +200,7 @@ var Editor = React.createClass({
         var block = [];
         var inside_markdown = false;
         while (current_line < this.editor.session.getLength()){
-            current_line_text = this.editor.session.getLine(current_line).trim();
+            var current_line_text = this.editor.session.getLine(current_line).trim();
 
             if (current_line_text.match(markdown_start) != null){
                 inside_markdown = true;
@@ -249,15 +253,15 @@ var Editor = React.createClass({
         }
     },
 
-    detectBlockLines: function(current_line, script){
-        var meta = '^\s*---\s*.*';
+    detectBlockLines: function(current_line){
+        var meta = /^\s*---\s*.*/;
         var markdown_start = /^\s*\/\*\*/;
         var markdown_end = /\*\*\/\s*$/;
         var inside_markdown = false;
         var start = 0;
         var start_found = false;
         while (!start_found){
-            current_line_text = this.editor.session.getLine(current_line).trim();
+            var current_line_text = this.editor.session.getLine(current_line).trim();
             if (current_line_text.match(markdown_end) != null){
                 inside_markdown = true;
             }
@@ -335,7 +339,7 @@ var Editor = React.createClass({
 
     fileOpenHandler: function(){
         var self = this;
-        filename = TabsStore.getEditorFile(this.props.eventKey);
+        var filename = TabsStore.getEditorFile(this.props.eventKey);
         var data = fs.readFileSync(filename, 'utf8');
         self.editor.session.setValue(data, -1);
     },
@@ -344,7 +348,7 @@ var Editor = React.createClass({
         var self = this;
         var position = self.editor.getCursorPosition();
         var scrollRow = self.editor.renderer.getScrollTopRow();
-        filename = TabsStore.getEditorFile(this.props.eventKey);
+        var filename = TabsStore.getEditorFile(this.props.eventKey);
         var content = self.editor.getValue().replace(/[^\S\r\n]+$/gm, ""); // trim trailing spaces
         fs.writeFile(filename, content, function(err) {
             if(err) {
@@ -377,7 +381,7 @@ var Editor = React.createClass({
 
         if (typeof(ret) == 'undefined'){ // start from the beginning in case of end of file
             this.editor.gotoLine(0, 0, true);
-            var ret = this.editor.find(value ,{
+            ret = this.editor.find(value ,{
               backwards: false,
               wrap: false,
               caseSensitive: false,
@@ -541,7 +545,7 @@ var Editor = React.createClass({
     },
 
     getHints: function(word){
-        hints = [];
+        var hints = [];
         for (var i=0; i< this.completion_words.length; i++){
             if (this.completion_words[i].toLowerCase().startsWith(word)){
                 hints.push(this.completion_words[i])
@@ -577,7 +581,7 @@ var Editor = React.createClass({
         }
 
         this.complete();
-        scrollToDown("#completion-list-"+this.props.eventKey, "#completion-hint-active-"+this.props.eventKey);
+        scrollUtils.scrollToDown("#completion-list-"+this.props.eventKey, "#completion-hint-active-"+this.props.eventKey);
 
     },
 
@@ -588,7 +592,7 @@ var Editor = React.createClass({
             this.current_hint = this.hints.length-1;
         }
         this.complete();
-        scrollToUp("#completion-list-"+this.props.eventKey, "#completion-hint-active-"+this.props.eventKey);
+        scrollUtils.scrollToUp("#completion-list-"+this.props.eventKey, "#completion-hint-active-"+this.props.eventKey);
     },
 
     renderHints: function(){

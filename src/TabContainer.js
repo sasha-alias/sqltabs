@@ -16,9 +16,6 @@
 */
 
 var React = require('react');
-var Input = require('react-bootstrap').Input;
-var DropdownButton = require('react-bootstrap').DropdownButton;
-var MenuItem = require('react-bootstrap').MenuItem;
 var TabsStore = require('./TabsStore');
 var TabActions = require('./Actions');
 var TabContent = require('./TabContent');

@@ -22,7 +22,7 @@
     "firebase": "^5.9.1",
     "firebase-admin": "^7.1.1",
     "flux": "2.0.1",
-    "grpc": "^1.19.0",
+    "grpc": "^1.20.3",
     "jquery": "^3.3.1",
     "lowdb": "0.7.2",
     "marked": "^0.3.3",
@@ -49,6 +49,8 @@
     "electron": "^4.1.0",
     "electron-packager": "^13.1.1",
     "electron-reload": "^1.4.0",
+    "eslint": "^5.16.0",
+    "eslint-plugin-react": "^7.13.0",
     "uglify-es": "^3.3.9"
   },
   "optionalDependencies": {
@@ -57,9 +59,10 @@
   "scripts": {
     "postinstall": "npm install grpc --runtime=electron --target=4.1.0; rm -r node_modules/c3/node_modules; babel --plugins transform-react-jsx --out-dir=build src/;",
     "start": "electron ./",
+    "build": "eslint main.js src/ && babel --plugins transform-react-jsx --out-dir=build src/",
     "build:mac": "./mac_build.sh",
     "build:win": "./win_build.sh",
     "build:linux": "./linux_build.sh",
-    "build:watch": "babel --plugins transform-react-jsx --out-dir=build src/ --watch"
+    "build:watch": "eslint main.js src/ && babel --plugins transform-react-jsx --out-dir=build src/ --watch"
   }
 }

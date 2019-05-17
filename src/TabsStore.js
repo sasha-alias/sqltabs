@@ -109,13 +109,12 @@ var _TabsStore = function(){
                 connstr = ''
             }
         }
+        var password = null;
         if (this.selectedTab > 0) {
             password = this.tabs[this.selectedTab].password;
-        } else {
-            password = null;
         }
 
-        newid = TabSequence.nextval();
+        var newid = TabSequence.nextval();
         this.tabs[newid] = new Tab(newid, connstr, password);
         this.order.push(newid);
         this.selectedTab = newid;
@@ -130,38 +129,36 @@ var _TabsStore = function(){
 
     this.closeTab = function(id){
         delete this.tabs[id];
-        idx = this.order.indexOf(id);
+        var idx = this.order.indexOf(id);
         this.order.splice(idx, 1);
         if (id == this.selectedTab) {
             if (idx <= this.order.length-1) {
                 this.selectedTab = this.order[idx];
             } else {
                 this.selectedTab = this.order[idx-1];
-            };
-        };
+            }
+        }
     };
 
     this.nextTab = function(){
         if (this.order.length <= 1) {
             return;
-        };
+        }
+        var idx = this.order.indexOf(this.selectedTab)+1;
         if (this.order.indexOf(this.selectedTab) == this.order.length-1){
             idx = 0;
-        } else {
-            idx = this.order.indexOf(this.selectedTab)+1;
-        };
+        }
         this.selectedTab = this.order[idx];
     };
 
     this.previosTab = function(){
         if (this.order.length <= 1) {
             return;
-        };
+        }
+        var idx = this.order.indexOf(this.selectedTab)-1;
         if (this.order.indexOf(this.selectedTab) == 0){
             idx = this.order.length-1;
-        } else {
-            idx = this.order.indexOf(this.selectedTab)-1;
-        };
+        }
         this.selectedTab = this.order[idx];
     };
 
@@ -174,7 +171,7 @@ var _TabsStore = function(){
             return 'idle_fingers';
         } else {
             return 'chrome';
-        };
+        }
     };
 
     this.setMode = function(mode){
@@ -213,13 +210,13 @@ var _TabsStore = function(){
     this.getConnstr = function(id){
         if (id in this.tabs) {
             return this.tabs[id].connstr;
-        };
+        }
     };
 
     this.getPassword = function(id){
         if (id in this.tabs) {
             return this.tabs[id].password;
-        };
+        }
     };
 
     this.getSecret = function(connstr){
@@ -234,11 +231,11 @@ var _TabsStore = function(){
             return;
         }
 
-        hist_idx = this.connectionHistory.indexOf(connstr);
+        var hist_idx = this.connectionHistory.indexOf(connstr);
         if (hist_idx == -1){ // add to history
             if (this.connectionHistory.length === 20){// limit history size
                 this.connectionHistory.pop();
-            };
+            }
             this.connectionHistory.unshift(connstr);
         } else { // shift to the beginning of history
             this.connectionHistory.splice(hist_idx, 1);
@@ -256,7 +253,7 @@ var _TabsStore = function(){
 
     this.setPassword = function(id, password, savePassword){
         this.tabs[id].password = password;
-        connstr = this.getConnstr(id);
+        var connstr = this.getConnstr(id);
 
         console.log(connstr, password, savePassword);
 
@@ -286,19 +283,19 @@ var _TabsStore = function(){
     this.getResult = function(id){
         if (id in this.tabs){
             return this.tabs[id].result;
-        };
+        }
     };
 
     this.setError = function(id, error){
         if (id in this.tabs){
             this.tabs[id].error = error;
-        };
+        }
     };
 
     this.getError = function(id){
         if (id in this.tabs){
             return this.tabs[id].error;
-        };
+        }
     };
 
     this.openFile = function(filename, tabid){
@@ -319,7 +316,7 @@ var _TabsStore = function(){
     this.getEditorFile = function(id){
         if (id in this.tabs){
             return this.tabs[id].filename;
-        };
+        }
     };
 
     this.getTabByFilename = function(filename){
@@ -422,20 +419,20 @@ var _TabsStore = function(){
             return;
         }
         if (format == 'csv'){
-            file = fs.openSync(filename, 'w');
+            var file = fs.openSync(filename, 'w');
             for (var i = 0; i < this.tabs[this.selectedTab].result.length; i++){
                 var block = this.tabs[this.selectedTab].result[i]
                 for (var j = 0; j < block.datasets.length; j++){
                     var dataset = block.datasets[j];
                     // write field names
-                    field_names = [];
+                    var field_names = [];
                     dataset.fields.forEach(function(field){
                         field_names.push('"' + field.name + '"');
                     });
                     fs.writeSync(file, field_names.join()+EOL);
                     // write records
                     dataset.data.forEach(function(record){
-                        values = []
+                        var values = []
                         record.forEach(function(col){
                             if (col != null){
                                 var escaped = col.replace(/"/g, '""');
@@ -455,7 +452,7 @@ var _TabsStore = function(){
 
     this.getConnectionColor = function(connstr){
         if (connstr == null){
-            var connstr = this.getConnstr(this.selectedTab);
+            connstr = this.getConnstr(this.selectedTab);
         }
         return Config.getConnectionColor(connstr);
     }
@@ -473,7 +470,7 @@ var _TabsStore = function(){
 
     // restore recent connection string on startup
     if (typeof(Config.getConnHistory()) != 'undefined' && Config.getConnHistory().length > 0){
-        connstr = Config.getConnHistory()[0];
+        var connstr = Config.getConnHistory()[0];
         this.newTab(connstr);
     } else {
         this.newTab();
@@ -483,7 +480,7 @@ var _TabsStore = function(){
 
 MicroEvent.mixin(_TabsStore);
 
-TabsStore = new _TabsStore();
+var TabsStore = new _TabsStore();
 
 
 module.exports = TabsStore;

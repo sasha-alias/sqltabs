@@ -94,13 +94,13 @@ var Actions = {
     },
 
     close: function(id){
-        close = () => Dialog.showMessageBox({
+        var closeDialog = () => Dialog.showMessageBox({
             buttons: ["No", "Yes"],
             defaultId: 1,
             message: "Do you really want to close the tab?"
         });
 
-        if (typeof id !== 'undefined' || close()) {
+        if (typeof id !== 'undefined' || closeDialog()) {
             AppDispatcher.dispatch({
                 eventName: 'close-tab',
                 key: id,

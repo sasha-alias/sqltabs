@@ -19,10 +19,10 @@ var request = require('request');
 var CryptoJS = require("crypto-js");
 
 if (typeof(DEVMODE) == 'undefined'){
-    DEVMODE = true;
+    var DEVMODE = true;
 }
 
-Cloud = {
+const Cloud = {
 
     share: function(target_server, encrypt, encryptionKey, data, callback, err_callback){
         if (target_server.indexOf('http://') == -1 && target_server.indexOf('https://') == -1){
