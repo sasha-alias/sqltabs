@@ -1,4 +1,6 @@
 
+var React = require('react'); // eslint-disable-line no-unused-vars
+
 var Renderer = {
 
     info: function(tabid, info, getFunction){
