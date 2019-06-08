@@ -1,4 +1,6 @@
 
+var React = require('react');
+
 var Renderer = {
 
     info: function(tabid, info, getFunction){

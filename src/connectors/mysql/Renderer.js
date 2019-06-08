@@ -1,5 +1,6 @@
 
 var Actions = require('../../Actions');
+var React = require('react');
 
 var Renderer = {
 
