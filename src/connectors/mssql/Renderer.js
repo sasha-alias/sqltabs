@@ -1,5 +1,5 @@
 
-var React = require('react');
+var React = require('react'); // eslint-disable-line no-unused-vars
 
 var Renderer = {
 
