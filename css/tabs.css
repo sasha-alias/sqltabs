@@ -435,6 +435,11 @@ body{
   padding-left: 8px;
 }
 
+.target-server-encryption-switch{
+  margin-top: 10px !important;
+  margin-right: 10px !important;
+}
+
 .schema-nav{
     padding-top: 10px;
 }

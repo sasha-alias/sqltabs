@@ -22,6 +22,8 @@ Supported Platforms:
 In order to run SQL Tabs from source code follow the next steps:
 (In case of any issues please report them [here](https://github.com/sasha-alias/sqltabs/issues/39))
 
+__node.js not higher than v10 is required__
+
 1. Install [npm](https://www.npmjs.com) - a javascript package manager
 
 2. Get the code, install dependencies and build the application:

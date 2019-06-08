@@ -173,6 +173,7 @@ var CloudMessage = React.createClass({
 
                             <label>
                             <input
+                                className="target-server-encryption-switch"
                                 defaultChecked={this.state.encrypt}
                                 onChange={ ()=>{ this.setState({encrypt: !this.state.encrypt}) }}
                                 type="checkbox"/>
