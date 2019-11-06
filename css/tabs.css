@@ -3,11 +3,11 @@ html{
     overflow: hidden;
 }
 
-body{ 
+body{
     height: 100%;
     overflow: hidden;
-    margin:0; 
-    padding:0; 
+    margin:0;
+    padding:0;
     font-size: xx-large;
 }
 
@@ -120,7 +120,7 @@ body{
 }
 
 .vsplitter {
-    display: inline-block; 
+    display: inline-block;
     cursor: ew-resize;
     width: 3px;
     height: 100%;
@@ -169,8 +169,15 @@ body{
 }
 
 .query-error{
-    font-family: monospace;
     white-space: pre;
+}
+
+.query-error pre{
+    margin-top: 10px;
+    background: none;
+    border: none;
+    color: white;
+    padding: 0;
 }
 
 .floating-cols-header{

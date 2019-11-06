@@ -103,6 +103,7 @@ var Client = function(connstr, password, redshift){
                 } else {
                     var ds = new Dataset({rows: [], fields: [], cmdStatus: ""});
                     ds.resultStatus = "PGRES_BAD_RESPONSE";
+                    ds.resultError = err;
                     ds.resultErrorMessage = err.message;
                     self.Response.datasets.push(ds);
                     callback(self.Response);
