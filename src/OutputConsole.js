@@ -18,7 +18,7 @@
 var React = require('react');
 var ObjectInfo = require('./ObjectInfo');
 var Actions = require('./Actions');
-var SqlDoc = require('sqldoc');
+var SqlDoc = require('./sqldoc/sqldoc');
 var TabsStore = require('./TabsStore');
 
 var OutputConsole = React.createClass({
