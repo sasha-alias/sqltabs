@@ -22,7 +22,7 @@
     "firebase": "^5.9.1",
     "firebase-admin": "^7.1.1",
     "flux": "2.0.1",
-    "grpc": "^1.21.1",
+    "grpc": "^1.24.2",
     "jquery": "^3.3.1",
     "lowdb": "0.7.2",
     "marked": "^0.3.3",
@@ -39,7 +39,6 @@
     "react-dom": "^0.14.9",
     "request": "^2.60.0",
     "sql-formatter": "^1.2.1",
-    "sqldoc": "^1.1.1",
     "tunnel-ssh": "^4.1.4"
   },
   "devDependencies": {
@@ -49,6 +48,7 @@
     "babel-preset-env": "^1.7.0",
     "electron": "4.1.0",
     "electron-packager": "^13.1.1",
+    "electron-rebuild": "^1.8.4",
     "electron-reload": "^1.4.0",
     "eslint": "^5.16.0",
     "eslint-plugin-react": "^7.13.0",
@@ -58,12 +58,13 @@
     "msnodesqlv8": "^0.6.12"
   },
   "scripts": {
-    "postinstall": "npm install grpc --runtime=electron --target=4.1.0; rm -r node_modules/c3/node_modules; babel --plugins transform-react-jsx --out-dir=build src/;",
+    "postinstall": "npm install grpc --runtime=electron --target=4.1.0 && eslint main.js src/ && babel --plugins transform-react-jsx --out-dir=build src/",
     "start": "electron ./",
     "build": "eslint main.js src/ && babel --plugins transform-react-jsx --out-dir=build src/",
     "build:mac": "./mac_build.sh",
     "build:win": "./win_build.sh",
     "build:linux": "./linux_build.sh",
-    "build:watch": "eslint main.js src/ && babel --plugins transform-react-jsx --out-dir=build src/ --watch"
+    "build:watch": "eslint main.js src/ && babel --plugins transform-react-jsx --out-dir=build src/ --watch",
+    "build-msnodesqlv8": ".\\scripts\\build_msnodesqlv8.bat x64"
   }
 }
