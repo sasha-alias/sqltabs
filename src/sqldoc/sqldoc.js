@@ -1,3 +1,3 @@
-var SqlDoc = require('./build/SqlDoc');
+var SqlDoc = require('./src/SqlDoc');
 
 module.exports = SqlDoc;
