@@ -59,7 +59,7 @@
   },
   "scripts": {
     "postinstall": "npm install grpc --runtime=electron --target=4.1.0 && eslint main.js src/ && babel --plugins transform-react-jsx --out-dir=build src/",
-    "start": "electron ./",
+    "start": "electron ./ --dev",
     "build": "eslint main.js src/ && babel --plugins transform-react-jsx --out-dir=build src/",
     "build:mac": "./mac_build.sh",
     "build:win": "./win_build.sh",

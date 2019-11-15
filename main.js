@@ -1,4 +1,8 @@
 
+function isDev() {
+  return process.argv[2] == '--dev';
+}
+
 if (process.platform == 'linux'){
     var mkdirp = require('mkdirp');
     mkdirp(process.env.HOME+'/.local/share/icons', function(err){console.log(err)});
@@ -25,7 +29,9 @@ if (process.platform == 'linux'){
 var electron = require('electron');
 var config = require('./build/Config');
 
-//require('electron-reload')(__dirname);
+if (isDev()){
+    require('electron-reload')(__dirname);
+}
 
 var app = electron.app;
 var BrowserWindow = electron.BrowserWindow;
@@ -44,7 +50,9 @@ var createWindow = function(){
         },
     });
     mainWindow.maximize();
-    //mainWindow.toggleDevTools();
+    if (isDev()){
+        mainWindow.toggleDevTools();
+    }
     mainWindow.loadURL('file://' + __dirname + '/index.html');
     mainWindow.on('closed', function() {
         mainWindow = null;
