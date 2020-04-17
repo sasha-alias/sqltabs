@@ -32,10 +32,19 @@ __node.js not higher than v10 is required__
         cd sqltabs
         npm install
 
+
 3. Run the application:
 
         npm start
 
 
 Contribution and issues reports are very appreciated.
+
+
+### Platform specific things
+
+You might want to rebuild grpc for firebase driver to work:
+
+        npm rebuild grpc --runtime=electron --target=4.1.0 --target_archx64
+
 
