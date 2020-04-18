@@ -16,11 +16,12 @@
 */
 
 
-var Dialog = require('electron').remote.dialog;
-var dispatcher = require('./Dispatcher');
-var AppDispatcher = dispatcher.AppDispatcher;
-var SignalsDispatcher = dispatcher.SignalsDispatcher;
-var DBDispatcher = dispatcher.DBDispatcher;
+const dispatcher = require('./Dispatcher');
+const AppDispatcher = dispatcher.AppDispatcher;
+const SignalsDispatcher = dispatcher.SignalsDispatcher;
+const DBDispatcher = dispatcher.DBDispatcher;
+const { remote } = require('electron');
+const Dialog = remote.dialog;
 
 var QueryCallback = function(key, result){
     DBDispatcher.dispatch({
