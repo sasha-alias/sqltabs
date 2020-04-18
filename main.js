@@ -74,6 +74,12 @@ app.on('open-file', function(event, path){
 });
 
 app.on('ready', function() {
+
+    if (!isDev()){
+        const { autoUpdater } = require("electron-updater");
+        autoUpdater.checkForUpdatesAndNotify();
+    }
+
     createWindow();
     if (files2open.length != 0){
         var contents = mainWindow.webContents;
@@ -88,6 +94,7 @@ app.on('ready', function() {
             contents.on('did-finish-load', emit_open_file);
         }
     }
+
     if (urlToOpen) {
         mainWindow.webContents.on('did-finish-load', function () {
             mainWindow.webContents.send('open-url', urlToOpen);
