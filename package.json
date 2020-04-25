@@ -35,6 +35,7 @@
       ]
     },
     "linux": {
+      "icon": "logo.icns",
       "category": "Development",
       "publish": [
         "github"
