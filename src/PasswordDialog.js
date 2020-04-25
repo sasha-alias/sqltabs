@@ -15,15 +15,16 @@
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-var React = require('react');
-var ReactDOM = require('react-dom');
-var Modal = require('react-bootstrap').Modal;
-var Button = require('react-bootstrap').Button;
-var TabsStore = require('./TabsStore');
-var Actions = require('./Actions');
-var dialog = require('electron').remote.dialog;
+const React = require('react');
+const ReactDOM = require('react-dom');
+const Modal = require('react-bootstrap').Modal;
+const Button = require('react-bootstrap').Button;
+const TabsStore = require('./TabsStore');
+const Actions = require('./Actions');
+const { remote } = require('electron');
+const dialog = remote.dialog;
 
-var PasswordDialog = React.createClass({
+const PasswordDialog = React.createClass({
 
     getInitialState: function(){
         return {

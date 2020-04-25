@@ -35,7 +35,14 @@
       ]
     },
     "linux": {
+      "logo": "logo.png",
       "category": "Development",
+      "publish": [
+        "github"
+      ]
+    },
+    "windows": {
+      "icon": "logo.png",
       "publish": [
         "github"
       ]
