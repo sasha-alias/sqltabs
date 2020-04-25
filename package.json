@@ -35,13 +35,12 @@
       ]
     },
     "linux": {
-      "logo": "logo.png",
       "category": "Development",
       "publish": [
         "github"
       ]
     },
-    "windows": {
+    "win": {
       "icon": "logo.png",
       "publish": [
         "github"
