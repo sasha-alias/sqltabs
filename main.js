@@ -27,7 +27,6 @@ function isDev() {
 //}
 
 var electron = require('electron');
-var config = require('./build/Config');
 
 if (isDev()){
     require('electron-reload')(__dirname);
