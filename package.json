@@ -1,8 +1,8 @@
 {
   "name": "sqltabs",
-  "version": "1.1.0-alpha",
+  "version": "1.1.0",
   "author": "Aliaksandr Aliashkevich",
-  "description": "SQL Tabs is the browser for databases",
+  "description": "SQL Tabs - a browser for databases",
   "repository": {
     "type": "git",
     "url": "https://github.com/sasha-alias/sqltabs"
