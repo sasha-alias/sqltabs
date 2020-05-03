@@ -17,7 +17,7 @@
 
 var Actions = require ('./Actions');
 var TabsStore = require('./TabsStore');
-var remote = require('electron').remote;
+var { remote } = require('electron');
 var Menu = remote.Menu;
 var BrowserWindow = remote.BrowserWindow;
 var dialog = remote.dialog;

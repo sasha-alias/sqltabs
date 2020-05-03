@@ -3,31 +3,30 @@ function isDev() {
   return process.argv[2] == '--dev';
 }
 
-if (process.platform == 'linux'){
-    var mkdirp = require('mkdirp');
-    mkdirp(process.env.HOME+'/.local/share/icons', function(err){console.log(err)});
-    mkdirp(process.env.HOME+'/.local/share/applications');
-    var fs = require('fs');
-    fs.open(process.env.HOME+"/.local/share/applications/sqltabs.desktop", "wx", function(err){
-        if (err){
-            return;
-        }
-        fs.writeFile(process.env.HOME+"/.local/share/applications/sqltabs.desktop", "Icon=sqltabs", function(err) {
-            if(err) {
-                return console.log(err);
-            }
-        });
-    });
-    fs.open(process.env.HOME+"/.local/share/icons/sqltabs.png", "wx", function(err){
-        if(err){
-            return;
-        }
-        fs.createReadStream('logo.png').pipe(fs.createWriteStream(process.env.HOME+'/.local/share/icons/sqltabs.png'));
-    });
-}
+//if (process.platform == 'linux'){
+//    var mkdirp = require('mkdirp');
+//    mkdirp(process.env.HOME+'/.local/share/icons', function(err){console.log(err)});
+//    mkdirp(process.env.HOME+'/.local/share/applications');
+//    var fs = require('fs');
+//    fs.open(process.env.HOME+"/.local/share/applications/sqltabs.desktop", "wx", function(err){
+//        if (err){
+//            return;
+//        }
+//        fs.writeFile(process.env.HOME+"/.local/share/applications/sqltabs.desktop", "Icon=sqltabs", function(err) {
+//            if(err) {
+//                return console.log(err);
+//            }
+//        });
+//    });
+//    fs.open(process.env.HOME+"/.local/share/icons/sqltabs.png", "wx", function(err){
+//        if(err){
+//            return;
+//        }
+//        fs.createReadStream('logo.png').pipe(fs.createWriteStream(process.env.HOME+'/.local/share/icons/sqltabs.png'));
+//    });
+//}
 
 var electron = require('electron');
-var config = require('./build/Config');
 
 if (isDev()){
     require('electron-reload')(__dirname);
@@ -74,6 +73,12 @@ app.on('open-file', function(event, path){
 });
 
 app.on('ready', function() {
+
+    if (!isDev()){
+        const { autoUpdater } = require("electron-updater");
+        autoUpdater.checkForUpdatesAndNotify();
+    }
+
     createWindow();
     if (files2open.length != 0){
         var contents = mainWindow.webContents;
@@ -88,25 +93,26 @@ app.on('ready', function() {
             contents.on('did-finish-load', emit_open_file);
         }
     }
+
     if (urlToOpen) {
         mainWindow.webContents.on('did-finish-load', function () {
             mainWindow.webContents.send('open-url', urlToOpen);
         });
     }
 
-    if (!app.isDefaultProtocolClient('postgres') && !config.getNoProtocolDialog()) {
-        electron.dialog.showMessageBox({
-            type: 'question',
-            buttons: ['Yes', 'No'],
-            cancelId: 1,
-            message: 'Do you want to set SQL Tabs as the default postgres client?'
-        }, function (button) {
-            config.saveNoProtocolDialog(true); // prevent protocol dialog on next start even if No has bee chosen
-            if (button === 0 ) {
-                app.setAsDefaultProtocolClient('postgres');
-            }
-        })
-    }
+    //if (!app.isDefaultProtocolClient('postgres') && !config.getNoProtocolDialog()) {
+    //    electron.dialog.showMessageBox({
+    //        type: 'question',
+    //        buttons: ['Yes', 'No'],
+    //        cancelId: 1,
+    //        message: 'Do you want to set SQL Tabs as the default postgres client?'
+    //    }, function (button) {
+    //        config.saveNoProtocolDialog(true); // prevent protocol dialog on next start even if No has bee chosen
+    //        if (button === 0 ) {
+    //            app.setAsDefaultProtocolClient('postgres');
+    //        }
+    //    })
+    //}
 });
 
 app.on('open-url', function (ev, url) {

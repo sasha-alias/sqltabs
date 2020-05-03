@@ -2,6 +2,7 @@
 SQL Tabs.app
 build/*
 .build
+dist
 node_modules/*
 sqltabs.dmg
 .idea
