@@ -84,7 +84,7 @@
     "babel-eslint": "^10.0.1",
     "babel-plugin-transform-react-jsx": "^6.24.1",
     "babel-preset-env": "^1.7.0",
-    "electron": "4.1.0",
+    "electron": "7.2.4",
     "electron-builder": "^22.5.1",
     "electron-builder-notarize": "^1.1.2",
     "electron-packager": "^13.1.1",
