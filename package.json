@@ -49,6 +49,7 @@
     }
   },
   "dependencies": {
+    "@babel/polyfill": "^7.12.1",
     "alasql": "^0.3.9",
     "async": "^1.4.2",
     "bootstrap": "^3.3.2",
@@ -80,6 +81,12 @@
     "tunnel-ssh": "^4.1.4"
   },
   "devDependencies": {
+    "@babel/cli": "^7.12.10",
+    "@babel/core": "^7.12.10",
+    "@babel/plugin-proposal-private-methods": "^7.12.1",
+    "@babel/preset-env": "^7.12.11",
+    "@babel/preset-react": "^7.12.10",
+    "@babel/preset-typescript": "^7.12.7",
     "babel-cli": "^6.26.0",
     "babel-eslint": "^10.0.1",
     "babel-plugin-transform-react-jsx": "^6.24.1",
@@ -92,6 +99,8 @@
     "electron-reload": "^1.4.0",
     "eslint": "^5.16.0",
     "eslint-plugin-react": "^7.13.0",
+    "esm": "^3.2.25",
+    "mocha": "^8.2.1",
     "uglify-es": "^3.3.9"
   },
   "optionalDependencies": {
@@ -100,12 +109,14 @@
   "scripts": {
     "postinstall": "eslint main.js src/ && babel --plugins transform-react-jsx --out-dir=build src/ && electron-builder install-app-deps",
     "start": "electron ./ --dev",
-    "compile": "eslint main.js src/ && babel --plugins transform-react-jsx --out-dir=build src/",
-    "compile:watch": "eslint main.js src/ && babel --plugins transform-react-jsx --out-dir=build src/ --watch",
+    "compile": "eslint main.js src/ && babel --extensions '.ts,.js' --out-dir=build src/",
+    "compile:watch": "eslint main.js src/ && babel --extensions '.ts,.js' --out-dir=build src/ --watch",
     "build": "npm run compile",
     "build:mac": "electron-builder --mac",
     "build:win": "electron-builder --windows",
     "build:linux": "electron-builder --linux",
-    "build-msnodesqlv8": ".\\scripts\\build_msnodesqlv8.bat x64"
+    "build-msnodesqlv8": ".\\scripts\\build_msnodesqlv8.bat x64",
+    "test": "mocha --require esm",
+    "test:watch": "mocha --require esm --watch --recursive"
   }
 }
