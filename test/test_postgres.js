@@ -67,4 +67,51 @@ describe("Postgres driver", async ()=> {
         assert(Executor.tabConnections[0].connected == false);
     });
 
+    it("runs a single query", async ()=>{
+        const res = await Executor.runQuery(0, PG_CONNSTR, "SELECT 555 test");
+        assert(res.items[0].data[0].test == 555);
+        assert.equal(res.items[0].resultType, "DATA");
+    });
+
+    it("runs two queries", async ()=>{
+        const res = await Executor.runQuery(0, PG_CONNSTR, "SELECT 111 test; SELECT 222 test;");
+        assert(res.items[0].data[0].test == 111);
+        assert(res.items[1].data[0].test == 222);
+    });
+
+
+    it("raise notice works", async ()=>{
+        const res = await Executor.runQuery(0, PG_CONNSTR, "DO $$BEGIN RAISE NOTICE 'just a notice'; END;$$;");
+        assert.equal(res.items[0].message.message, 'just a notice');
+        assert.equal(res.items[0].resultType, "MESSAGE");
+    });
+
+    it("raise two notices works", async ()=>{
+        const res = await Executor.runQuery(0, PG_CONNSTR, "DO $$BEGIN RAISE NOTICE 'notice1'; RAISE NOTICE 'notice2'; END;$$;");
+        assert(res.items[0].message.message == 'notice1');
+        assert(res.items[1].message.message == 'notice2');
+    });
+
+    it("raise warning works", async ()=>{
+        const res = await Executor.runQuery(0, PG_CONNSTR, "DO $$BEGIN RAISE WARNING 'just a warning'; END;$$;");
+        assert.equal(res.items[0].message.message, 'just a warning');
+        assert.equal(res.items[0].message.severity, "WARNING");
+    });
+
+    it("raise exception works", async ()=>{
+        const res = await Executor.runQuery(0, PG_CONNSTR, "DO $$BEGIN RAISE EXCEPTION 'just an error'; END;$$;");
+        assert.equal(res.items[0].message.message, 'just an error');
+        assert.equal(res.items[0].message.severity, "ERROR");
+    });
+
+    it("detects explain plan", async ()=>{
+        const res = await Executor.runQuery(0, PG_CONNSTR, "EXPLAIN SELECT * FROM pg_class");
+        assert.equal(res.items[0].resultType, "PLAN");
+    });
+
+    it("unexpected syntax error handled", async ()=>{
+        const res = await Executor.runQuery(0, PG_CONNSTR, "SELECT * FOM nonexisting_table");
+        assert.equal(res.items[0].message.severity, "ERROR");
+    });
+
 });

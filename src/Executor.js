@@ -16,10 +16,8 @@
 */
 
 var postgres = require('./connectors/postgres/Database.js');
-var cassandra = require('./connectors/cassandra/Database.js');
 var mysql = require('./connectors/mysql/Database.js');
 var mssql = require('./connectors/mssql/Database.js');
-var alasql = require('./connectors/alasql/Database.js');
 var firebase = require('./connectors/firebase/Database.js');
 var url = require('url');
 var path = require('path');
@@ -56,11 +54,7 @@ var Executor = {
 
     getConnector: function(connstr){
         var db = postgres;
-        if  (connstr == '' || connstr == null || connstr.indexOf('alasql://') == 0){
-            db = alasql;
-        } else if (connstr.indexOf('cassandra://') == 0){
-            db = cassandra;
-        } else if (connstr.indexOf('mysql://') == 0){
+        if (connstr.indexOf('mysql://') == 0){
             db = mysql;
         } else if (connstr.indexOf('mssql://') == 0){
             db = mssql;

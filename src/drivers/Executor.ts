@@ -1,26 +1,28 @@
 
+import { Driver } from "./Driver";
 import Postgres from "./postgres/Database.js";
+import MSSql from "./mssql/Database.js";
 
-export default {
+class Executor {
 
-    tabConnections: {}, // connections per tab
-    bgConnections: {}, // connections per connstr (background connection)
+    tabConnections: { [id: number] : Driver } = {} // connections per tab
+    bgConnections: { [id: string] : Driver } = {} // connections per connstr (background connection)
 
-    get tabConnectionCount(): integer {
+    get tabConnectionCount(): number {
         return Object.keys(this.tabConnections).length;
-    },
+    }
 
-    get bgConnectionCount(): integer {
+    get bgConnectionCount(): number {
         return Object.keys(this.bgConnections).length;
-    },
+    }
 
-    async testConnection (tabId, connstr) {
-        const db = await this.getDatabase(tabId, connstr);
+    async testConnection (tabId: number, connstr: string) {
+        const db = await this._getDatabase(tabId, connstr);
         const res = await db.testConnection();
         return res;
-    },
+    }
 
-    async getDatabase(tabId, connstr) {
+    async _getDatabase(tabId: number, connstr: string): Promise<Driver> {
         // disconnect from previos connection
         if (tabId in this.tabConnections && this.tabConnections[tabId].connstr != connstr){
             await this.disconnect(tabId);
@@ -31,27 +33,32 @@ export default {
         } else {
             // create one background connection per connstr
             if (!(connstr in this.bgConnections)){
-                this.bgConnections[connstr] = await this.getConnection(connstr);
+                this.bgConnections[connstr] = await this._getConnection(connstr);
             }
             // create one active per tab connection
-            this.tabConnections[tabId] = await this.getConnection(connstr);
+            this.tabConnections[tabId] = await this._getConnection(connstr);
             return this.tabConnections[tabId];
         }
-    },
+    }
 
-    async disconnect(tabId) {
+    _getConnection(connstr: string): Driver {
+
+        if (connstr.indexOf('mssql://') == 0){
+            return new MSSql(connstr);
+        } else {
+            return new Postgres(connstr);
+        }
+    }
+
+    async disconnect(tabId: number) {
         if (tabId in this.tabConnections){
             await this.tabConnections[tabId].disconnect();
             delete this.tabConnections[tabId];
-            await this.cleanupBgConnections();
+            await this._cleanupBgConnections();
         }
-    },
+    }
 
-    getConnection(connstr) {
-        return new Postgres(connstr);
-    },
-
-    async cleanupBgConnections() {
+    async _cleanupBgConnections() {
         // for each bgConnection check if it still exists among tabConnections
         // if not then disconnect and delete the one from the bgConnections
         for (let connstr in this.bgConnections) {
@@ -68,4 +75,13 @@ export default {
             }
         }
     }
+
+    async runQuery(tabId: number, connstr: string, query: string): Promise<Results> {
+        const db = await this._getDatabase(tabId, connstr);
+        const res = await db.runQuery(query);
+        return res;
+        //return Dataset(db, res);
+    }
 }
+
+export default new Executor();
