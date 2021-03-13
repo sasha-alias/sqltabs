@@ -60,8 +60,6 @@ export class Result {
 
     message: Message;
 
-    messageSeverity: MessageSeverity;
-
     constructor(resultType: ResultType, payload: any){
         this.resultType = resultType;
         switch (resultType) {
@@ -74,6 +72,9 @@ export class Result {
             case ResultType.PLAN:
                 this.data = payload;
                 break
+            case ResultType.COMMAND:
+                this.message = payload;
+                break;
         }
     }
 }

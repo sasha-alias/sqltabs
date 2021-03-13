@@ -1,5 +1,6 @@
 
 import { Driver } from "./Driver";
+import { Results } from "./Results";
 import Postgres from "./postgres/Database.js";
 import MSSql from "./mssql/Database.js";
 
@@ -80,7 +81,6 @@ class Executor {
         const db = await this._getDatabase(tabId, connstr);
         const res = await db.runQuery(query);
         return res;
-        //return Dataset(db, res);
     }
 }
 

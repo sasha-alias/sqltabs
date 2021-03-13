@@ -69,6 +69,7 @@ describe("Postgres driver", async ()=> {
 
     it("runs a single query", async ()=>{
         const res = await Executor.runQuery(0, PG_CONNSTR, "SELECT 555 test");
+        await Executor.disconnect(0);
         assert(res.items[0].data[0].test == 555);
         assert.equal(res.items[0].resultType, "DATA");
     });
@@ -77,41 +78,57 @@ describe("Postgres driver", async ()=> {
         const res = await Executor.runQuery(0, PG_CONNSTR, "SELECT 111 test; SELECT 222 test;");
         assert(res.items[0].data[0].test == 111);
         assert(res.items[1].data[0].test == 222);
+        await Executor.disconnect(0);
     });
 
 
     it("raise notice works", async ()=>{
         const res = await Executor.runQuery(0, PG_CONNSTR, "DO $$BEGIN RAISE NOTICE 'just a notice'; END;$$;");
+        await Executor.disconnect(0);
         assert.equal(res.items[0].message.message, 'just a notice');
         assert.equal(res.items[0].resultType, "MESSAGE");
     });
 
     it("raise two notices works", async ()=>{
         const res = await Executor.runQuery(0, PG_CONNSTR, "DO $$BEGIN RAISE NOTICE 'notice1'; RAISE NOTICE 'notice2'; END;$$;");
+        await Executor.disconnect(0);
         assert(res.items[0].message.message == 'notice1');
         assert(res.items[1].message.message == 'notice2');
     });
 
     it("raise warning works", async ()=>{
         const res = await Executor.runQuery(0, PG_CONNSTR, "DO $$BEGIN RAISE WARNING 'just a warning'; END;$$;");
+        await Executor.disconnect(0);
         assert.equal(res.items[0].message.message, 'just a warning');
         assert.equal(res.items[0].message.severity, "WARNING");
     });
 
     it("raise exception works", async ()=>{
         const res = await Executor.runQuery(0, PG_CONNSTR, "DO $$BEGIN RAISE EXCEPTION 'just an error'; END;$$;");
+        await Executor.disconnect(0);
         assert.equal(res.items[0].message.message, 'just an error');
         assert.equal(res.items[0].message.severity, "ERROR");
     });
 
     it("detects explain plan", async ()=>{
         const res = await Executor.runQuery(0, PG_CONNSTR, "EXPLAIN SELECT * FROM pg_class");
+        await Executor.disconnect(0);
         assert.equal(res.items[0].resultType, "PLAN");
     });
 
     it("unexpected syntax error handled", async ()=>{
         const res = await Executor.runQuery(0, PG_CONNSTR, "SELECT * FOM nonexisting_table");
+        await Executor.disconnect(0);
         assert.equal(res.items[0].message.severity, "ERROR");
     });
 
+    it("keeps the same session between queries on the same tab", async ()=>{
+        await Executor.runQuery(0, PG_CONNSTR, "SET sqltabs.test_session = 123");
+        const res = await Executor.runQuery(0, PG_CONNSTR, "SELECT current_setting('sqltabs.test_session') test_session");
+        const res1 = await Executor.runQuery(1, PG_CONNSTR, "SELECT current_setting('sqltabs.test_session') test_session");
+        await Executor.disconnect(0);
+        await Executor.disconnect(1);
+        assert.equal(res.items[0].data[0].test_session, 123);
+        assert.equal(res1.items[0].message.severity, "ERROR");
+    });
 });
